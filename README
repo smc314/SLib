@@ -1,0 +1,36 @@
+This is a C++ library of various utilities that I have developed over
+a while.  They are core components that I use in a lot of my primary
+software development.  They probably duplicate features and functionality
+in many other existing libraries, but I either didn't know of the other
+libraries at the time I added a component here, or I thought the other
+library was just too large to get just the one component or feature that
+I was looking for.
+
+Hence this library.
+
+The code compiles fine on Linux, MS Windows (using the borland free compiler),
+and AIX.  I haven't tested it on any other platforms, but I actively use
+it on the first three mentioned.
+
+All of the code in this library is copyrighted by me (Steven M. Cherry
+<smc@cherrys.org>) but available to anyone to use under the terms of the
+GNU LGPL.  You can find a copy of the LGPL in this source archive as 
+the file COPYING.
+
+Building:
+
+For any of the above platforms, simply cd into src, and do:
+make -f Makefile.platform
+
+This will generate a shared object, or DLL and place it in the lib
+directory with all includes going into the include directory.  If you 
+would like the library or includes to be located somewhere else, you
+are welcome to move them anywhere you want.
+
+For new platforms, start with the closest makefile to your platform
+and change as necessary.  You'll also probably have to make changes
+at least to Thread, Lock, Socket, SSocket, and perhaps others to get
+things to actually work.
+
+If you have any questions, comments, or concerns, drop me a note.
+:-)

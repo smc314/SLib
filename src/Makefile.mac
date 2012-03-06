@@ -1,0 +1,49 @@
+#
+# This is the linux build version of the makefile for SLib
+###############################################################
+
+CC=g++
+AR=ar
+DOC=doc++
+
+OPENSSLDIR=/usr
+SOCKET_LIB=
+
+CFLAGS=-g -Wall -D_REENTRANT -O2 -rdynamic -I$(OPENSSLDIR)/include \
+	-I/usr/include/libxml2
+LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
+	-lresolv -lxml2
+
+%.o:	%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# smtp.o is not here because we need to find out how to compile it
+# on a mac before including it in this list.
+DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Tools.o twine.o Date.o \
+	Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o
+
+all: $(DOTOH) incs
+	$(CC) -shared -o libSLib.so $(DOTOH) $(LFLAGS)
+	cp libSLib.so ../lib
+
+incs:
+	cp *.h Pool.cpp ../include
+
+test_twine: test_string.o test_twine.o $(DOTOH)
+	$(CC) -o test_twine test_twine.o $(DOTOH) $(LFLAGS)
+	$(CC) -o test_string test_string.o $(DOTOH) $(LFLAGS)
+
+test_enex: test_enex.o $(DOTOH)
+	$(CC) -o test_enex test_enex.o $(DOTOH) $(LFLAGS)
+
+docs: 
+	cd ../doc
+	rm -f *.html
+	cd ../include
+	doc++ --html --dir ../doc *.h
+
+clean:
+	rm -f $(DOTOH) *.o libSLib.so core
+	rm -f ../lib/libSLib.so
+	rm -f ../include/*.h
+	rm -f ../include/Pool.cpp

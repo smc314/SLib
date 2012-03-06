@@ -1,0 +1,60 @@
+#
+# This is the aix build version of the makefile for SLib
+###############################################################
+
+CC=xlC_r
+AR=ar
+DOC=doc++
+
+OPENSSLDIR=/home/slib/utility
+SOCKET_LIB=
+
+#
+# AIX xlC_r is the "reentrant" version of the xlC compiler.
+# Good options:
+# -qeh enables exception handling
+# -O2 best level of optimization
+# -qmkshrobj compiler option to create shared objects.
+# -G linker option to create a shared library.
+
+
+CFLAGS=-qeh -O2 -DAIX -I$(OPENSSLDIR)/include
+LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto $(SOCKET_LIB)
+
+%.o:	%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Tools.o twine.o Date.o smtp.o \
+	Interval.o EMail.o Timer.o Parms.o
+
+all: $(DOTOH) incs shared
+
+
+shared:
+	$(CC) -G -qmkshrobj -o libSLib.so $(DOTOH) $(LFLAGS)
+	cp libSLib.so ../lib
+	cp libSLib.so ../lib/libSLib.a
+
+static:
+	ar -r libSLib.a $(DOTOH)
+	cp libSLib.a ../lib
+
+incs:
+	cp *.h Pool.cpp ../include
+
+test_twine: test_string.o test_twine.o $(DOTOH)
+	$(CC) -o test_twine test_twine.o $(DOTOH) $(LFLAGS)
+	$(CC) -o test_string test_string.o $(DOTOH) $(LFLAGS)
+
+docs: 
+	cd ../doc
+	rm -f *.html
+	cd ../include
+	doc++ --html --dir ../doc *.h
+
+clean:
+	rm -f $(DOTOH) *.o libSLib.a libSLib.so core
+	rm -f ../lib/libSLib.a
+	rm -f ../lib/libSLib.so
+	rm -f ../include/*.h
+	rm -f ../include/Pool.cpp

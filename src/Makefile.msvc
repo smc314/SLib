@@ -1,0 +1,83 @@
+#
+# This is the MS VC++ build version of the makefile for SLib
+# Use nmake -f Makefile.msvc to run this
+###############################################################
+
+CC=cl.exe
+LINK=link.exe
+OHEXT=obj
+CP=copy
+RM=del /Q
+
+3PL=..\..
+SOCKET_LIB=ws2_32.lib
+
+
+CFLAGS=-c -Zp8 -EHsc -DWIN32 -D_MT -D_DLL -DLINT_ARGS -D_X86_=1 -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include" -I "$(3PL)\boost\boost_1_47_0" /analyze
+
+BOOSTLIBS=/LIBPATH:$(3PL)\boost\boost_1_47_0\stage\lib
+SSLLIBS=$(3PL)\lib\libeay32.lib $(3PL)\lib\ssleay32.lib \
+	$(3PL)\lib\libxml2.lib
+
+LFLAGS=-machine:i386 -subsystem:console
+LLIBS=$(SSLLIBS) $(SOCKET_LIB) $(BOOSTLIBS)
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $<
+
+
+DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
+	Thread.$(OHEXT) Tools.$(OHEXT) twine.$(OHEXT) Date.$(OHEXT) \
+	smtp.$(OHEXT) Interval.$(OHEXT) EMail.$(OHEXT) Timer.$(OHEXT) \
+	Parms.$(OHEXT) LogMsg.$(OHEXT) Hash.$(OHEXT) EnEx.$(OHEXT) XmlHelpers.$(OHEXT) \
+	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT)
+
+all: $(DOTOH) incs
+	$(LINK) $(LFLAGS) $(DOTOH) /OUT:libSLib.dll /DLL $(LLIBS)
+	$(CP) libSLib.dll ..\lib
+	$(CP) libSLib.lib ..\lib
+
+test_twine: test_string.$(OHEXT) test_twine.$(OHEXT) $(DOTOH)
+	$(LINK) $(LFLAGS) /OUT:test_twine.exe test_twine.$(OHEXT) libSLib.lib $(LLIBS)
+	$(LINK) $(LFLAGS) /OUT:test_string.exe test_string.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_enex: test_enex.$(OHEXT) $(DOTOH)
+	$(CC) test_enex.$(OHEXT) libSLib.lib $(LFLAGS)
+
+thrash_twine: thrash_twine.$(OHEXT)
+	$(CC) thrash_twine.$(OHEXT) libSLib.lib $(LFLAGS)
+
+test_log: test_log.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_log.exe test_log.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_logfile: test_logfile.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_logfile.exe test_logfile.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_date: test_date.$(OHEXT)
+	$(LINK) /OUT:test_date.exe test_date.$(OHEXT) libSLib.lib $(LFLAGS)
+
+test_sleep: test_sleep.$(OHEXT)
+	$(LINK) /OUT:test_sleep.exe test_sleep.$(OHEXT) libSLib.lib $(LFLAGS)
+
+test_compile: test_compile.$(OHEXT)
+	$(LINK) /OUT:test_compile.exe test_compile.$(OHEXT) $(LFLAGS) $(DOTOH)
+
+incs:
+	$(CP) *.h ..\include
+	$(CP) Pool.cpp ..\include
+
+clean:
+	$(RM) $(DOTOH) *.$(OHEXT) libSLib.dll core *.pch *.lib *.exp *.exe.manifest *.exe *.dll.manifest
+	$(RM) ..\lib\libSLib.dll
+	$(RM) ..\lib\libSLib.lib
+	$(RM) ..\include\Pool.cpp
+
+install:
+	$(CP) ..\include\*.h $(3PL)\include
+	$(CP) ..\include\*.cpp $(3PL)\include
+	$(CP) ..\lib\libSLib.lib $(3PL)\lib
+	$(CP) ..\lib\libSLib.dll $(3PL)\bin
+
+docs:
+	docxx --html --dir ..\..\appint\doc\slib *.h
+

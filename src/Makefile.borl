@@ -1,0 +1,44 @@
+#
+# This is the borland build version of the makefile for SLib
+###############################################################
+
+CC=bcc32
+IMPLIB=implib
+OHEXT=obj
+CP=cp
+RM=rm
+
+OPENSSLDIR=D:\third_party
+SOCKET_LIB=
+
+CFLAGS=-w -VM -WM -VF -WR -I"$(OPENSSLDIR)\include"
+LFLAGS=$(OPENSSLDIR)\borland\libeay32.lib $(OPENSSLDIR)\borland\ssleay32.lib \
+	$(OPENSSLDIR)\borland\RSAglue.lib $(SOCKET_LIB)
+
+.cpp.obj:
+	$(CC) $(CFLAGS) -c $<
+
+DOTOH=Base64.$(OHEXT) Log.$(OHEXT) SSocket.$(OHEXT) Socket.$(OHEXT) \
+	Thread.$(OHEXT) Tools.$(OHEXT) twine.$(OHEXT) Date.$(OHEXT) \
+	smtp.$(OHEXT) Interval.$(OHEXT) EMail.$(OHEXT) Timer.$(OHEXT) \
+	Parms.$(OHEXT)
+
+all: $(DOTOH) incs
+	$(CC) $(CFLAGS) -WD -elibSLib.dll $(DOTOH) $(LFLAGS)
+	$(IMPLIB) libSLib libSLib.dll
+	$(CP) libSLib.dll ..\lib
+	$(CP) libSLib.lib ..\lib
+
+test_twine: test_string.$(OHEXT) test_twine.$(OHEXT) $(DOTOH)
+	$(CC) test_twine.$(DOTOH) $(DOTOH) $(LFLAGS)
+	$(CC) test_string.$(DOTOH) $(DOTOH) $(LFLAGS)
+
+incs:
+	$(CP) *.h Pool.cpp ..\include
+
+clean:
+	$(RM) -f $(DOTOH) *.$(OHEXT) libSLib.dll core
+	$(RM) -f ..\lib\libSLib.dll
+	$(RM) -f ..\lib\libSLib.lib
+	$(RM) -f ..\include\*.h
+	$(RM) -f ..\include\Pool.cpp

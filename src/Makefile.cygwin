@@ -1,0 +1,43 @@
+#
+# This is the linux build version of the makefile for SLib
+###############################################################
+
+CC=g++
+AR=ar
+DOC=doc++
+
+OPENSSLDIR=/usr
+SOCKET_LIB=
+
+CFLAGS=-g -Wall -D_REENTRANT -O2 -I$(OPENSSLDIR)/include
+LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB)
+
+%.o:	%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Tools.o twine.o Date.o \
+	Interval.o Timer.o Parms.o
+
+all: $(DOTOH) incs
+	ar -r libSLib.a $(DOTOH)
+	cp libSLib.a ../lib
+
+incs:
+	cp *.h Pool.cpp ../include
+
+test_twine: test_string.o test_twine.o $(DOTOH)
+	$(CC) -o test_twine test_twine.o $(DOTOH) $(LFLAGS)
+	$(CC) -o test_string test_string.o $(DOTOH) $(LFLAGS)
+
+docs: 
+	cd ../doc
+	rm -f *.html
+	cd ../include
+	doc++ --html --dir ../doc *.h
+
+clean:
+	rm -f $(DOTOH) *.o libSLib.so libSLib.a core
+	rm -f ../lib/libSLib.so
+	rm -f ../lib/libSLib.a
+	rm -f ../include/*.h
+	rm -f ../include/Pool.cpp
