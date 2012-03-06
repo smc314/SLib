@@ -1,0 +1,14 @@
+# Compiled Objects #
+####################
+*.obj
+*.dll
+*.lib
+*.exp
+
+# VI Swap files #
+#################
+*.swp
+
+# Everything in the include directory #
+#######################################
+include/*.h
