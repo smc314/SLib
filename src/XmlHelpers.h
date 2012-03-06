@@ -32,6 +32,7 @@
 #include "xmlinc.h"
 #include "AutoXMLChar.h"
 #include "twine.h"
+#include "Base64.h"
 
 #include <vector>
 using namespace std;
@@ -179,6 +180,31 @@ class DLLEXPORT XmlHelpers {
 			xmlNodePtr cdata = xmlNewCDataBlock(parent->doc, (const xmlChar*)content, content.size() );
 			xmlAddChild(parent, cdata);
 		}
+
+		static twine getBase64( xmlNodePtr node ){
+			if(node == NULL){
+				throw AnException(0, FL, "NULL node passed to XmlHelpers::getBase64()");
+			}
+			// First pick up the data in a CDATA section
+			twine b64 = XmlHelpers::getCDATASection( node );
+
+			// Then Base64 decode the data:
+			twine ret = Base64::decode( b64() );
+			return ret;
+		}
+
+		static void setBase64( xmlNodePtr parent, const twine& content) {
+			if(parent == NULL){
+				throw AnException(0, FL, "NULL Parent passed to XmlHelpers::setBase64()");
+			}
+
+			// First encode the data
+			twine b64 = Base64::encode( content() );
+
+			// Then set it into a cdata block
+			XmlHelpers::setCDATASection(parent, b64);
+		}
+
 
 		static int getIntAttr(xmlNodePtr node, const char* attrName){
 			if(node == NULL){
