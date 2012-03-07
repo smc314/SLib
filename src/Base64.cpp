@@ -92,6 +92,10 @@ char *Base64::encode(const char *sv)
 	char* r;
 	int len, rlen;
 
+	if(sv == NULL){
+		return ""; // nothing to encode.
+	}
+
 	len = strlen(sv);
 	rlen = (len + 2) / 3 * 4;
 	/* add space for null */
@@ -109,6 +113,10 @@ void Base64::encode(const char* sv, char* r)
 	size_t len;   		/* length of the string */
 	char *p;   		/* result string */
 	int i;
+
+	if(sv == NULL){
+		return; // Nothing to encode.
+	}
 
 	s = sv;
 	len = strlen(s);
@@ -147,6 +155,10 @@ char *Base64::decode(const char *sv)
 	char* r;
 	int len, rlen;
 
+	if(sv == NULL){
+		return ""; // nothing to decode
+	}
+
 	len = strlen(sv);
 	rlen = len * 3 / 4;
 	if ((r = (char *) malloc(rlen)) == NULL)
@@ -162,6 +174,10 @@ void Base64::decode(const char* sv, char* ret)
 	int len;
 	char *r;
 	int c1, c2, c3, c4;
+
+	if(sv == NULL){
+		return; // nothing to decode
+	}
 
 	len = strlen(sv);
 	str = (unsigned char *)sv;

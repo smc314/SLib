@@ -199,7 +199,12 @@ class DLLEXPORT XmlHelpers {
 			}
 
 			// First encode the data
-			twine b64 = Base64::encode( content() );
+			twine b64;
+			if(content.length() == 0){
+				b64 = "";
+			} else {
+				b64 = Base64::encode( content() );
+			}
 
 			// Then set it into a cdata block
 			XmlHelpers::setCDATASection(parent, b64);
