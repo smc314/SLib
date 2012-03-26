@@ -32,7 +32,7 @@
 #include "xmlinc.h"
 #include "AutoXMLChar.h"
 #include "twine.h"
-#include "Base64.h"
+#include "EnEx.h"
 
 #include <vector>
 using namespace std;
@@ -151,6 +151,7 @@ class DLLEXPORT XmlHelpers {
 		}
 
 		static twine getCDATASection(xmlNodePtr node) {
+			EnEx ee(FL, "XmlHelpers::getCDATASection(xmlNodePtr node)");
 			if(node == NULL){
 				throw AnException(0, FL, "NULL node passed to XmlHelpers::getCDATASection()");
 			}
@@ -182,6 +183,7 @@ class DLLEXPORT XmlHelpers {
 		}
 
 		static twine getBase64( xmlNodePtr node ){
+			EnEx ee(FL, "XmlHelpers::getBase64(xmlNodePtr node)");
 			if(node == NULL){
 				throw AnException(0, FL, "NULL node passed to XmlHelpers::getBase64()");
 			}
@@ -189,8 +191,8 @@ class DLLEXPORT XmlHelpers {
 			twine b64 = XmlHelpers::getCDATASection( node );
 
 			// Then Base64 decode the data:
-			twine ret = Base64::decode( b64() );
-			return ret;
+			b64.decode64();
+			return b64;
 		}
 
 		static void setBase64( xmlNodePtr parent, const twine& content) {
@@ -199,12 +201,13 @@ class DLLEXPORT XmlHelpers {
 			}
 
 			// First encode the data
-			twine b64;
+			twine b64; // have to make a copy because the input is const.
 			if(content.length() == 0){
 				b64 = "";
 			} else {
-				b64 = Base64::encode( content() );
+				b64 = content;
 			}
+			b64.encode64();
 
 			// Then set it into a cdata block
 			XmlHelpers::setCDATASection(parent, b64);
@@ -212,6 +215,7 @@ class DLLEXPORT XmlHelpers {
 
 
 		static int getIntAttr(xmlNodePtr node, const char* attrName){
+			EnEx ee(FL, "XmlHelpers::getIntAttr(xmlNodePtr node)");
 			if(node == NULL){
 				throw AnException(0, FL, "NULL node passed into getIntAttr");
 			}

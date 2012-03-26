@@ -58,7 +58,6 @@ class DLLEXPORT EnExProfile {
 		unsigned long m_minTime;
 		unsigned long m_maxTime;
 		bool m_stopProfile;
-		SLib::Mutex m_mutex;
 };
 
 
@@ -104,7 +103,19 @@ class DLLEXPORT EnterExit {
 		 * children under the given node.
 		 */
 		static void RecordGlobalHitMap(xmlNodePtr node);
+
+		/** This will print our stack trace to standard output
+		  */
+		static void PrintStackTrace(void);
+
+		/** This will log our stack trace to the log file using the given log channel.
+		  */
+		static void PrintStackTrace(int channel);
 			
+		/** This will capture our stack trace to a twine and return it.
+		  */
+		static twine GetStackTrace(void);
+
 		/** This handles saving our thread-local hit counter information into the
 		    global structure.  This will take more time because we have to lock the
 		    global structure mutex, but if called only seldom on major functions, this
@@ -123,6 +134,10 @@ class DLLEXPORT EnterExit {
 		 */
 		static map<const char*, EnExProfile*>* FindOurHitCounter(void);
 
+		/** Looks up our thread-specific stack trace from the global list.
+		 */
+		static vector<const char*>* FindOurStackTrace(void);
+
 		const char* m_file;
 		int m_line;
 		const char* m_methodName;
@@ -131,6 +146,7 @@ class DLLEXPORT EnterExit {
 		bool m_saveToGlobal;
 		EnExProfile* m_methodProfile;
 		map<const char*, EnExProfile*>* m_hitCounter;
+		vector<const char*>* m_stackTrace;
 };
 
 /** This is a mirror of the EnterExit class, but it does nothing.  We use a define to swap between these

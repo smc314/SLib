@@ -42,7 +42,8 @@ const int TWINE_NOT_FOUND = -1;
 #include <vector>
 using namespace std;
 
-#include <xmlinc.h>
+#include "xmlinc.h"
+#include "Base64.h"
 
 namespace SLib {
 
@@ -450,6 +451,18 @@ class DLLEXPORT twine
 		* on the given split string.
 		*/
 		vector < twine > split(twine spliton);
+
+		/**
+		  * Handles converting the contents of our twine into a base64 encoded
+		  * version.
+		  */
+		twine& encode64();
+
+		/**
+		  * Handles converting the contents of our twine into a base64 decoded
+		  * version.
+		  */
+		twine& decode64();
 
 		/** Determines if the given twine pointer is null, or if the
 		 * twine itself is empty.

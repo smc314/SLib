@@ -33,6 +33,13 @@ vector< pair<
 	map<const char*, EnExProfile*>* 
 > > hit_counter_list;
 
+/** This is the stack trace for each thread.
+ */
+vector< pair<
+	THREAD_ID_TYPE,
+	vector<const char*>*
+> > stack_trace_list;
+
 SLib::Mutex hit_counter_list_add_mutex;
 
 
@@ -75,6 +82,7 @@ EnterExit::EnterExit(const char* file, int line, const char* methodName, bool sa
 void EnterExit::Init(void)
 {
 	m_hitCounter = FindOurHitCounter();
+	m_stackTrace = FindOurStackTrace();
 
 	map<const char*, EnExProfile*>::iterator it = m_hitCounter->find(m_methodName);
 	if(it != m_hitCounter->end()){
@@ -88,6 +96,7 @@ void EnterExit::Init(void)
 	}
 
 	if(m_line) TRACE(m_file, m_line, "%s: Entering Method", m_methodName);
+	m_stackTrace->push_back(m_methodName);
 	m_methodEntryStamp = Timer::GetCycleCount();
 }
 
@@ -110,10 +119,31 @@ map<const char*, EnExProfile*>* EnterExit::FindOurHitCounter(void)
 	return the_pair.second;
 }
 
+vector<const char*>* EnterExit::FindOurStackTrace(void)
+{
+	THREAD_ID_TYPE tid = Thread::CurrentThreadId();
+	for(int i = 0, l = stack_trace_list.size(); i < l; i++){
+		if(stack_trace_list[i].first == tid){
+			return stack_trace_list[i].second;
+		}
+	}
+
+	// If we get here, then our tid was not in the list.  Add it in.
+	pair<THREAD_ID_TYPE, vector<const char*>* > the_pair;
+	the_pair.first = tid;
+	the_pair.second = new vector<const char*>();
+	{ // for scope
+		SLib::Lock the_lock(&hit_counter_list_add_mutex);
+		stack_trace_list.push_back(the_pair);
+	} // mutex released here
+	return the_pair.second;
+}
+
 EnterExit::~EnterExit()
 {
 	m_methodExitStamp = Timer::GetCycleCount();
 	if(m_line) TRACE(m_file, m_line, "%s: Exiting Method", m_methodName);
+	m_stackTrace->pop_back();
 
 	m_methodProfile->RecordEntryExit(m_methodEntryStamp, m_methodExitStamp);
 
@@ -121,6 +151,39 @@ EnterExit::~EnterExit()
 		// Save our whole hit counter map to the global aggregate
 		SaveToGlobal();
 	}
+}
+
+void EnterExit::PrintStackTrace(void)
+{
+	twine msg = EnterExit::GetStackTrace();
+	printf("%s", msg() );
+}
+
+void EnterExit::PrintStackTrace(int channel)
+{
+	twine msg = EnterExit::GetStackTrace();
+	switch(channel){
+		case 0: PANIC(FL, msg() ); break;
+		case 1: ERRORL(FL, msg() ); break;
+		case 2: WARN(FL, msg() ); break;
+		case 3: INFO(FL, msg() ); break;
+		case 4: DEBUG(FL, msg() ); break;
+		case 5: TRACE(FL, msg() ); break;
+		case 6: SQLTRACE(FL, msg() ); break;
+	}
+}
+
+twine EnterExit::GetStackTrace(void)
+{
+	twine tmp, msg;
+	tmp.format("Stack trace for thread: %d\n", (int)Thread::CurrentThreadId() );
+	msg += tmp;
+	vector<const char*>* stack_trace = FindOurStackTrace();
+	for(int i = 0; i < (int)stack_trace->size(); i++){
+		tmp.format("\t%s\n", stack_trace->at( i ) );
+		msg += tmp;
+	}
+	return msg;
 }
 
 void EnterExit::SaveToGlobal(void)
@@ -362,8 +425,6 @@ double EnExProfile::TotalTime(void)
 
 void EnExProfile::RecordEntryExit(unsigned long entry, unsigned long exit)
 {
-	//SLib::Lock the_lock(&m_mutex); // prevent simultaneous access to this method.
-
 	unsigned long diff = exit - entry;
 	if(diff < 0){
 		diff = 0;

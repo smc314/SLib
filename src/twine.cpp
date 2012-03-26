@@ -28,6 +28,7 @@
 #include "AnException.h"
 #include "EnEx.h"
 #include "AutoXMLChar.h"
+#include "memptr.h"
 
 const int MAX_INPUT_SIZE = 10240000;
 
@@ -126,8 +127,11 @@ twine::twine(const xmlNodePtr node, const char* attrName):
 twine::~twine() 
 {
 	EnEx ee("twine::~twine()");
-	if(m_allocated_size > 0)
+	if(m_allocated_size > 0 || m_data != NULL){
 		free(m_data);
+		m_allocated_size = 0;
+		m_data = NULL;
+	}
 }
 
 twine& twine::operator=(const twine& t)
@@ -933,7 +937,7 @@ vector < twine > twine::split(twine spliton)
 
 twine& twine::getAttribute(xmlNodePtr node, const char* attrName)
 {
-	EnEx ee("twine::getAttribute(xmlNodePtr node, const char* attrName");
+	EnEx ee("twine::getAttribute(xmlNodePtr node, const char* attrName)");
 
 	AutoXMLChar tmp;
 	tmp = xmlGetProp(node, (const xmlChar*)attrName);
@@ -942,3 +946,44 @@ twine& twine::getAttribute(xmlNodePtr node, const char* attrName)
 	}
 	return set(tmp);
 }
+
+twine& twine::encode64()
+{
+	EnEx ee("twine::encode64()");
+
+	// Reserve enough space to handle the conversion:
+	size_t len = (size() + 2) * 4 / 3;
+	len ++; // add space for the null.
+	memptr< char > tmpspace = (char*)malloc( len );
+	if(tmpspace == (char*)NULL){
+		throw AnException(0, FL, "Error reserving space for base64 encoding.");
+	}
+	memset(tmpspace, 0, len);
+
+	// Now do the conversion
+	Base64::encode( m_data, tmpspace );
+
+	// Now copy the converted data over to ourself:
+	return operator=(tmpspace);
+}
+
+twine& twine::decode64()
+{
+	EnEx ee("twine::decode64()");
+
+	// Reserve enough space to handle the conversion:
+	size_t len = (size()) * 3 / 4;
+	len ++; // add space for the null.
+	memptr< char > tmpspace = (char*)malloc( len );
+	if(tmpspace == (char*)NULL){
+		throw AnException(0, FL, "Error reserving space for base64 decoding.");
+	}
+	memset(tmpspace, 0, len);
+
+	// Now do the conversion
+	Base64::decode( m_data, tmpspace );
+
+	// Now copy the converted data over to ourself:
+	return operator=(tmpspace);
+}
+

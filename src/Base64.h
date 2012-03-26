@@ -26,8 +26,6 @@
 #	define DLLEXPORT 
 #endif
 
-#include "twine.h"
-
 /* ************************************************************ */
 /* This is the header file that will define the encoding and    */
 /* decoding routines for base64 representation as defined by    */
@@ -61,22 +59,6 @@ class DLLEXPORT Base64 {
 
 		/**
 		  * This method will encode the given character
-		  * string into a new character string, using base64
-		  * encoding.  You are responsible for freeing the memory
-		  * of the new string.
-		  */
-		static twine *encode(twine* src);
-
-		/**
-		  * This method will encode the given character
-		  * string into a new character string, using base64
-		  * encoding.  You are responsible for freeing the memory
-		  * of the new string.
-		  */
-		static twine *encode(twine& src);
-
-		/**
-		  * This method will encode the given character
 		  * string into the given target string, using base64
 		  * encoding.  You are responsible for allocating enough
 		  * space and providing the target character string.
@@ -93,32 +75,11 @@ class DLLEXPORT Base64 {
 
 		/**
 		  * This method will decode the given character
-		  * string into a new character string, using base64
-		  * decoding.  You are responsible for freeing the memory
-		  * of the new string.
-		  */
-		static twine *decode(twine* src);
-
-		/**
-		  * This method will decode the given character
-		  * string into a new character string, using base64
-		  * decoding.  You are responsible for freeing the memory
-		  * of the new string.
-		  */
-		static twine *decode(twine& src);
-
-		/**
-		  * This method will decode the given character
 		  * string into the given target string, using base64
 		  * decoding.  You are responsible for allocating enough
 		  * space and providing the target character string.
 		  */
 		static void decode(const char* src, char* dst);
-
-		/**
-		  * Use this to free a twine* returned from this class.
-		  */
-		static void Free(twine* t);
 
 		/**
 		  * Use this to free a char* returned from this class.

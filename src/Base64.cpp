@@ -93,7 +93,7 @@ char *Base64::encode(const char *sv)
 	int len, rlen;
 
 	if(sv == NULL){
-		return ""; // nothing to encode.
+		return NULL; // nothing to encode.
 	}
 
 	len = strlen(sv);
@@ -140,23 +140,13 @@ void Base64::encode(const char* sv, char* r)
 	*p = '\0';
 }
 
-twine *Base64::encode(twine* src)
-{
-	return new twine(encode(src->c_str()));
-}
-
-twine *Base64::encode(twine& src)
-{
-	return new twine(encode(src.c_str()));
-}
-
 char *Base64::decode(const char *sv)
 {
 	char* r;
 	int len, rlen;
 
 	if(sv == NULL){
-		return ""; // nothing to decode
+		return NULL; // nothing to decode
 	}
 
 	len = strlen(sv);
@@ -227,21 +217,6 @@ void Base64::decode(const char* sv, char* ret)
 		}
 	}
 	*r = '\0';
-}
-
-twine *Base64::decode(twine* src)
-{
-	return new twine(decode(src->c_str()));
-}
-
-twine *Base64::decode(twine& src)
-{
-	return new twine(decode(src.c_str()));
-}
-
-void Base64::Free(twine* t)
-{
-	delete t;
 }
 
 void Base64::Free(char* c)

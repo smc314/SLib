@@ -28,6 +28,7 @@ using namespace std;
 #include "Log.h"
 #include "Tools.h"
 #include "Thread.h"
+#include "EnEx.h"
 
 
 #ifndef FL
@@ -110,6 +111,8 @@ class AnException {
 			m_line = line;
 			va_end(ap);
 
+			m_stack = EnEx::GetStackTrace()();
+
 			DEBUG(FL, 
 				"Generating exception:\n=====================\n"
 				"%s\n"
@@ -117,9 +120,11 @@ class AnException {
 				"In File: %s\n"
 				"On Line: %d\n"
 				"With ID: %d\n"
+				"=====================\n"
+				"%s"
 				"=====================\n",
 				m_message.c_str(), m_file.c_str(), 
-				m_line, m_id);
+				m_line, m_id, m_stack.c_str() );
 			
 		}	
 
@@ -159,12 +164,18 @@ class AnException {
 			m_message.append(new_msg);
 		}
 
+		/// Use this function to retrieve the stack trace captured at the time of the exception.
+		const char* Stack(void){
+			return m_stack.c_str();
+		}
+
 	protected:
 
 		string m_message;
 		string m_file;
 		int  m_id;
 		int  m_line;
+		string m_stack;
 
 };
 
