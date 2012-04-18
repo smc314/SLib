@@ -321,7 +321,10 @@ int twine::compare(const twine& t) const
 int twine::compare(const char* c) const
 {
 	EnEx ee("twine::compare(const char* c)");
-	if(m_data_size == 0){
+	if((m_data_size == 0) && (c == NULL)){
+		return 0; // equal if both null
+	}
+	if(m_data_size == 0 || c == NULL){
 		return -1;
 	}
 	return strcmp(m_data, c);
