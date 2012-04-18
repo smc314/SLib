@@ -833,12 +833,12 @@ twine& twine::reserve(int min_size)
 {
 	EnEx ee("twine::reserve(int min_size)");
 	if(m_allocated_size == 0){
-		m_data = (char *)malloc(min_size + 1);
+		m_data = (char *)malloc(min_size + 10);
 		if(m_data == NULL){
 			throw AnException(0, FL,
 				"twine: Error Allocating Memory");
 		}
-		m_allocated_size = min_size + 1;
+		m_allocated_size = min_size + 10;
 		memset(m_data, 0, m_allocated_size);
 		m_data_size = 0;
 		return *this;
@@ -846,13 +846,13 @@ twine& twine::reserve(int min_size)
 	if(min_size < m_allocated_size) {
 		return *this;
 	} else {
-		char *ptr = (char *)realloc(m_data, min_size+1);
+		char *ptr = (char *)realloc(m_data, min_size+10);
 		if(ptr == NULL){
 			throw AnException(0, FL,
 				"twine: Error reallocating memory.");
 		}
 		m_data = ptr;
-		m_allocated_size = min_size+1;
+		m_allocated_size = min_size+10;
 		//for(int i = m_data_size; i < m_allocated_size; i++)
 			//m_data[i] = '\0';
 		return *this;
