@@ -8,8 +8,8 @@
 #include <map>
 using namespace std;
 
-#include <AnException.h>
-#include <LogMsg.h>
+#include "AnException.h"
+#include "LogMsg.h"
 using namespace SLib;
 
 namespace SLib {
@@ -332,7 +332,7 @@ class DLLEXPORT LogFile {
 		long readLong();
 
 		/** Reads a twine from the current position of our log file stream */
-		twine readTwine(int length);
+		twine readTwine(size_t length);
 
 		/** Seek's in our log file to the position referenced as an offset from the start of the file */
 		void seek(long offsetFromStart);

@@ -10,10 +10,11 @@
 #endif
 
 /* C Standard Headers */
-#include <vector>
-#include <string>
+#include <stdint.h>
 
 /* C++ Standard Headers */
+#include <vector>
+#include <string>
 #include <map>
 using namespace std;
 
@@ -43,7 +44,7 @@ class DLLEXPORT EnExProfile {
 		double MaxTime(void);
 		double TotalTime(void);
 
-		void RecordEntryExit(unsigned long entry, unsigned long exit);
+		void RecordEntryExit(uint64_t entry, uint64_t exit);
 
 		/** Add information from another profile object into ours.  This is primarily used
 		  * when we are held in the global profile list and the thread-based profiles are
@@ -53,10 +54,10 @@ class DLLEXPORT EnExProfile {
 
 	private:
 		const char* m_methodName;
-		unsigned long m_hits;
-		unsigned long m_totalTime;
-		unsigned long m_minTime;
-		unsigned long m_maxTime;
+		uint64_t m_hits;
+		uint64_t m_totalTime;
+		uint64_t m_minTime;
+		uint64_t m_maxTime;
 		bool m_stopProfile;
 };
 
@@ -141,8 +142,8 @@ class DLLEXPORT EnterExit {
 		const char* m_file;
 		int m_line;
 		const char* m_methodName;
-		unsigned long m_methodEntryStamp;
-		unsigned long m_methodExitStamp;
+		uint64_t m_methodEntryStamp;
+		uint64_t m_methodExitStamp;
 		bool m_saveToGlobal;
 		EnExProfile* m_methodProfile;
 		map<const char*, EnExProfile*>* m_hitCounter;

@@ -122,7 +122,7 @@ class DLLEXPORT twine
 		/** Assignment from integer.  This will use the sprintf
 		  * "%d" to convert from the given integer.
 		  */
-		twine& operator=(const int i);
+		twine& operator=(const size_t i);
 			
 		/** Assignment from float. This will use the sprintf
 		  * "%f" to convert from the given float.
@@ -147,7 +147,7 @@ class DLLEXPORT twine
 
 		/** Concatenation
 		  */
-		twine& operator+=(const int i);
+		twine& operator+=(const size_t i);
 
 		/** Concatenation
 		  */
@@ -155,7 +155,7 @@ class DLLEXPORT twine
 
 		/** Change to an integer.  This uses atoi().
 		  */
-		int get_int(void) const;
+		size_t get_int(void) const;
 
 		/** Change to a float. This uses (float)atof().
 		  */
@@ -167,7 +167,7 @@ class DLLEXPORT twine
 
 		/** Get a single char from the twine
 		  */
-		const char operator[](int i) const;
+		const char operator[](size_t i) const;
 
 		/** Get the chars - This is easier to type than c_str()
 		  */
@@ -185,7 +185,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		int compare(const twine& t) const;
+		size_t compare(const twine& t) const;
 
 		/** Compares this twine against the input
 		  * Returns:
@@ -195,7 +195,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		int compare(const char* c) const;
+		size_t compare(const char* c) const;
 
 		/** Compares count chars of this twine against the input
 		  * Returns:
@@ -205,7 +205,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		int compare(const twine& t, int count) const;
+		size_t compare(const twine& t, size_t count) const;
 
 		/** Compares count chars of this twine against the input
 		  * Returns:
@@ -215,7 +215,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		int compare(const char* c, int count) const;
+		size_t compare(const char* c, size_t count) const;
 
 		/** Compares this twine against the input
 		  * Returns:
@@ -225,7 +225,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		int compare(int i) const;
+		size_t compare(size_t i) const;
 
 		/** Compares this twine against the input
 		  * Returns:
@@ -235,14 +235,12 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		int compare(float f) const;
+		size_t compare(float f) const;
 
 		/** Compares the beginning of this twine against the input
 		 * to determine if this twine starts the same way.
 		 */
-		bool startsWith(const twine& t){
-			return compare(t, t.size()) == 0;
-		}
+		bool startsWith(const twine& t) const;
 
 		/** Compares the ending of this twine against the input
 		 * to determine if this twine ends the same way.
@@ -268,7 +266,7 @@ class DLLEXPORT twine
 
 		/** Forces a recheck of the twine size,  Use this after writes.
 		  */
-		int check_size(void);
+		size_t check_size(void);
 
 		/** Sets the chars of the twine from the input.
 		  */
@@ -276,26 +274,26 @@ class DLLEXPORT twine
 
 		/** Sets the chars of the twine from first n chars of the input.
 		  */
-		twine& set(const char* c, int n);
+		twine& set(const char* c, size_t n);
 
 		/** Gets a substring of the twine from start going count
 		  * characters.
 		  */
-		twine substr(int start, int count) const;
+		twine substr(size_t start, size_t count) const;
 
 		/** Gets a substring of the twine from start to twine size.
 		  */
-		twine substr(int start) const;
+		twine substr(size_t start) const;
 
 		/** Gets a substring of the twine from start going count
 		  * characters.  Returns as a pointer.
 		  */
-		twine* substrp(int start, int count) const;
+		twine* substrp(size_t start, size_t count) const;
 
 		/** Gets a substring of the twine from start to twine size.
 		  * Returns as a pointer.
 		  */
-		twine* substrp(int start) const;
+		twine* substrp(size_t start) const;
 
 		/** Sets the string contents from the given format.  This
 		  * will use the standard printf formatting rules.
@@ -309,67 +307,67 @@ class DLLEXPORT twine
 
 		/** Searches the twine,  Returns position or TWINE_NOT_FOUND.
 		  */
-		int find(const char* needle) const;
+		size_t find(const char* needle) const;
 
 		/** Searches the twine,  Returns position or TWINE_NOT_FOUND.
 		  */
-		int find(const char c) const;
+		size_t find(const char c) const;
 
 		/** Searches the twine,  Returns position or TWINE_NOT_FOUND.
 		  */
-		int find(const twine& t) const;
+		size_t find(const twine& t) const;
 
 		/** Searches the twine starting at position p.
 		  */
-		int find(const char* needle, int p) const;
+		size_t find(const char* needle, size_t p) const;
 
 		/** Searches the twine starting at position p.
 		  */
-		int find(const char c, int p) const;
+		size_t find(const char c, size_t p) const;
 
 		/** Searches the twine starting at position p.
 		  */
-		int find(const twine& t, int p) const;
+		size_t find(const twine& t, size_t p) const;
 
 		/** Searches the twine in reverse for the target.
 		  */
-		int rfind(const char c) const;
+		size_t rfind(const char c) const;
 
 		/** Searches the twine in reverse starting at p.
 		  */
-		int rfind(const char c, int p) const;
+		size_t rfind(const char c, size_t p) const;
 
 		/** Searches the twine in reverse for the target.
 		  */
-		int rfind(const char* needle) const;
+		size_t rfind(const char* needle) const;
 
 		/** Searches the twine in reverse starting at p.
 		  */
-		int rfind(const char* needle, int p) const;
+		size_t rfind(const char* needle, size_t p) const;
 
 		/** Searches the twine in reverse for the target.
 		  */
-		int rfind(const twine& needle) const;
+		size_t rfind(const twine& needle) const;
 
 		/** Searches the twine in reverse starting at p.
 		  */
-		int rfind(const twine& needle, int p) const;
+		size_t rfind(const twine& needle, size_t p) const;
 
 		/** Counts the number of occurrances of a char in the twine.
 		  */
-		int countof(const char needle) const;
+		size_t countof(const char needle) const;
 
 		/** Replaces a range with the input.
 		  */
-		twine& replace(int start, int count, const char* rep);
+		twine& replace(size_t start, size_t count, const char* rep);
 
 		/** Replaces a range with the input.
 		  */
-		twine& replace(int start, int count, const twine* t);
+		twine& replace(size_t start, size_t count, const twine* t);
 
 		/** Replaces a range with the input.
 		  */
-		twine& replace(int start, int count, const twine& t);
+		twine& replace(size_t start, size_t count, const twine& t);
 
 		/** Replaces all instances of char c with char n
 		 */
@@ -385,15 +383,15 @@ class DLLEXPORT twine
 			
 		/** Inserts a const char* into the twine at the given position.
 		  */
-		twine& insert(int p, const char* c);
+		twine& insert(size_t p, const char* c);
 			
 		/** Erases the range starting at p and going for n chars
 		  */
-		twine& erase(int p, int n);
+		twine& erase(size_t p, size_t n);
 			
 		/** Erases the range starting at p and going to the end.
 		  */
-		twine& erase(int p);
+		twine& erase(size_t p);
 			
 		/** Erases the whole twine.
 		  */
@@ -414,23 +412,23 @@ class DLLEXPORT twine
 		  * change the size of the twine will use this.  Therefore
 		  * the out of memory exception may be seen from other methods.
 		  */
-		twine& reserve(int min_size);
+		twine& reserve(size_t min_size);
 
 		/** Returns the length of the twine.
 		  */
-		int size(void) const;
+		size_t size(void) const;
 
 		/** Returns the length of the twine.
 		  */
-		int length(void) const;
+		size_t length(void) const;
 
 		/** Returns the max length that the twine could hold now.
 		  */
-		int max_size(void) const;
+		size_t max_size(void) const;
 
 		/** Returns the max length that the twine could hold now.
 		  */
-		int capacity(void) const;
+		size_t capacity(void) const;
 
 		/** Returns true if the size of the twine is zero.
 		  */
@@ -444,7 +442,7 @@ class DLLEXPORT twine
 		/**
 		  * Uppercases the character at i in the twine.
 		  */
-		twine& ucase(int i);
+		twine& ucase(size_t i);
 		
 		/**
 		* Splits the current twine into a vector of twines based
@@ -503,7 +501,7 @@ class DLLEXPORT twine
 
 		/** Checks the index against the bounds of the array:
 		  */
-		void bounds_check(int p) const;
+		void bounds_check(size_t p) const;
 
 		/** our representation is a char array:
 		  */
@@ -511,11 +509,11 @@ class DLLEXPORT twine
 		
 		/** size of allocated memory in m_data:
 		  */
-		int m_allocated_size;
+		size_t m_allocated_size;
 
 		/** size of string currently in m_data:
 		  */
-		int m_data_size;
+		size_t m_data_size;
 
 };
 

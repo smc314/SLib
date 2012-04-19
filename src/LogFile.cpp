@@ -859,7 +859,7 @@ int LogFile::readInt()
 		throw AnException(0, FL, "Trying to write to a log file that has not been opened.");
 	}
 	int ret = 0;
-	int count = fread ( &ret, sizeof(int), 1, m_log);
+	size_t count = fread ( &ret, sizeof(int), 1, m_log);
 	if(count != 1){
 		throw AnException(0, FL, "Error reading an int from our log file.");
 	}
@@ -880,7 +880,7 @@ long LogFile::readLong()
 		throw AnException(0, FL, "Trying to write to a log file that has not been opened.");
 	}
 	long ret = 0;
-	int count = fread ( &ret, sizeof(long), 1, m_log);
+	size_t count = fread ( &ret, sizeof(long), 1, m_log);
 	if(count != 1){
 		throw AnException(0, FL, "Error reading a long from our log file.");
 	}
@@ -895,14 +895,14 @@ void LogFile::write(twine& value)
 	fwrite( value.data(), value.length(), 1, m_log);
 }
 
-twine LogFile::readTwine(int length)
+twine LogFile::readTwine(size_t length)
 {
 	if(m_log == NULL){
 		throw AnException(0, FL, "Trying to write to a log file that has not been opened.");
 	}
 	twine ret;
 	ret.reserve(length);
-	int count = fread ( ret.data(), length, 1, m_log);
+	size_t count = fread ( ret.data(), length, 1, m_log);
 	if(count != 1){
 		throw AnException(0, FL, "Error reading a twine from our log file.");
 	}
@@ -920,7 +920,7 @@ void LogFile::write(twine& value, int stringTableIndex)
 	if (stringTableIndex != -1) {
 		write(stringTableIndex);
 	} else {
-		write(value.length());
+		write((int)value.length());
 		write(value);
 	}
 }

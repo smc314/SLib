@@ -490,7 +490,7 @@ class DLLEXPORT Date
 		  * This is a public member variable that allows the
 		  * DB interfaces to see the length of the date string.
 		  */
-		int m_len;
+		size_t m_len;
 
 	protected:
 

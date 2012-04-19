@@ -1179,7 +1179,7 @@ int SSocket::IsDataThere(int mills)
 {
 	fd_set rfds;
 	struct timeval tv;
-	int n, ret;
+	size_t n, ret;
 
 	try {
 		FD_ZERO(&rfds);

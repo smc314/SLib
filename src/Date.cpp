@@ -124,7 +124,7 @@ void Date::SetValue(void)
 void Date::SetValue(const char* date, const char* format)
 {
 	int* values[6];
-	int field_count, ptr1, ret;
+	size_t field_count, ptr1, ret;
 	bool found_year, found_month, found_day;
 	twine format_copy;
 

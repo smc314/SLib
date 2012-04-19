@@ -90,7 +90,7 @@ static unsigned char index_64[256] =
 char *Base64::encode(const char *sv)
 {
 	char* r;
-	int len, rlen;
+	size_t len, rlen;
 
 	if(sv == NULL){
 		return NULL; // nothing to encode.
@@ -112,7 +112,7 @@ void Base64::encode(const char* sv, char* r)
 	const char *s;   		/* string to encode */
 	size_t len;   		/* length of the string */
 	char *p;   		/* result string */
-	int i;
+	size_t i;
 
 	if(sv == NULL){
 		return; // Nothing to encode.
@@ -143,7 +143,7 @@ void Base64::encode(const char* sv, char* r)
 char *Base64::decode(const char *sv)
 {
 	char* r;
-	int len, rlen;
+	size_t len, rlen;
 
 	if(sv == NULL){
 		return NULL; // nothing to decode
@@ -161,9 +161,9 @@ char *Base64::decode(const char *sv)
 void Base64::decode(const char* sv, char* ret)
 {
 	unsigned char *str;
-	int len;
+	size_t len;
 	char *r;
-	int c1, c2, c3, c4;
+	size_t c1, c2, c3, c4;
 
 	if(sv == NULL){
 		return; // nothing to decode
@@ -201,7 +201,7 @@ void Base64::decode(const char* sv, char* ret)
 
 		c1 = index_64[c1];
 		c2 = index_64[c2];
-		*r++ = (c1 << 2) | ((c2 & 0x30) >> 4);
+		*r++ = (char)((c1 << 2) | ((c2 & 0x30) >> 4));
 
 		if (c3 == '=') {
 			break;
@@ -213,7 +213,7 @@ void Base64::decode(const char* sv, char* ret)
 			break;
 		} else {
 			c4 = index_64[c4];
-			*r++ = ((c3 & 0x03) << 6) | c4;
+			*r++ = (char)(((c3 & 0x03) << 6) | c4);
 		}
 	}
 	*r = '\0';

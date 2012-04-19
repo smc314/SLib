@@ -134,9 +134,9 @@ void *run_lots(void* v)
 			dat->i1 = 18;
 			dat->i2 = 19;
 			dat->i3 = dat->i1 * dat->i2;
-			dat->field6 = dat->i1 + dat->i2 + dat->i3;
+			dat->field6 = (size_t)dat->i1 + dat->i2 + dat->i3;
 			dat->field7 = "interesting";
-			dat->field8 = i * j;
+			dat->field8 = (size_t)i * j;
 			dat->field9 = dat->field2.substr(3, 5);
 			if(dat->field1 > dat->field2)
 				dat->fielda = "true";

@@ -46,7 +46,7 @@ void Tools::sleep(int mills)
 
 void Tools::rtrim(char *s)
 {
-	int i;
+	size_t i;
 	i = strlen(s) -1;
 	while(s[i] == ' '){
 		s[i] = '\0';

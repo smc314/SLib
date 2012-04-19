@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include <ctype.h>
 
 #include "twine.h"
 
@@ -75,7 +74,7 @@ twine::twine(const char* c) :
 	if(c == NULL){
 		throw AnException(0, FL, "Input is null.");
 	}
-	int csize = strlen(c);
+	size_t csize = strlen(c);
 	if(csize > MAX_INPUT_SIZE){
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
@@ -93,7 +92,7 @@ twine::twine(const xmlChar* c) :
 	if(c == NULL){
 		throw AnException(0, FL, "Input is null.");
 	}
-	int csize = strlen((const char*)c);
+	size_t csize = strlen((const char*)c);
 	if(csize > MAX_INPUT_SIZE){
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
@@ -164,7 +163,7 @@ twine& twine::operator=(const twine* t)
 twine& twine::operator=(const char* c)
 {
 	EnEx ee("twine::operator=(const char* c)");
-	int tsize = strlen(c);
+	size_t tsize = strlen(c);
 	if(tsize > MAX_INPUT_SIZE){
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
@@ -178,7 +177,7 @@ twine& twine::operator=(const char* c)
 twine& twine::operator<< (xmlChar* c)
 {
 	EnEx ee("twine::operator<<(const xmlChar* c)");
-	int tsize = strlen((const char*)c);
+	size_t tsize = strlen((const char*)c);
 	if(tsize > MAX_INPUT_SIZE){
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
@@ -190,9 +189,9 @@ twine& twine::operator<< (xmlChar* c)
 	return *this;
 }
 
-twine& twine::operator=(const int i)
+twine& twine::operator=(const size_t i)
 {
-	EnEx ee("twine::operator=(const int i)");
+	EnEx ee("twine::operator=(const size_t i)");
 	reserve(15);
 	memset(m_data, 0, m_allocated_size);
 	sprintf(m_data, "%d", i);
@@ -241,9 +240,9 @@ twine& twine::operator+=(const char c)
 	return *this;
 }
 
-twine& twine::operator+=(const int i)
+twine& twine::operator+=(const size_t i)
 {
-	EnEx ee("twine::operator+=(const int i)");
+	EnEx ee("twine::operator+=(const size_t i)");
 	char tmp[16];
 	memset(tmp, 0, 16);
 	sprintf(tmp, "%d", i);
@@ -261,7 +260,7 @@ twine& twine::operator+=(const float i)
 	return *this;
 }
 
-int twine::get_int() const 
+size_t twine::get_int() const 
 {
 	EnEx ee("twine::get_int()");
 	return atoi(m_data);
@@ -279,9 +278,9 @@ double twine::get_double() const
 	return atof(m_data);
 }
 
-const char twine::operator[](int i) const
+const char twine::operator[](size_t i) const
 {
-	EnEx ee("twine::operator[](int i)");
+	EnEx ee("twine::operator[](size_t i)");
 	if( (i < 0) || (i >= m_data_size)){
 		throw AnException(0,FL,"twine: Out Of Bounds Access");
 	}
@@ -306,7 +305,7 @@ twine::operator const xmlChar*() const
 	return (const xmlChar*)m_data;
 }
 
-int twine::compare(const twine& t) const
+size_t twine::compare(const twine& t) const
 {
 	EnEx ee("twine::compare(twine& t)");
 	if((m_data_size == 0) && (t.m_data_size == 0)){
@@ -318,7 +317,7 @@ int twine::compare(const twine& t) const
 	return strcmp(m_data, t.m_data);
 }
 
-int twine::compare(const char* c) const
+size_t twine::compare(const char* c) const
 {
 	EnEx ee("twine::compare(const char* c)");
 	if((m_data_size == 0) && (c == NULL)){
@@ -330,9 +329,9 @@ int twine::compare(const char* c) const
 	return strcmp(m_data, c);
 }
 
-int twine::compare(const twine& t, int count) const
+size_t twine::compare(const twine& t, size_t count) const
 {
-	EnEx ee("twine::compare(twine& t, int count)");
+	EnEx ee("twine::compare(twine& t, size_t count)");
 	if((m_data_size == 0) && (t.m_data_size == 0)){
 		return 0; // equal if both null
 	}
@@ -342,29 +341,29 @@ int twine::compare(const twine& t, int count) const
 	return strncmp(m_data, t.m_data, count);
 }
 
-int twine::compare(const char* c, int count) const
+size_t twine::compare(const char* c, size_t count) const
 {
-	EnEx ee("twine::compare(const char* c, int count)");
+	EnEx ee("twine::compare(const char* c, size_t count)");
 	if(m_data_size == 0){
 		return -1;
 	}
 	return strncmp(m_data, c, count);
 }
 
-int twine::compare(int i) const
+size_t twine::compare(size_t i) const
 {
-	EnEx ee("twine::compare(int i)");
+	EnEx ee("twine::compare(size_t i)");
 	if(m_data_size == 0){
 		return -1;
 	}
 
-	int m = atoi(m_data);
+	size_t m = atoi(m_data);
 	if(m < i) return -1;
 	else if(m > i) return 1;
 	else return 0;
 }
 
-int twine::compare(float f) const
+size_t twine::compare(float f) const
 {
 	EnEx ee("twine::compare(float f)");
 	if(m_data_size == 0){
@@ -375,6 +374,11 @@ int twine::compare(float f) const
 	if(m < f) return -1;
 	else if(m > f) return 1;
 	else return 0;
+}
+
+bool twine::startsWith(const twine& t) const
+{
+	return compare(t, t.size()) == 0;
 }
 
 bool twine::endsWith(const twine& t) const
@@ -405,7 +409,7 @@ bool twine::endsWith(const twine& t) const
 	// start = m_data_size - t.m_data_size
 	// start = 7
 
-	int start = m_data_size - t.m_data_size;
+	size_t start = m_data_size - t.m_data_size;
 
 	return strncmp(m_data + start, t.m_data, t.m_data_size) == 0;
 }
@@ -416,7 +420,7 @@ char* twine::data(void)
 	return m_data;
 }
 
-int twine::check_size(void)
+size_t twine::check_size(void)
 {
 	EnEx ee("twine::check_size(void)");
 	if(m_data != NULL){
@@ -431,9 +435,9 @@ twine& twine::set(const char* c)
 	return operator=(c);
 }
 
-twine& twine::set(const char* c, int n)
+twine& twine::set(const char* c, size_t n)
 {
-	EnEx ee("twine::set(const char* c, int n)");
+	EnEx ee("twine::set(const char* c, size_t n)");
 	if(n > MAX_INPUT_SIZE){
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
@@ -444,17 +448,17 @@ twine& twine::set(const char* c, int n)
 	return *this;
 }
 	
-twine twine::substr(int start) const
+twine twine::substr(size_t start) const
 {
-	EnEx ee("twine::substr(int start)");
+	EnEx ee("twine::substr(size_t start)");
 	bounds_check(start);
 	twine ret(&m_data[start]);
 	return ret;
 }
 
-twine twine::substr(int start, int count) const
+twine twine::substr(size_t start, size_t count) const
 {
-	EnEx ee("twine::substr(int start, int count)");
+	EnEx ee("twine::substr(size_t start, size_t count)");
 	if(count == 0){
 		twine blankret;
 		return blankret;
@@ -466,17 +470,17 @@ twine twine::substr(int start, int count) const
 	return ret;
 }
 
-twine* twine::substrp(int start) const
+twine* twine::substrp(size_t start) const
 {
-	EnEx ee("twine::substrp(int start)");
+	EnEx ee("twine::substrp(size_t start)");
 	bounds_check(start);
 	twine *ret = new twine(&m_data[start]);
 	return ret;
 }
 
-twine* twine::substrp(int start, int count) const
+twine* twine::substrp(size_t start, size_t count) const
 {
-	EnEx ee("twine::substrp(int start, int count)");
+	EnEx ee("twine::substrp(size_t start, size_t count)");
 	if(count == 0){
 		twine* blankret = new twine();
 		return blankret;
@@ -503,7 +507,7 @@ twine& twine::format(const char* f, ...)
 twine& twine::format(const char* f, va_list ap) 
 {
 	EnEx ee("twine::format(const char* f, va_list ap)");
-	int nsize;
+	size_t nsize;
 	bool success = false;
 	
 	reserve(256); // make sure we have a minimum amount of space
@@ -532,7 +536,7 @@ twine& twine::format(const char* f, va_list ap)
 	return *this;
 }
 
-int twine::find(const char* needle) const
+size_t twine::find(const char* needle) const
 {
 	EnEx ee("twine::find(const char* needle)");
 	char *ptr;
@@ -546,7 +550,7 @@ int twine::find(const char* needle) const
 	}
 }
 
-int twine::find(const char c) const
+size_t twine::find(const char c) const
 {
 	EnEx ee("twine::find(const char c)");
 	char *ptr;
@@ -560,15 +564,15 @@ int twine::find(const char c) const
 	}
 }
 
-int twine::find(const twine& t) const
+size_t twine::find(const twine& t) const
 {
 	EnEx ee("twine::find(const twine& t)");
 	return find(t());
 }
 
-int twine::find(const char* needle, int p) const
+size_t twine::find(const char* needle, size_t p) const
 {
-	EnEx ee("twine::find(const char* needle, int p)");
+	EnEx ee("twine::find(const char* needle, size_t p)");
 	char *ptr;
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
@@ -580,9 +584,9 @@ int twine::find(const char* needle, int p) const
 	}
 }
 	
-int twine::find(const char c, int p) const
+size_t twine::find(const char c, size_t p) const
 {
-	EnEx ee("twine::find(const char c, int p)");
+	EnEx ee("twine::find(const char c, size_t p)");
 	char *ptr;
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
@@ -594,13 +598,13 @@ int twine::find(const char c, int p) const
 	}
 }
 
-int twine::find(const twine& t, int p) const
+size_t twine::find(const twine& t, size_t p) const
 {
-	EnEx ee("twine::find(const twine& t, int p)");
+	EnEx ee("twine::find(const twine& t, size_t p)");
 	return find(t(), p);
 }
 
-int twine::rfind(const char c) const
+size_t twine::rfind(const char c) const
 {
 	EnEx ee("twine::rfind(const char c)");
 	char *ptr;
@@ -614,9 +618,9 @@ int twine::rfind(const char c) const
 	}
 }
 
-int twine::rfind(const char c, int p) const
+size_t twine::rfind(const char c, size_t p) const
 {
-	EnEx ee("twine::rfind(const char c, int p)");
+	EnEx ee("twine::rfind(const char c, size_t p)");
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
 	bounds_check(p);
@@ -628,13 +632,13 @@ int twine::rfind(const char c, int p) const
 	return TWINE_NOT_FOUND;
 }
 	
-int twine::rfind(const char* c) const
+size_t twine::rfind(const char* c) const
 {
 	EnEx ee("twine::rfind(const char* c)");
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
-	int p = m_data_size - 1;
-	int len = strlen(c);
+	size_t p = m_data_size - 1;
+	size_t len = strlen(c);
 	while(p >= 0){
 		if(strncmp(&m_data[p], c, len) == 0)
 			return p;
@@ -643,13 +647,13 @@ int twine::rfind(const char* c) const
 	return TWINE_NOT_FOUND;
 }
 
-int twine::rfind(const char* c, int p) const
+size_t twine::rfind(const char* c, size_t p) const
 {
-	EnEx ee("twine::rfind(const char* c, int p)");
+	EnEx ee("twine::rfind(const char* c, size_t p)");
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
 	bounds_check(p);
-	int len = strlen(c);
+	size_t len = strlen(c);
 	while(p >= 0){
 		if(strncmp(&m_data[p], c, len) == 0)
 			return p;
@@ -658,31 +662,31 @@ int twine::rfind(const char* c, int p) const
 	return TWINE_NOT_FOUND;
 }
 
-int twine::rfind(const twine& t) const
+size_t twine::rfind(const twine& t) const
 {
 	EnEx ee("twine::rfind(const twine& t)");
 	return rfind(t());
 }
 
-int twine::rfind(const twine& t, int p) const
+size_t twine::rfind(const twine& t, size_t p) const
 {
-	EnEx ee("twine::rfind(const twine& t, int p)");
+	EnEx ee("twine::rfind(const twine& t, size_t p)");
 	return rfind(t(), p);
 }
 
-int twine::countof(const char needle) const
+size_t twine::countof(const char needle) const
 {
 	EnEx ee("twine::countof(const char needle)");
-	int count = 0;
-	for(int i = 0; i < m_data_size; i++){
+	size_t count = 0;
+	for(size_t i = 0; i < m_data_size; i++){
 		if(m_data[i] == needle) count++;
 	}
 	return count;
 }
 
-twine& twine::replace(int start, int count, const char* rep)
+twine& twine::replace(size_t start, size_t count, const char* rep)
 {
-	EnEx ee("twine::replace(int start, int count, const char* rep)");
+	EnEx ee("twine::replace(size_t start, size_t count, const char* rep)");
 	if(rep == NULL){
 		throw AnException(0, FL, "Invalid replacement value (NULL).");
 	}
@@ -692,8 +696,8 @@ twine& twine::replace(int start, int count, const char* rep)
 		erase(start);
 		append(rep);
 	} else {	
-		int len = strlen(rep);
-		int i;
+		size_t len = strlen(rep);
+		size_t i;
 		if(len > MAX_INPUT_SIZE){
 			throw AnException(0,FL,"twine: Input Too Large");
 		}
@@ -719,16 +723,16 @@ twine& twine::replace(int start, int count, const char* rep)
 	return *this;
 }	
 
-twine& twine::replace(int start, int count, const twine* t)
+twine& twine::replace(size_t start, size_t count, const twine* t)
 {
-	EnEx ee("twine::replace(int start, int count, const twine* t)");
+	EnEx ee("twine::replace(size_t start, size_t count, const twine* t)");
 	replace(start, count, t->c_str());
 	return *this;
 }
 
-twine& twine::replace(int start, int count, const twine& t)
+twine& twine::replace(size_t start, size_t count, const twine& t)
 {
-	EnEx ee("twine::replace(int start, int count, const twine& t)");
+	EnEx ee("twine::replace(size_t start, size_t count, const twine& t)");
 	replace(start, count, t());
 	return *this;
 }
@@ -737,7 +741,7 @@ twine& twine::replace(const char c, const char n)
 {
 	EnEx ee("twine::replace(const char c, const char n)");
 
-	for(int i = 0; i < m_data_size; i++){
+	for(size_t i = 0; i < m_data_size; i++){
 		if(m_data[i] == c){
 			m_data[i] = n;
 		}
@@ -748,7 +752,7 @@ twine& twine::replace(const char c, const char n)
 twine& twine::append(const char* c)
 {
 	EnEx ee("twine::append(const char* c)");
-	int csize = strlen(c);
+	size_t csize = strlen(c);
 	reserve(m_data_size + csize);
 	strcat(m_data, c);
 	m_data_size += csize;
@@ -756,14 +760,14 @@ twine& twine::append(const char* c)
 	return *this;
 }
 
-twine& twine::insert(int p, const char* c)
+twine& twine::insert(size_t p, const char* c)
 {
-	EnEx ee("twine::insert(int p, const char* c)");
+	EnEx ee("twine::insert(size_t p, const char* c)");
 	bounds_check(p);
 
-	int csize = strlen(c);
+	size_t csize = strlen(c);
 	reserve(m_data_size + csize);
-	for(int i = m_data_size - 1; i >= p; i--){
+	for(size_t i = m_data_size - 1; i >= p; i--){
 		m_data[i+csize] = m_data[i];
 	}
 	strncpy(m_data + p, c, csize);
@@ -772,12 +776,12 @@ twine& twine::insert(int p, const char* c)
 	return *this;
 }
 
-twine& twine::erase(int p, int n)
+twine& twine::erase(size_t p, size_t n)
 {
-	EnEx ee("twine::erase(int p, int n)");
+	EnEx ee("twine::erase(size_t p, size_t n)");
 	bounds_check(p);
 	bounds_check(p+n-1);
-	for(int i = p; i < m_data_size - n; i++){
+	for(size_t i = p; i < m_data_size - n; i++){
 		m_data[i] = m_data[i+n];
 	}
 	m_data_size -= n;	
@@ -785,9 +789,9 @@ twine& twine::erase(int p, int n)
 	return *this;
 }
 
-twine& twine::erase(int p)
+twine& twine::erase(size_t p)
 {
-	EnEx ee("twine::erase(int p)");
+	EnEx ee("twine::erase(size_t p)");
 	bounds_check(p);
 	m_data[p] = '\0';
 	m_data_size = p;
@@ -805,7 +809,7 @@ twine& twine::erase(void)
 twine& twine::rtrim(void)
 {
 	EnEx ee("twine::rtrim(void)");
-	int i = m_data_size - 1;
+	size_t i = m_data_size - 1;
 	while(i >= 0 && (isspace((unsigned char)m_data[i]) ||
 		m_data[i] == '\r' ||
 		m_data[i] == '\n')
@@ -819,7 +823,7 @@ twine& twine::rtrim(void)
 twine& twine::ltrim(void)
 {
 	EnEx ee("twine::ltrim(void)");
-	int i = 0;
+	size_t i = 0;
 	while( (i < m_data_size) && (isspace((unsigned char)m_data[i])) ) i++;
 
 	if(i > 0){
@@ -829,9 +833,9 @@ twine& twine::ltrim(void)
 }
 		
 	
-twine& twine::reserve(int min_size) 
+twine& twine::reserve(size_t min_size) 
 {
-	EnEx ee("twine::reserve(int min_size)");
+	EnEx ee("twine::reserve(size_t min_size)");
 	if(m_allocated_size == 0){
 		m_data = (char *)malloc(min_size + 10);
 		if(m_data == NULL){
@@ -853,31 +857,31 @@ twine& twine::reserve(int min_size)
 		}
 		m_data = ptr;
 		m_allocated_size = min_size+10;
-		//for(int i = m_data_size; i < m_allocated_size; i++)
+		//for(size_t i = m_data_size; i < m_allocated_size; i++)
 			//m_data[i] = '\0';
 		return *this;
 	}
 }
 
-int twine::size(void) const 
+size_t twine::size(void) const 
 { 
 	EnEx ee("twine::size(void)");
 	return m_data_size; 
 }
 
-int twine::length(void) const 
+size_t twine::length(void) const 
 { 
 	EnEx ee("twine::length(void)");
 	return m_data_size; 
 }
 
-int twine::max_size(void) const 
+size_t twine::max_size(void) const 
 { 
 	EnEx ee("twine::max_size(void)");
 	return m_allocated_size - 1; 
 }
 
-int twine::capacity(void) const 
+size_t twine::capacity(void) const 
 { 
 	EnEx ee("twine::capacity(void)");
 	return m_allocated_size - 1; 
@@ -889,9 +893,9 @@ bool twine::empty(void) const
 	return (m_data_size == 0); 
 }
 	
-void twine::bounds_check(int p) const
+void twine::bounds_check(size_t p) const
 {
-	EnEx ee("twine::bounds_check(int p)");
+	EnEx ee("twine::bounds_check(size_t p)");
 	if( (p < 0) || (p >= m_data_size)){
 		throw AnException(0, FL, "twine: Index out of bounds.");
 	}
@@ -900,16 +904,16 @@ void twine::bounds_check(int p) const
 twine& twine::ucase(void)
 {
 	EnEx ee("twine::ucase(void)");
-	int i;
+	size_t i;
 	for(i = 0; i < m_data_size; i++){
 		m_data[i] = toupper(m_data[i]);
 	}
 	return *this;
 }
 
-twine& twine::ucase(int i)
+twine& twine::ucase(size_t i)
 {
-	EnEx ee("twine::ucase(int i)");
+	EnEx ee("twine::ucase(size_t i)");
 	bounds_check(i);
 	m_data[i] = toupper(m_data[i]);
 	return *this;
@@ -919,7 +923,7 @@ vector < twine > twine::split(twine spliton)
 {
 	EnEx ee("twine::split(twine spliton)");
 	vector < twine > v;
-	int idx1, idx2;
+	size_t idx1, idx2;
 
 	idx1 = 0;
 	idx2 = find(spliton);

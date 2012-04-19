@@ -57,7 +57,7 @@ class DLLEXPORT XmlHelpers {
 			if(childNodeName == NULL){
 				throw AnException(0, FL, "NULL childNodeName passed to XmlHelpers::FindChild()");
 			}
-			int l = strlen(childNodeName);
+			size_t l = strlen(childNodeName);
 			if(l == 0){
 				// Empty child node name.  Just return the first one found.
 				return parent->xmlChildrenNode;
@@ -109,7 +109,7 @@ class DLLEXPORT XmlHelpers {
 			if(childNodeName == NULL){
 				throw AnException(0, FL, "NULL childNodeName passed to XmlHelpers::FindChild()");
 			}
-			int l = strlen(childNodeName);
+			size_t l = strlen(childNodeName);
 			if(l == 0){
 				// Empty child node name.  Just return the first one found.
 				throw AnException(0, FL, "Child Node name is empty");
@@ -178,7 +178,7 @@ class DLLEXPORT XmlHelpers {
 			if(parent == NULL){
 				throw AnException(0, FL, "NULL Parent passed to XmlHelpers::setCDATASection()");
 			}
-			xmlNodePtr cdata = xmlNewCDataBlock(parent->doc, (const xmlChar*)content, content.size() );
+			xmlNodePtr cdata = xmlNewCDataBlock(parent->doc, (const xmlChar*)content, (int)content.size() );
 			xmlAddChild(parent, cdata);
 		}
 
@@ -214,7 +214,7 @@ class DLLEXPORT XmlHelpers {
 		}
 
 
-		static int getIntAttr(xmlNodePtr node, const char* attrName){
+		static size_t getIntAttr(xmlNodePtr node, const char* attrName){
 			EnEx ee(FL, "XmlHelpers::getIntAttr(xmlNodePtr node)");
 			if(node == NULL){
 				throw AnException(0, FL, "NULL node passed into getIntAttr");
@@ -231,7 +231,7 @@ class DLLEXPORT XmlHelpers {
 			}
 		}
 
-		static void setIntAttr(xmlNodePtr node, const char* attrName, int val){
+		static void setIntAttr(xmlNodePtr node, const char* attrName, size_t val){
 			if(node == NULL){
 				throw AnException(0, FL, "NULL node passed into setIntAttr");
 			}

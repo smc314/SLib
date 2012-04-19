@@ -103,7 +103,7 @@ void EnterExit::Init(void)
 map<const char*, EnExProfile*>* EnterExit::FindOurHitCounter(void)
 {
 	THREAD_ID_TYPE tid = Thread::CurrentThreadId();
-	for(int i = 0, l = hit_counter_list.size(); i < l; i++){
+	for(size_t i = 0, l = hit_counter_list.size(); i < l; i++){
 		if(hit_counter_list[i].first == tid){
 			return hit_counter_list[i].second;
 		}
@@ -122,7 +122,7 @@ map<const char*, EnExProfile*>* EnterExit::FindOurHitCounter(void)
 vector<const char*>* EnterExit::FindOurStackTrace(void)
 {
 	THREAD_ID_TYPE tid = Thread::CurrentThreadId();
-	for(int i = 0, l = stack_trace_list.size(); i < l; i++){
+	for(size_t i = 0, l = stack_trace_list.size(); i < l; i++){
 		if(stack_trace_list[i].first == tid){
 			return stack_trace_list[i].second;
 		}
@@ -423,9 +423,9 @@ double EnExProfile::TotalTime(void)
 	return (double)m_totalTime;
 }
 
-void EnExProfile::RecordEntryExit(unsigned long entry, unsigned long exit)
+void EnExProfile::RecordEntryExit(uint64_t entry, uint64_t exit)
 {
-	unsigned long diff = exit - entry;
+	uint64_t diff = exit - entry;
 	if(diff < 0){
 		diff = 0;
 	}

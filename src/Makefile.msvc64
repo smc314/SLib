@@ -13,12 +13,12 @@ RM=del /Q
 SOCKET_LIB=ws2_32.lib
 
 
-CFLAGS=-c -Zp8 -EHsc -DWIN32 -D_MT -D_DLL -DLINT_ARGS -D_X86_=1 -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include" /analyze
+CFLAGS=-c -Zp8 -EHsc -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include"
 
-SSLLIBS=$(3PL)\lib\libeay32.lib $(3PL)\lib\ssleay32.lib \
-	$(3PL)\lib\libxml2.lib
+SSLLIBS=$(3PL)\x64\lib\libeay32.lib $(3PL)\x64\lib\ssleay32.lib \
+	$(3PL)\x64\lib\libxml2.lib
 
-LFLAGS=-machine:i386 -subsystem:console
+LFLAGS=-machine:x64 -subsystem:console
 LLIBS=$(SSLLIBS) $(SOCKET_LIB)
 
 .cpp.obj:
@@ -66,18 +66,22 @@ incs:
 	$(CP) Pool.cpp ..\include
 
 clean:
-	$(RM) $(DOTOH) *.$(OHEXT) libSLib.dll core *.pch *.lib *.exp *.exe.manifest *.exe *.dll.manifest
+	$(RM) $(DOTOH) *.$(OHEXT) libSLib.dll core *.pch *.lib *.exp *.exe.manifest *.exe *.dll *.dll.manifest
 	$(RM) ..\lib\libSLib.dll
 	$(RM) ..\lib\libSLib.lib
 	$(RM) ..\include\*.h
 	$(RM) ..\include\Pool.cpp
 	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp
 
+
 install:
 	$(CP) ..\include\*.h $(3PL)\include
 	$(CP) ..\include\*.cpp $(3PL)\include
-	$(CP) ..\lib\libSLib.lib $(3PL)\lib
-	$(CP) ..\lib\libSLib.dll $(3PL)\bin
+	-mkdir $(3PL)\x64
+	-mkdir $(3PL)\x64\lib
+	-mkdir $(3PL)\x64\bin
+	$(CP) ..\lib\libSLib.lib $(3PL)\x64\lib
+	$(CP) ..\lib\libSLib.dll $(3PL)\x64\bin
 
 docs:
 	docxx --html --dir ..\..\appint\doc\slib *.h

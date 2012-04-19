@@ -89,7 +89,7 @@ class AutoXMLChar
 		  */
 		virtual char* duplicate(void) const {
 			char* ret;
-			int len = strlen( (char*)m_xml_char_ptr ) + 1;
+			size_t len = strlen( (char*)m_xml_char_ptr ) + 1;
 			ret = (char*)malloc(len);
 			if(ret == NULL){
 				throw AnException(0, FL, "Error duplicating "

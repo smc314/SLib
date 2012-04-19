@@ -67,7 +67,7 @@ twine& EMail::Subject(void)
 
 void EMail::Body(twine& msg)
 {
-	int ptr1;
+	size_t ptr1;
 	m_body = msg;
 
 	ptr1 = m_body.find('\n');

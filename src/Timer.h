@@ -28,6 +28,9 @@
 
 #include <time.h>
 #include <sys/timeb.h>
+#ifndef _WIN32
+#include <sys/time.h>
+#endif
 
 namespace SLib
 {
@@ -66,6 +69,28 @@ class DLLEXPORT Timer
 		  */
 		float Duration(void);
 
+		/** Use this method to retrieve a microsecond resolution clock value.
+		  * We use gettimeofday on linux and ftime on windows to implement this. Note,
+		  * ftime on windows only provides millisecond resolution, not microsecond
+		  * resolution.
+		  */
+#ifdef _WIN32
+		static inline unsigned long long GetCycleCount(void)
+		{
+			struct timeb tb;
+			ftime( &tb);
+			return tb.time * 1000000 + tb.millitm * 1000;
+		}
+#else
+		static __inline__ uint64_t GetCycleCount(void)
+		{
+			struct timeval tv;
+			gettimeofday( &tv, NULL);
+			return tv.tv_sec * 1000000 + tv.tv_usec;
+		}
+#endif
+
+#if 0
 		/** Use this method to retrieve the current CPU cycle count
 		 * value on an intel machine.  This works on windows, linux, and mac.
 		 */
@@ -111,7 +136,7 @@ class DLLEXPORT Timer
 			return ((unsigned long)a) | (((unsigned long)d) << 32);
 		}
 #endif
-
+#endif // #if 0
 
 
 	private:
