@@ -207,7 +207,7 @@ vector<twine> File::readLines()
 	contents.check_size();
 
 	vector<twine> lines = contents.split("\n");
-	for(int i = 0; i < (int)lines.size(); i++){
+	for(size_t i = 0; i < lines.size(); i++){
 		lines[i].rtrim();
 	}
 

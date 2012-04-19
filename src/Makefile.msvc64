@@ -61,6 +61,9 @@ test_sleep: test_sleep.$(OHEXT)
 test_compile: test_compile.$(OHEXT)
 	$(LINK) /OUT:test_compile.exe test_compile.$(OHEXT) $(LFLAGS) $(DOTOH)
 
+test_xml: test_xml.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_xml.exe test_xml.$(OHEXT) libSLib.lib $(LLIBS)
+
 incs:
 	$(CP) *.h ..\include
 	$(CP) Pool.cpp ..\include

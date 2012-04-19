@@ -18,6 +18,17 @@ class BlockingQueue
 		mutable CONDITION_VARIABLE ConditionVar;
 
 	public:
+		BlockingQueue()
+		{
+			InitializeCriticalSection( &CritSection );
+			InitializeConditionVariable( &ConditionVar );
+		}
+
+		virtual ~BlockingQueue()
+		{
+			DeleteCriticalSection( &CritSection );
+		}
+
 		void push(Data const& data)
 		{
 			//boost::mutex::scoped_lock lock(the_mutex);

@@ -32,12 +32,14 @@ using namespace std;
 #include "Thread.h"
 #include "Timer.h"
 #include "Log.h"
+#include "BlockingQueue.h"
 using namespace SLib;
 
 void *run_lots(void *);
 twine func1(twine t);
 twine func2(twine t);
 twine func3(twine t);
+int testBlockingQueue(void);
 
 class data_class 
 {
@@ -80,6 +82,9 @@ class data_class
 
 int main (void)
 {
+	printf("Testing the blocking queue...\n");
+	testBlockingQueue();
+
 	printf("Testing twine functionality\n");
 
 	vector < Thread * > th_vect;
@@ -183,4 +188,29 @@ twine func3(twine t)
 {
 	t += "you got here :-)";
 	return t;
+}
+
+int testBlockingQueue(void)
+{
+	printf("Creating the queue<int>\n");
+	BlockingQueue<int> testQueue;
+
+	printf("push(1)\n");
+	testQueue.push(1);
+	printf("push(2)\n");
+	testQueue.push(2);
+	printf("push(3)\n");
+	testQueue.push(3);
+
+	printf("pop()\n");
+	int val = testQueue.pop();
+	printf("pop()\n");
+	val = testQueue.pop();
+	printf("pop()\n");
+	val = testQueue.pop();
+
+	printf("empty()\n");
+	bool isEmpty = testQueue.empty();
+
+	return 0;
 }

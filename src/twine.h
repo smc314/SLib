@@ -185,7 +185,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		size_t compare(const twine& t) const;
+		int compare(const twine& t) const;
 
 		/** Compares this twine against the input
 		  * Returns:
@@ -195,7 +195,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		size_t compare(const char* c) const;
+		int compare(const char* c) const;
 
 		/** Compares count chars of this twine against the input
 		  * Returns:
@@ -205,7 +205,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		size_t compare(const twine& t, size_t count) const;
+		int compare(const twine& t, size_t count) const;
 
 		/** Compares count chars of this twine against the input
 		  * Returns:
@@ -215,7 +215,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		size_t compare(const char* c, size_t count) const;
+		int compare(const char* c, size_t count) const;
 
 		/** Compares this twine against the input
 		  * Returns:
@@ -225,7 +225,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		size_t compare(size_t i) const;
+		int compare(size_t i) const;
 
 		/** Compares this twine against the input
 		  * Returns:
@@ -235,7 +235,7 @@ class DLLEXPORT twine
 		  *    <li>+1 if this object is greater than the input.</li>
 		  * </ul>
 		  */
-		size_t compare(float f) const;
+		int compare(float f) const;
 
 		/** Compares the beginning of this twine against the input
 		 * to determine if this twine starts the same way.

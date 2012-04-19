@@ -305,7 +305,7 @@ twine::operator const xmlChar*() const
 	return (const xmlChar*)m_data;
 }
 
-size_t twine::compare(const twine& t) const
+int twine::compare(const twine& t) const
 {
 	EnEx ee("twine::compare(twine& t)");
 	if((m_data_size == 0) && (t.m_data_size == 0)){
@@ -317,7 +317,7 @@ size_t twine::compare(const twine& t) const
 	return strcmp(m_data, t.m_data);
 }
 
-size_t twine::compare(const char* c) const
+int twine::compare(const char* c) const
 {
 	EnEx ee("twine::compare(const char* c)");
 	if((m_data_size == 0) && (c == NULL)){
@@ -329,7 +329,7 @@ size_t twine::compare(const char* c) const
 	return strcmp(m_data, c);
 }
 
-size_t twine::compare(const twine& t, size_t count) const
+int twine::compare(const twine& t, size_t count) const
 {
 	EnEx ee("twine::compare(twine& t, size_t count)");
 	if((m_data_size == 0) && (t.m_data_size == 0)){
@@ -341,7 +341,7 @@ size_t twine::compare(const twine& t, size_t count) const
 	return strncmp(m_data, t.m_data, count);
 }
 
-size_t twine::compare(const char* c, size_t count) const
+int twine::compare(const char* c, size_t count) const
 {
 	EnEx ee("twine::compare(const char* c, size_t count)");
 	if(m_data_size == 0){
@@ -350,7 +350,7 @@ size_t twine::compare(const char* c, size_t count) const
 	return strncmp(m_data, c, count);
 }
 
-size_t twine::compare(size_t i) const
+int twine::compare(size_t i) const
 {
 	EnEx ee("twine::compare(size_t i)");
 	if(m_data_size == 0){
@@ -363,7 +363,7 @@ size_t twine::compare(size_t i) const
 	else return 0;
 }
 
-size_t twine::compare(float f) const
+int twine::compare(float f) const
 {
 	EnEx ee("twine::compare(float f)");
 	if(m_data_size == 0){
@@ -507,7 +507,7 @@ twine& twine::format(const char* f, ...)
 twine& twine::format(const char* f, va_list ap) 
 {
 	EnEx ee("twine::format(const char* f, va_list ap)");
-	size_t nsize;
+	int nsize;
 	bool success = false;
 	
 	reserve(256); // make sure we have a minimum amount of space
@@ -809,13 +809,17 @@ twine& twine::erase(void)
 twine& twine::rtrim(void)
 {
 	EnEx ee("twine::rtrim(void)");
+	if(m_data_size == 0){
+		return *this; // bail out early.
+	}
 	size_t i = m_data_size - 1;
 	while(i >= 0 && (isspace((unsigned char)m_data[i]) ||
 		m_data[i] == '\r' ||
 		m_data[i] == '\n')
 	) {
-		m_data[i--] = '\0';
+		m_data[i] = '\0';
 		m_data_size --;
+		i--;
 	}
 	return *this;
 }
