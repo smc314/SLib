@@ -163,6 +163,9 @@ twine& twine::operator=(const twine* t)
 twine& twine::operator=(const char* c)
 {
 	EnEx ee("twine::operator=(const char* c)");
+	if(c == NULL){
+		throw AnException(0, FL, "twine = NULL not allowed.");
+	}
 	size_t tsize = strlen(c);
 	if(tsize > MAX_INPUT_SIZE){
 		throw AnException(0,FL,"twine: Input Too Large");
@@ -177,6 +180,9 @@ twine& twine::operator=(const char* c)
 twine& twine::operator<< (xmlChar* c)
 {
 	EnEx ee("twine::operator<<(const xmlChar* c)");
+	if(c == NULL){
+		throw AnException(0, FL, "twine << NULL not allowed.");
+	}
 	size_t tsize = strlen((const char*)c);
 	if(tsize > MAX_INPUT_SIZE){
 		throw AnException(0,FL,"twine: Input Too Large");
@@ -344,7 +350,10 @@ int twine::compare(const twine& t, size_t count) const
 int twine::compare(const char* c, size_t count) const
 {
 	EnEx ee("twine::compare(const char* c, size_t count)");
-	if(m_data_size == 0){
+	if((m_data_size == 0) && (c == NULL)){
+		return 0; // equal if both null
+	}
+	if(m_data_size == 0 || c == NULL){
 		return -1;
 	}
 	return strncmp(m_data, c, count);
@@ -496,6 +505,9 @@ twine& twine::format(const char* f, ...)
 {
 	va_list ap;
 	EnEx ee("twine::format(const char* f, ...)");
+	if(f == NULL){
+		throw AnException(0, FL, "Null format string.");
+	}
 	
 	va_start(ap, f);
 	format(f, ap);
@@ -509,6 +521,9 @@ twine& twine::format(const char* f, va_list ap)
 	EnEx ee("twine::format(const char* f, va_list ap)");
 	int nsize;
 	bool success = false;
+	if(f == NULL){
+		throw AnException(0, FL, "Null format string.");
+	}
 	
 	reserve(256); // make sure we have a minimum amount of space
 
@@ -539,6 +554,9 @@ twine& twine::format(const char* f, va_list ap)
 size_t twine::find(const char* needle) const
 {
 	EnEx ee("twine::find(const char* needle)");
+	if(needle == NULL){
+		throw AnException(0, FL, "Can't search for NULL input.");
+	}
 	char *ptr;
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
@@ -573,6 +591,9 @@ size_t twine::find(const twine& t) const
 size_t twine::find(const char* needle, size_t p) const
 {
 	EnEx ee("twine::find(const char* needle, size_t p)");
+	if(needle == NULL){
+		throw AnException(0, FL, "Can't search for NULL input.");
+	}
 	char *ptr;
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
@@ -635,6 +656,9 @@ size_t twine::rfind(const char c, size_t p) const
 size_t twine::rfind(const char* c) const
 {
 	EnEx ee("twine::rfind(const char* c)");
+	if(c == NULL){
+		throw AnException(0, FL, "Can't search for NULL input.");
+	}
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
 	size_t p = m_data_size - 1;
@@ -650,6 +674,9 @@ size_t twine::rfind(const char* c) const
 size_t twine::rfind(const char* c, size_t p) const
 {
 	EnEx ee("twine::rfind(const char* c, size_t p)");
+	if(c == NULL){
+		throw AnException(0, FL, "Can't search for NULL input.");
+	}
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
 	bounds_check(p);
@@ -752,6 +779,9 @@ twine& twine::replace(const char c, const char n)
 twine& twine::append(const char* c)
 {
 	EnEx ee("twine::append(const char* c)");
+	if(c == NULL){
+		return *this; // nothing to append
+	}
 	size_t csize = strlen(c);
 	reserve(m_data_size + csize);
 	strcat(m_data, c);
@@ -764,6 +794,9 @@ twine& twine::insert(size_t p, const char* c)
 {
 	EnEx ee("twine::insert(size_t p, const char* c)");
 	bounds_check(p);
+	if(c == NULL){
+		return *this; // nothing to insert
+	}
 
 	size_t csize = strlen(c);
 	reserve(m_data_size + csize);
@@ -949,6 +982,12 @@ vector < twine > twine::split(twine spliton)
 twine& twine::getAttribute(xmlNodePtr node, const char* attrName)
 {
 	EnEx ee("twine::getAttribute(xmlNodePtr node, const char* attrName)");
+	if(node == NULL){
+		throw AnException(0, FL, "Invalid xmlNodePtr given (NULL).");
+	}
+	if(attrName == NULL){
+		throw AnException(0, FL, "Invalid attrName given (NULL).");
+	}
 
 	AutoXMLChar tmp;
 	tmp = xmlGetProp(node, (const xmlChar*)attrName);
