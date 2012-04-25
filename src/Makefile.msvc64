@@ -16,7 +16,7 @@ SOCKET_LIB=ws2_32.lib
 CFLAGS=-c -Zp8 -EHsc -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include"
 
 SSLLIBS=$(3PL)\x64\lib\libeay32.lib $(3PL)\x64\lib\ssleay32.lib \
-	$(3PL)\x64\lib\libxml2.lib
+	$(3PL)\x64\lib\libxml2.lib $(3PL)\x64\lib\libcurl_imp.lib
 
 LFLAGS=-machine:x64 -subsystem:console
 LLIBS=$(SSLLIBS) $(SOCKET_LIB)
@@ -29,10 +29,11 @@ DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
 	Thread.$(OHEXT) Tools.$(OHEXT) twine.$(OHEXT) Date.$(OHEXT) \
 	smtp.$(OHEXT) Interval.$(OHEXT) EMail.$(OHEXT) Timer.$(OHEXT) \
 	Parms.$(OHEXT) LogMsg.$(OHEXT) Hash.$(OHEXT) EnEx.$(OHEXT) XmlHelpers.$(OHEXT) \
-	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT)
+	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT) HttpClient.$(OHEXT)
 
-all: $(DOTOH) incs
+all: $(DOTOH) LogDump.$(OHEXT) incs
 	$(LINK) $(LFLAGS) $(DOTOH) /OUT:libSLib.dll /DLL $(LLIBS)
+	$(CC) LogDump.$(OHEXT) libSLib.lib $(LFLAGS)
 	$(CP) libSLib.dll ..\lib
 	$(CP) libSLib.lib ..\lib
 
@@ -74,7 +75,7 @@ clean:
 	$(RM) ..\lib\libSLib.lib
 	$(RM) ..\include\*.h
 	$(RM) ..\include\Pool.cpp
-	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp
+	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h
 
 
 install:
@@ -85,6 +86,7 @@ install:
 	-mkdir $(3PL)\x64\bin
 	$(CP) ..\lib\libSLib.lib $(3PL)\x64\lib
 	$(CP) ..\lib\libSLib.dll $(3PL)\x64\bin
+	$(CP) LogDump.exe $(3PL)\x64\bin
 
 docs:
 	docxx --html --dir ..\..\appint\doc\slib *.h
