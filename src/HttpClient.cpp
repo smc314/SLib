@@ -26,6 +26,8 @@
 #include "XmlHelpers.h"
 using namespace SLib;
 
+static bool HttpClient_cURL_Initialized = false;
+
 struct MemoryStruct {
 	char* memory;
 	size_t size;
@@ -76,7 +78,10 @@ char* HttpClient::GetPage(const twine& url )
 	chunk.memory = NULL;
 	chunk.size = 0;
 
-	curl_global_init(CURL_GLOBAL_ALL);
+	if(HttpClient_cURL_Initialized == false){
+		curl_global_init(CURL_GLOBAL_ALL);
+		HttpClient_cURL_Initialized = true;
+	}
 	curl_handle = curl_easy_init();
 	curl_easy_setopt( curl_handle, CURLOPT_URL, url() );
 	curl_easy_setopt( curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback );
@@ -106,7 +111,10 @@ xmlDocPtr HttpClient::PostPage(const twine& url, const char* msg, size_t msgLen)
 	chunk.memory = NULL;
 	chunk.size = 0;
 
-	curl_global_init(CURL_GLOBAL_ALL);
+	if(HttpClient_cURL_Initialized == false){
+		curl_global_init(CURL_GLOBAL_ALL);
+		HttpClient_cURL_Initialized = true;
+	}
 	curl_handle = curl_easy_init();
 	curl_easy_setopt( curl_handle, CURLOPT_URL, url() );
 	curl_easy_setopt( curl_handle, CURLOPT_POSTFIELDS, msg );
