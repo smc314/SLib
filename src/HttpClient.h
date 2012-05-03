@@ -49,6 +49,15 @@ class DLLEXPORT HttpClient
 		/// Standard Destructor
 		virtual ~HttpClient();
 
+		/// Use this to download a page using Get
+		char* Get( const twine& url);
+
+		/// Use this to download a page as an XML document
+		xmlDocPtr GetXml(const twine& url);
+
+		/// Use this to post a message to the server and retrieve the response.
+		xmlDocPtr Post(const twine& url, const char* msg, size_t msgLen);
+
 		/// Use this to download a page using GET with no cookie or state management.
 		static char* GetPage( const twine& url );
 
@@ -60,6 +69,16 @@ class DLLEXPORT HttpClient
 
 		/// Use this to post an xml document to a URL and retrieve the response.
 		static xmlDocPtr PostXml( const twine& url, xmlDocPtr doc);
+
+	private:
+
+		/// Copy constructor is private to prevent use
+		HttpClient( const HttpClient& c) {}
+
+		/// Assignment operator is private to prevent use
+		HttpClient& operator=(const HttpClient& c) { return *this; }
+
+		CURL* m_curl_handle;
 };
 
 } // End Namespace SLib

@@ -61,11 +61,79 @@ size_t HttpClient_WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
 HttpClient::HttpClient()
 {
 	EnEx ee(FL, "HttpClient::HttpClient()");
+
+	if(HttpClient_cURL_Initialized == false){
+		curl_global_init(CURL_GLOBAL_ALL);
+		HttpClient_cURL_Initialized = true;
+	}
+	m_curl_handle = curl_easy_init();
 }
 
 HttpClient::~HttpClient()
 {
 	EnEx ee(FL, "HttpClient::~HttpClient()");
+
+	curl_easy_cleanup( m_curl_handle );
+}
+
+char* HttpClient::Get(const twine& url )
+{
+	EnEx ee(FL, "HttpClient::Get(const twine& url)");
+
+	struct MemoryStruct chunk;
+
+	chunk.memory = NULL;
+	chunk.size = 0;
+
+	curl_easy_setopt( m_curl_handle, CURLOPT_URL, url() );
+	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback );
+	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEDATA, (void*)&chunk );
+	curl_easy_perform( m_curl_handle );
+	curl_easy_reset( m_curl_handle );
+
+	return chunk.memory;
+}
+
+xmlDocPtr HttpClient::GetXml(const twine& url)
+{
+	EnEx ee(FL, "HttpClient::GetXml(const twine& url)");
+
+	dptr<char> contents = Get( url );
+	xmlDocPtr doc = xmlParseDoc( (xmlChar*) contents() );
+	return doc;
+}
+
+xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)
+{
+	EnEx ee(FL, "HttpClient::Post(const twine& url, const char* msg, size_t msgLen)");
+
+	struct MemoryStruct chunk;
+	struct curl_slist* slist = NULL;
+
+	chunk.memory = NULL;
+	chunk.size = 0;
+
+	{ // for timing scope
+		EnEx ee2(FL, "HttpClient::Post - curl_easy_setopt");
+		curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1);
+		curl_easy_setopt( m_curl_handle, CURLOPT_URL, url() );
+		curl_easy_setopt( m_curl_handle, CURLOPT_POSTFIELDS, msg );
+		curl_easy_setopt( m_curl_handle, CURLOPT_POSTFIELDSIZE, msgLen );
+		curl_easy_setopt( m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback );
+		curl_easy_setopt( m_curl_handle, CURLOPT_WRITEDATA, (void*)&chunk );
+		slist = curl_slist_append(slist, "Expect:");
+		curl_easy_setopt( m_curl_handle, CURLOPT_HTTPHEADER, slist);
+	}
+	{ // for timing scope
+		EnEx ee3(FL, "HttpClient::Post - curl_easy_perform");
+		curl_easy_perform( m_curl_handle );
+	}
+	curl_easy_reset( m_curl_handle );
+	curl_slist_free_all(slist);
+
+	dptr<char> contents = chunk.memory;
+	xmlDocPtr doc = xmlParseDoc( (xmlChar*) contents() );
+	return doc;
 }
 
 char* HttpClient::GetPage(const twine& url )
@@ -106,6 +174,7 @@ xmlDocPtr HttpClient::PostPage(const twine& url, const char* msg, size_t msgLen)
 	EnEx ee(FL, "HttpClient::PostPage(const twine& url, const char* msg, size_t msgLen)");
 
 	CURL* curl_handle;
+	struct curl_slist* slist = NULL;
 	struct MemoryStruct chunk;
 
 	chunk.memory = NULL;
@@ -121,8 +190,11 @@ xmlDocPtr HttpClient::PostPage(const twine& url, const char* msg, size_t msgLen)
 	curl_easy_setopt( curl_handle, CURLOPT_POSTFIELDSIZE, msgLen );
 	curl_easy_setopt( curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback );
 	curl_easy_setopt( curl_handle, CURLOPT_WRITEDATA, (void*)&chunk );
+	slist = curl_slist_append(slist, "Expect:");
+	curl_easy_setopt( curl_handle, CURLOPT_HTTPHEADER, slist);
 	curl_easy_perform( curl_handle );
 	curl_easy_cleanup( curl_handle );
+	curl_slist_free_all(slist);
 
 	dptr<char> contents = chunk.memory;
 	xmlDocPtr doc = xmlParseDoc( (xmlChar*) contents() );
