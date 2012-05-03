@@ -115,7 +115,7 @@ xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)
 
 	{ // for timing scope
 		EnEx ee2(FL, "HttpClient::Post - curl_easy_setopt");
-		curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1);
+		//curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1);
 		curl_easy_setopt( m_curl_handle, CURLOPT_URL, url() );
 		curl_easy_setopt( m_curl_handle, CURLOPT_POSTFIELDS, msg );
 		curl_easy_setopt( m_curl_handle, CURLOPT_POSTFIELDSIZE, msgLen );
