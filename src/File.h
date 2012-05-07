@@ -136,6 +136,9 @@ class DLLEXPORT File
 #endif
 		}
 
+		/// Recursively deletes the given directory
+		static void RmDir(const twine& dirName);
+
 	protected:
 
 		void closeFile();

@@ -369,3 +369,34 @@ void File::EnsurePath(const twine& fileName)
 		}
 	}
 }
+
+void File::RmDir(const twine& dirName)
+{
+	EnEx ee("File::RmDir(const twine& dirName)");
+
+	if(dirName.length() == 0){
+		throw AnException(0, FL, "Empty directory name passed to File::RmDir()");
+	}
+
+	// Ensure it is empty
+	vector<twine> files = File::listFiles( dirName );
+	vector<twine> folders = File::listFolders( dirName );
+
+	for(size_t i = 0; i < files.size(); i++){
+		if(files[i] != "." && files[i] != ".." ){
+			File::Delete( dirName + "/" + files[i] );
+		}
+	}
+
+	for(size_t i = 0; i < folders.size(); i++){
+		File::RmDir( dirName + "/" + folders[i] );
+	}
+		
+	// Now delete the directory itself:
+#ifdef _WIN32
+	_rmdir( dirName() );
+#else
+	rmdir( dirName() );
+#endif
+
+}
