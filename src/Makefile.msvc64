@@ -16,7 +16,8 @@ SOCKET_LIB=ws2_32.lib
 CFLAGS=-c -Zp8 -EHsc -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include"
 
 SSLLIBS=$(3PL)\x64\lib\libeay32.lib $(3PL)\x64\lib\ssleay32.lib \
-	$(3PL)\x64\lib\libxml2.lib $(3PL)\x64\lib\libcurl_imp.lib
+	$(3PL)\x64\lib\libxml2.lib $(3PL)\x64\lib\libcurl_imp.lib \
+	$(3PL)\x64\lib\zdll.lib
 
 LFLAGS=-machine:x64 -subsystem:console
 LLIBS=$(SSLLIBS) $(SOCKET_LIB)
@@ -24,15 +25,20 @@ LLIBS=$(SSLLIBS) $(SOCKET_LIB)
 .cpp.obj:
 	$(CC) $(CFLAGS) $<
 
+.c.obj:
+	$(CC) $(CFLAGS) $<
+
+
+MINIZIP_OH=ioapi.$(OHEXT) iowin32.$(OHEXT) mztools.$(OHEXT) unzip.$(OHEXT) zip.$(OHEXT)
 
 DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
 	Thread.$(OHEXT) Tools.$(OHEXT) twine.$(OHEXT) Date.$(OHEXT) \
 	smtp.$(OHEXT) Interval.$(OHEXT) EMail.$(OHEXT) Timer.$(OHEXT) \
 	Parms.$(OHEXT) LogMsg.$(OHEXT) Hash.$(OHEXT) EnEx.$(OHEXT) XmlHelpers.$(OHEXT) \
-	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT) HttpClient.$(OHEXT)
+	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT) HttpClient.$(OHEXT) ZipFile.$(OHEXT)
 
-all: $(DOTOH) LogDump.$(OHEXT) incs
-	$(LINK) $(LFLAGS) $(DOTOH) /OUT:libSLib.dll /DLL $(LLIBS)
+all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) incs
+	$(LINK) $(LFLAGS) $(DOTOH) $(MINIZIP_OH) /OUT:libSLib.dll /DLL $(LLIBS)
 	$(CC) LogDump.$(OHEXT) libSLib.lib $(LFLAGS)
 	$(CP) libSLib.dll ..\lib
 	$(CP) libSLib.lib ..\lib
@@ -49,6 +55,9 @@ thrash_twine: thrash_twine.$(OHEXT)
 
 test_log: test_log.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_log.exe test_log.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_zip: test_zip.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_zip.exe test_zip.$(OHEXT) libSLib.lib $(LLIBS)
 
 test_logfile: test_logfile.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_logfile.exe test_logfile.$(OHEXT) libSLib.lib $(LLIBS)
@@ -75,7 +84,7 @@ clean:
 	$(RM) ..\lib\libSLib.lib
 	$(RM) ..\include\*.h
 	$(RM) ..\include\Pool.cpp
-	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h
+	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h ZipFile.h
 
 
 install:

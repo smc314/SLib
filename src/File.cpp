@@ -3,13 +3,17 @@
 #include "EnEx.h"
 using namespace SLib;
 
+#ifdef _WIN32
+#include <direct.h>
+#endif
+
 File::File()
 {
 	EnEx ee("File::File()");
 	m_fp = NULL;
 }
 
-File::File(const twine fileName) : m_fileName(fileName)
+File::File(const twine& fileName) : m_fileName(fileName)
 {
 	EnEx ee("File::File(const twine fileName)");
 	m_fp = fopen(m_fileName(), "rb");
@@ -39,7 +43,7 @@ File::~File()
 	closeFile();
 }
 
-File& File::open(const twine fileName)
+File& File::open(const twine& fileName)
 {
 	EnEx ee("File::open(const twine fileName)");
 	closeFile();
@@ -215,7 +219,19 @@ vector<twine> File::readLines()
 
 }
 
-vector<twine> File::listFiles(twine dirName)
+bool File::Exists(const twine& fileName)
+{
+	EnEx ee("File::Exists(const twine& fileName)");
+
+	try {
+		File f(fileName); // try to open it
+		return true; // if we can, then it exists
+	} catch (AnException& e){
+		return false; // if not, then it doesn't
+	}
+}
+
+vector<twine> File::listFiles(const twine& dirName)
 {
 	EnEx ee("File::listFiles()");
 	vector<twine> ret;
@@ -242,7 +258,7 @@ vector<twine> File::listFiles(twine dirName)
 	return ret;
 }
 
-vector<twine> File::listFolders(twine dirName)
+vector<twine> File::listFolders(const twine& dirName)
 {
 	EnEx ee("File::listFolders()");
 	vector<twine> ret;
@@ -269,7 +285,7 @@ vector<twine> File::listFolders(twine dirName)
 	return ret;
 }
 
-void File::writeToFile(twine& fileName, twine& contents)
+void File::writeToFile(const twine& fileName, const twine& contents)
 {
 
 	FILE* fp = fopen(fileName(), "wb");
@@ -284,7 +300,7 @@ void File::writeToFile(twine& fileName, twine& contents)
 	}
 }
 
-void File::Copy(twine& from, twine& to)
+void File::Copy(const twine& from, const twine& to)
 {
 	EnEx ee("File::Copy(twine& from, twine& to)");
 
@@ -305,4 +321,51 @@ void File::Copy(twine& from, twine& to)
 	}
 
 	// dptr<> contents gets automatically free'd when we leave this function
+}
+
+void File::EnsurePath(const twine& fileName)
+{
+	EnEx ee("File::EnsurePath(const twine& fileName)");
+
+	vector<twine> segments;
+	twine seg;
+	for(size_t i = 0; i < fileName.length(); i++){
+		if(fileName[i] == '/' || fileName[i] == '\\'){
+			segments.push_back(seg);
+			seg = "";
+		} else {
+			seg += fileName[i];
+		}
+	}
+	segments.push_back(seg);
+
+	twine startingPath = ".";
+
+	for(size_t i = 0; i < segments.size() - 1; i++){
+		if(segments[i].length() == 0 ||
+			segments[i] == "." ||
+			segments[i] == ".."
+		){
+			continue; // skip these
+		}
+
+		// Check to see if the current segment exists:
+		vector<twine> folders = File::listFolders( startingPath );
+		bool found = false;
+		for(size_t j = 0; j < folders.size(); j++){
+			if(folders[j] == segments[i]){
+				found = true;
+				break;
+			}
+		}
+		startingPath += "/" + segments[i];
+		if(!found){
+			// Create the new directory:
+#ifdef _WIN32
+			_mkdir( startingPath() );
+#else
+			mkdir( startingPath() );
+#endif
+		}
+	}
 }

@@ -63,7 +63,7 @@ class DLLEXPORT File
 		File();
 
 		/// Pass in a file name and we will open the given file.  
-		File(const twine fileName);
+		File(const twine& fileName);
 
 		/// Pass in an existing file pointer.  
 		File(FILE* fp);
@@ -87,7 +87,7 @@ class DLLEXPORT File
 		bool operator==(File& f) const;
 
 		/// Opens the file name given.
-		File& open(const twine fileName);
+		File& open(const twine& fileName);
 
 		/// Returns the file name:
 		twine& name();
@@ -111,18 +111,24 @@ class DLLEXPORT File
 		/// Reads the whole file and returns each line from the file as an row in a vector.
 		vector<twine> readLines();
 
+		/// Determines if the file named exists or not.
+		static bool Exists(const twine& fileName);
+
 		/// Returns a list of file names that exist in this directory
-		static vector<twine> listFiles(twine dirName);
-		static vector<twine> listFolders(twine dirName);
+		static vector<twine> listFiles(const twine& dirName);
+		static vector<twine> listFolders(const twine& dirName);
 
 		/// Quick method to write a string out to a file.
-		static void writeToFile(twine& fileName, twine& contents);
+		static void writeToFile(const twine& fileName, const twine& contents);
 
 		/// Utility method to copy from one file location to another
-		static void Copy(twine& from, twine& to);
+		static void Copy(const twine& from, const twine& to);
+
+		/// Utility method to ensure all of the directories in a given path exist.
+		static void EnsurePath( const twine& fileName );
 
 		/// Utility method to delete a file
-		static void Delete(twine& fileName) {
+		static void Delete(const twine& fileName) {
 #ifdef _WIN32
 			_unlink( fileName() );
 #else

@@ -4,6 +4,7 @@
 *.dll
 *.lib
 *.exp
+*.exe
 
 # VI Swap files #
 #################
@@ -12,3 +13,4 @@
 # Everything in the include directory #
 #######################################
 include/*.h
+include/*.cpp
