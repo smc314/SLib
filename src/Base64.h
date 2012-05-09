@@ -66,6 +66,19 @@ class DLLEXPORT Base64 {
 		static void encode(const char* src, char* dst);
 
 		/**
+		  * This method will encode the given character
+		  * string into the given target string, using base64
+		  * encoding.  You are responsible for allocating enough
+		  * space and providing the target character string.
+		  * This version of the encode does not do a strlen on the input
+		  * src buffer.  You must tell us explicitly how much of the buffer
+		  * you want read and encoded.
+		  */
+		static void encode(const char* src, size_t src_len, char* dst);
+
+		static char* encode(const char* src, size_t src_len, size_t* ouput_len);
+
+		/**
 		  * This method will decode the given character
 		  * string into a new character string, using base64
 		  * decoding.  You are responsible for freeing the memory
@@ -78,13 +91,18 @@ class DLLEXPORT Base64 {
 		  * string into the given target string, using base64
 		  * decoding.  You are responsible for allocating enough
 		  * space and providing the target character string.
+		  * Returns how much data was decoded into dst.
 		  */
-		static void decode(const char* src, char* dst);
+		static size_t decode(const char* src, char* dst);
+
+		static char* decode(const char* src, size_t src_len, size_t* output_len);
 
 		/**
 		  * Use this to free a char* returned from this class.
 		  */
 		static void Free(char* c);
+
+		static void BuildDecodingTable();
 
 };
 

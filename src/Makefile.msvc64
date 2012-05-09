@@ -35,7 +35,8 @@ DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
 	Thread.$(OHEXT) Tools.$(OHEXT) twine.$(OHEXT) Date.$(OHEXT) \
 	smtp.$(OHEXT) Interval.$(OHEXT) EMail.$(OHEXT) Timer.$(OHEXT) \
 	Parms.$(OHEXT) LogMsg.$(OHEXT) Hash.$(OHEXT) EnEx.$(OHEXT) XmlHelpers.$(OHEXT) \
-	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT) HttpClient.$(OHEXT) ZipFile.$(OHEXT)
+	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT) HttpClient.$(OHEXT) ZipFile.$(OHEXT) \
+	MemBuf.$(OHEXT)
 
 all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) incs
 	$(LINK) $(LFLAGS) $(DOTOH) $(MINIZIP_OH) /OUT:libSLib.dll /DLL $(LLIBS)
@@ -58,6 +59,9 @@ test_log: test_log.$(OHEXT)
 
 test_zip: test_zip.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_zip.exe test_zip.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_membuf: test_membuf.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_membuf.exe test_membuf.$(OHEXT) libSLib.lib $(LLIBS)
 
 test_logfile: test_logfile.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_logfile.exe test_logfile.$(OHEXT) libSLib.lib $(LLIBS)
@@ -84,7 +88,7 @@ clean:
 	$(RM) ..\lib\libSLib.lib
 	$(RM) ..\include\*.h
 	$(RM) ..\include\Pool.cpp
-	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h ZipFile.h
+	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h ZipFile.h MemBuf.h
 
 
 install:

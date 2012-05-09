@@ -33,6 +33,7 @@
 #include "AutoXMLChar.h"
 #include "twine.h"
 #include "EnEx.h"
+#include "MemBuf.h"
 
 #include <vector>
 using namespace std;
@@ -211,6 +212,25 @@ class DLLEXPORT XmlHelpers {
 
 			// Then set it into a cdata block
 			XmlHelpers::setCDATASection(parent, b64);
+		}
+
+		static void setBase64( xmlNodePtr parent, const MemBuf& content) {
+			if(parent == NULL){
+				throw AnException(0, FL, "NULL Parent passed to XmlHelpers::setBase64()");
+			}
+
+			// First encode the data
+			MemBuf b64; // have to make a copy because the input is const.
+			if(content.length() == 0){
+				b64 = "";
+			} else {
+				b64 = content;
+			}
+			b64.encode64();
+			twine tmp = b64();
+
+			// Then set it into a cdata block
+			XmlHelpers::setCDATASection(parent, tmp);
 		}
 
 

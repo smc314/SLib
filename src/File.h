@@ -41,6 +41,7 @@
 using namespace std;
 
 #include "twine.h"
+#include "MemBuf.h"
 #include "Date.h"
 
 namespace SLib
@@ -106,6 +107,7 @@ class DLLEXPORT File
 
 		/// Reads the whole file and returns the contents in a newly allocated buffer.
 		unsigned char* readContents();
+		MemBuf& readContents(MemBuf& contents);
 		twine readContentsAsTwine();
 
 		/// Reads the whole file and returns each line from the file as an row in a vector.
@@ -120,6 +122,7 @@ class DLLEXPORT File
 
 		/// Quick method to write a string out to a file.
 		static void writeToFile(const twine& fileName, const twine& contents);
+		static void writeToFile(const twine& fileName, const MemBuf& contents);
 
 		/// Utility method to copy from one file location to another
 		static void Copy(const twine& from, const twine& to);

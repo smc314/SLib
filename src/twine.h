@@ -418,6 +418,10 @@ class DLLEXPORT twine
 		  */
 		size_t size(void) const;
 
+		/** Sets the length of the twine.
+		  */
+		void size(size_t s);
+
 		/** Returns the length of the twine.
 		  */
 		size_t length(void) const;

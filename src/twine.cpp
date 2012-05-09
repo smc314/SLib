@@ -906,6 +906,12 @@ size_t twine::size(void) const
 	return m_data_size; 
 }
 
+void twine::size(size_t s)
+{ 
+	EnEx ee("twine::size(size_t)");
+	m_data_size = s; 
+}
+
 size_t twine::length(void) const 
 { 
 	EnEx ee("twine::length(void)");
@@ -934,7 +940,7 @@ void twine::bounds_check(size_t p) const
 {
 	EnEx ee("twine::bounds_check(size_t p)");
 	if( (p < 0) || (p >= m_data_size)){
-		throw AnException(0, FL, "twine: Index out of bounds.");
+		throw AnException(0, FL, "twine: Index out of bounds. p(%d) m_data_size(%d)", p, m_data_size);
 	}
 }
 
@@ -1001,39 +1007,34 @@ twine& twine::encode64()
 {
 	EnEx ee("twine::encode64()");
 
-	// Reserve enough space to handle the conversion:
-	size_t len = (size() + 2) * 4 / 3;
-	len ++; // add space for the null.
-	memptr< char > tmpspace = (char*)malloc( len );
-	if(tmpspace == (char*)NULL){
-		throw AnException(0, FL, "Error reserving space for base64 encoding.");
-	}
-	memset(tmpspace, 0, len);
-
-	// Now do the conversion
-	Base64::encode( m_data, tmpspace );
+	// Run the conversion
+	size_t len;
+	memptr< char > tmpspace = Base64::encode( (char*)m_data, size(), &len );
 
 	// Now copy the converted data over to ourself:
-	return operator=(tmpspace);
+	reserve(len + 1);
+	erase(); // clean out anything we had
+	memcpy( m_data, tmpspace, len );
+	m_data[ len ] = '\0';
+	m_data_size = len;
+	return *this;
 }
 
 twine& twine::decode64()
 {
 	EnEx ee("twine::decode64()");
 
-	// Reserve enough space to handle the conversion:
-	size_t len = (size()) * 3 / 4;
-	len ++; // add space for the null.
-	memptr< char > tmpspace = (char*)malloc( len );
-	if(tmpspace == (char*)NULL){
-		throw AnException(0, FL, "Error reserving space for base64 decoding.");
-	}
-	memset(tmpspace, 0, len);
-
-	// Now do the conversion
-	Base64::decode( m_data, tmpspace );
+	// Run the conversion
+	size_t len;
+	memptr< char > tmpspace = Base64::decode( (char*)m_data, size(), &len);
 
 	// Now copy the converted data over to ourself:
-	return operator=(tmpspace);
+	reserve(len); // shouldn't be necessary, but just in case.
+	erase(); // clean out anything we had
+	memcpy( m_data, tmpspace, len);	
+	m_data_size = len;
+
+	// Return ourselves.
+	return *this;
 }
 

@@ -178,12 +178,11 @@ unsigned char* File::readContents()
 	return buff;
 }
 
-twine File::readContentsAsTwine()
+MemBuf& File::readContents(MemBuf& contents)
 {
-	EnEx ee("File::readContents()");
+	EnEx ee("File::readContentsAsMemBuf()");
 
-	twine contents;
-	contents.reserve(size());
+	contents.reserve( size() );
 
 	// Read the whole file in at once.
 	size_t ret = fread(contents.data(), size(), 1, m_fp);
@@ -191,7 +190,25 @@ twine File::readContentsAsTwine()
 	if(ret != 1){
 		throw AnException(0, FL, "Error reading from file (%s)", m_fileName());
 	}
-	contents.check_size();
+	return contents;
+}
+
+twine File::readContentsAsTwine()
+{
+	EnEx ee("File::readContentsTwine()");
+
+	twine contents;
+	size_t content_size = size();
+	contents.reserve(content_size);
+
+	// Read the whole file in at once.
+	size_t ret = fread(contents.data(), content_size, 1, m_fp);
+
+	if(ret != 1){
+		throw AnException(0, FL, "Error reading from file (%s)", m_fileName());
+	}
+	// Directly set the size instead of using check_size to avoid strlen calls.
+	contents.size(content_size);
 	return contents;
 }
 
@@ -223,12 +240,13 @@ bool File::Exists(const twine& fileName)
 {
 	EnEx ee("File::Exists(const twine& fileName)");
 
-	try {
-		File f(fileName); // try to open it
-		return true; // if we can, then it exists
-	} catch (AnException& e){
-		return false; // if not, then it doesn't
+	FILE* fp = fopen(fileName(), "rb");
+	if(fp == NULL){
+		return false; // doesn't exist.
 	}
+	// does exist.
+	fclose(fp);
+	return true;
 }
 
 vector<twine> File::listFiles(const twine& dirName)
@@ -286,6 +304,21 @@ vector<twine> File::listFolders(const twine& dirName)
 }
 
 void File::writeToFile(const twine& fileName, const twine& contents)
+{
+
+	FILE* fp = fopen(fileName(), "wb");
+	if(fp == NULL){
+		throw AnException(0, FL, "Error opening file(%s) in write mode!", fileName() );
+	}
+
+	size_t ret = fwrite(contents(), contents.size(), 1, fp);
+	fclose(fp);
+	if(ret != 1){
+		throw AnException(0, FL, "Error writing contents to file.");
+	}
+}
+
+void File::writeToFile(const twine& fileName, const MemBuf& contents)
 {
 
 	FILE* fp = fopen(fileName(), "wb");
@@ -383,13 +416,13 @@ void File::RmDir(const twine& dirName)
 	vector<twine> folders = File::listFolders( dirName );
 
 	for(size_t i = 0; i < files.size(); i++){
-		if(files[i] != "." && files[i] != ".." ){
-			File::Delete( dirName + "/" + files[i] );
-		}
+		File::Delete( dirName + "/" + files[i] );
 	}
 
 	for(size_t i = 0; i < folders.size(); i++){
-		File::RmDir( dirName + "/" + folders[i] );
+		if(folders[i] != "." && folders[i] != ".." ){
+			File::RmDir( dirName + "/" + folders[i] );
+		}
 	}
 		
 	// Now delete the directory itself:
