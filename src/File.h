@@ -113,6 +113,12 @@ class DLLEXPORT File
 		/// Reads the whole file and returns each line from the file as an row in a vector.
 		vector<twine> readLines();
 
+		/** Reads just a portion of the file, up to the size of the buffer given and returns
+		  * the number of bytes read & written to the buffer.
+		  */
+		size_t read(MemBuf& buffer);
+
+
 		/// Determines if the file named exists or not.
 		static bool Exists(const twine& fileName);
 

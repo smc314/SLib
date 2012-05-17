@@ -58,6 +58,18 @@ size_t HttpClient_WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
 	return realsize;
 }
 
+/** This one is used by the object (non-static) version of the methods below.
+  */
+size_t HttpClient_WriteMemoryCallback2(void* contents, size_t size, size_t nmemb, void* userp)
+{
+	size_t realsize = size * nmemb;
+	HttpClient* client = (HttpClient*)userp;
+
+	client->ResponseBuffer.append( (char*)contents, realsize );
+
+	return realsize;
+}
+
 HttpClient::HttpClient()
 {
 	EnEx ee(FL, "HttpClient::HttpClient()");
@@ -80,18 +92,18 @@ char* HttpClient::Get(const twine& url )
 {
 	EnEx ee(FL, "HttpClient::Get(const twine& url)");
 
-	struct MemoryStruct chunk;
-
-	chunk.memory = NULL;
-	chunk.size = 0;
-
 	curl_easy_setopt( m_curl_handle, CURLOPT_URL, url() );
-	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback );
-	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEDATA, (void*)&chunk );
+	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback2 );
+	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEDATA, this );
+	
+	// Ignore SSL cert issues
+	curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYPEER, false);
+	curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYHOST, false);
+
 	curl_easy_perform( m_curl_handle );
 	curl_easy_reset( m_curl_handle );
 
-	return chunk.memory;
+	return ResponseBuffer.data();
 }
 
 xmlDocPtr HttpClient::GetXml(const twine& url)
@@ -103,26 +115,26 @@ xmlDocPtr HttpClient::GetXml(const twine& url)
 	return doc;
 }
 
-xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)
+char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 {
-	EnEx ee(FL, "HttpClient::Post(const twine& url, const char* msg, size_t msgLen)");
+	EnEx ee(FL, "HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)");
 
-	struct MemoryStruct chunk;
 	struct curl_slist* slist = NULL;
-
-	chunk.memory = NULL;
-	chunk.size = 0;
 
 	{ // for timing scope
 		EnEx ee2(FL, "HttpClient::Post - curl_easy_setopt");
-		//curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1);
+		curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1);
 		curl_easy_setopt( m_curl_handle, CURLOPT_URL, url() );
 		curl_easy_setopt( m_curl_handle, CURLOPT_POSTFIELDS, msg );
 		curl_easy_setopt( m_curl_handle, CURLOPT_POSTFIELDSIZE, msgLen );
-		curl_easy_setopt( m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback );
-		curl_easy_setopt( m_curl_handle, CURLOPT_WRITEDATA, (void*)&chunk );
+		curl_easy_setopt( m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback2 );
+		curl_easy_setopt( m_curl_handle, CURLOPT_WRITEDATA, this );
 		slist = curl_slist_append(slist, "Expect:");
 		curl_easy_setopt( m_curl_handle, CURLOPT_HTTPHEADER, slist);
+
+		// Ignore SSL cert issues
+		curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYPEER, false);
+		curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYHOST, false);
 	}
 	{ // for timing scope
 		EnEx ee3(FL, "HttpClient::Post - curl_easy_perform");
@@ -131,8 +143,15 @@ xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)
 	curl_easy_reset( m_curl_handle );
 	curl_slist_free_all(slist);
 
-	dptr<char> contents = chunk.memory;
-	xmlDocPtr doc = xmlParseDoc( (xmlChar*) contents() );
+	return ResponseBuffer.data();
+}
+
+xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)
+{
+	EnEx ee(FL, "HttpClient::Post(const twine& url, const char* msg, size_t msgLen)");
+
+	PostRaw( url, msg, msgLen );
+	xmlDocPtr doc = xmlParseDoc( (xmlChar*) ResponseBuffer() );
 	return doc;
 }
 
@@ -185,6 +204,7 @@ xmlDocPtr HttpClient::PostPage(const twine& url, const char* msg, size_t msgLen)
 		HttpClient_cURL_Initialized = true;
 	}
 	curl_handle = curl_easy_init();
+	curl_easy_setopt( curl_handle, CURLOPT_VERBOSE, 1);
 	curl_easy_setopt( curl_handle, CURLOPT_URL, url() );
 	curl_easy_setopt( curl_handle, CURLOPT_POSTFIELDS, msg );
 	curl_easy_setopt( curl_handle, CURLOPT_POSTFIELDSIZE, msgLen );

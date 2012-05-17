@@ -138,9 +138,13 @@ class DLLEXPORT MemBuf
 		  */
 		MemBuf& set(const char* c, size_t n);
 
-		/** Appends a const char* to the end of the MemBuf
+		/** Appends a const char* to the end of the MemBuf - this will use strlen() to determine size.
 		  */
 		MemBuf& append(const char* c);
+			
+		/** Appends a const char* with a given size to the end of the MemBuf
+		  */
+		MemBuf& append(const char* c, size_t n);
 			
 		/** Appends a const MemBuf& to the end of the MemBuf
 		  */

@@ -259,11 +259,26 @@ MemBuf& MemBuf::append(const char* c)
 		return *this; // nothing to append
 	}
 
+	size_t oldSize = m_data_size;
 	size_t csize = strlen(c);
 	reserve(m_data_size + csize);
 
-	memcpy((char*)m_data + m_data_size, c, csize);
-	m_data_size += csize;
+	memcpy((char*)m_data + oldSize, c, csize);
+
+	return *this;
+}
+
+MemBuf& MemBuf::append(const char* c, size_t csize)
+{
+	EnEx ee("MemBuf::append(const char* c, size_t csize)");
+	if(c == NULL || csize == 0){
+		return *this; // nothing to append
+	}
+
+	size_t oldSize = m_data_size;
+	reserve(m_data_size + csize);
+
+	memcpy((char*)m_data + oldSize, c, csize);
 
 	return *this;
 }
@@ -275,10 +290,10 @@ MemBuf& MemBuf::append(const MemBuf& c)
 		return *this; // nothing to append
 	}
 
+	size_t oldSize = m_data_size;
 	reserve(m_data_size + c.size());
 
-	memcpy((char*)m_data + m_data_size, c.m_data, c.size());
-	m_data_size += c.size();
+	memcpy((char*)m_data + oldSize, c.m_data, c.size());
 
 	return *this;
 }

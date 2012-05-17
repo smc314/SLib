@@ -236,6 +236,14 @@ vector<twine> File::readLines()
 
 }
 
+size_t File::read(MemBuf& buffer)
+{
+	EnEx ee("File::read(char* buffer, size_t buffer_size)");
+
+	size_t ret = fread(buffer.data(), 1, buffer.size(), m_fp);
+	return ret;
+}
+
 bool File::Exists(const twine& fileName)
 {
 	EnEx ee("File::Exists(const twine& fileName)");

@@ -30,6 +30,7 @@
 
 #include "xmlinc.h"
 #include "twine.h"
+#include "MemBuf.h"
 using namespace SLib;
 
 namespace SLib {
@@ -58,6 +59,9 @@ class DLLEXPORT HttpClient
 		/// Use this to post a message to the server and retrieve the response.
 		xmlDocPtr Post(const twine& url, const char* msg, size_t msgLen);
 
+		/// Use this to post a message to the server and retrieve the response as a raw char buffer.
+		char* PostRaw(const twine& url, const char* msg, size_t msgLen);
+
 		/// Use this to download a page using GET with no cookie or state management.
 		static char* GetPage( const twine& url );
 
@@ -69,6 +73,11 @@ class DLLEXPORT HttpClient
 
 		/// Use this to post an xml document to a URL and retrieve the response.
 		static xmlDocPtr PostXml( const twine& url, xmlDocPtr doc);
+
+		/** This is public so that callers may directly access the memory that was used
+		  * when receiving the response from the server.
+		  */
+		MemBuf ResponseBuffer;
 
 	private:
 
