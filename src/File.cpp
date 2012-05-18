@@ -184,11 +184,13 @@ MemBuf& File::readContents(MemBuf& contents)
 
 	contents.reserve( size() );
 
-	// Read the whole file in at once.
-	size_t ret = fread(contents.data(), size(), 1, m_fp);
+	if(size() != 0){
+		// Read the whole file in at once.
+		size_t ret = fread(contents.data(), size(), 1, m_fp);
 
-	if(ret != 1){
-		throw AnException(0, FL, "Error reading from file (%s)", m_fileName());
+		if(ret != 1){
+			throw AnException(0, FL, "Error reading from file (%s)", m_fileName());
+		}
 	}
 	return contents;
 }
@@ -319,6 +321,11 @@ void File::writeToFile(const twine& fileName, const twine& contents)
 		throw AnException(0, FL, "Error opening file(%s) in write mode!", fileName() );
 	}
 
+	if(contents.size() == 0){
+		// nothing to write:
+		fclose(fp);
+		return;
+	}
 	size_t ret = fwrite(contents(), contents.size(), 1, fp);
 	fclose(fp);
 	if(ret != 1){
@@ -334,6 +341,11 @@ void File::writeToFile(const twine& fileName, const MemBuf& contents)
 		throw AnException(0, FL, "Error opening file(%s) in write mode!", fileName() );
 	}
 
+	if(contents.size() == 0){
+		// nothing to write:
+		fclose(fp);
+		return;
+	}
 	size_t ret = fwrite(contents(), contents.size(), 1, fp);
 	fclose(fp);
 	if(ret != 1){
@@ -346,22 +358,10 @@ void File::Copy(const twine& from, const twine& to)
 	EnEx ee("File::Copy(twine& from, twine& to)");
 
 	File f(from);
-	if(f.size() > 1024 * 1024 * 10) {
-		throw AnException(0, FL, "File copying limited to 10M or smaller files.");
-	}
-	dptr<unsigned char> contents = f.readContents();
+	MemBuf contents;
+	f.readContents(contents);
+	File::writeToFile( to, contents );
 
-	FILE* fp = fopen(to(), "wb");
-	if(fp == NULL){
-		throw AnException(0, FL, "Error opening file(%s) in write mode for copy!", to() );
-	}
-	size_t ret = fwrite(contents, f.size(), 1, fp);
-	fclose(fp);
-	if(ret != 1){
-		throw AnException(0, FL, "Error writing contents to file copy.");
-	}
-
-	// dptr<> contents gets automatically free'd when we leave this function
 }
 
 void File::EnsurePath(const twine& fileName)
@@ -384,8 +384,7 @@ void File::EnsurePath(const twine& fileName)
 
 	for(size_t i = 0; i < segments.size() - 1; i++){
 		if(segments[i].length() == 0 ||
-			segments[i] == "." ||
-			segments[i] == ".."
+			segments[i] == "."
 		){
 			continue; // skip these
 		}

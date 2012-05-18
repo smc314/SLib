@@ -405,6 +405,12 @@ void ZipFile::ExtractCurrentFile( unzFile uf, const twine& targetDir)
 
 	twine fullFileName = targetDir + "/" + filename_inzip;
 	//printf("Extracting current file to: %s\n", fullFileName() );
+	if(fullFileName.endsWith("/")){
+		// This is just a directory entry.  Ensure that it exists:
+		File::EnsurePath( fullFileName + "a" ); // add a to the end to get the whole path created.
+		return;
+	}
+
 	// Make sure the path leading up to the file exists.
 	File::EnsurePath( fullFileName );
 
