@@ -92,6 +92,7 @@ char* HttpClient::Get(const twine& url )
 {
 	EnEx ee(FL, "HttpClient::Get(const twine& url)");
 
+	ResponseBuffer.clear();
 	curl_easy_setopt( m_curl_handle, CURLOPT_URL, url() );
 	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback2 );
 	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEDATA, this );
@@ -119,6 +120,7 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 {
 	EnEx ee(FL, "HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)");
 
+	ResponseBuffer.clear();
 	struct curl_slist* slist = NULL;
 
 	{ // for timing scope
