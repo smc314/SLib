@@ -364,6 +364,19 @@ void File::Copy(const twine& from, const twine& to)
 
 }
 
+void File::Move(const twine& from, const twine& to)
+{
+	EnEx ee("File::Move(twine& from, twine& to)");
+
+#ifdef _WIN32
+	BOOL ret = MoveFile( from(), to() );
+	if(!ret){
+		throw AnException(0, FL, "Failed to move file (%s) to (%s)", from(), to() );
+	}
+#endif
+
+}
+
 void File::EnsurePath(const twine& fileName)
 {
 	EnEx ee("File::EnsurePath(const twine& fileName)");

@@ -125,7 +125,7 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 
 	{ // for timing scope
 		EnEx ee2(FL, "HttpClient::Post - curl_easy_setopt");
-		curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1);
+		//curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1);
 		curl_easy_setopt( m_curl_handle, CURLOPT_URL, url() );
 		curl_easy_setopt( m_curl_handle, CURLOPT_POSTFIELDS, msg );
 		curl_easy_setopt( m_curl_handle, CURLOPT_POSTFIELDSIZE, msgLen );
@@ -206,7 +206,7 @@ xmlDocPtr HttpClient::PostPage(const twine& url, const char* msg, size_t msgLen)
 		HttpClient_cURL_Initialized = true;
 	}
 	curl_handle = curl_easy_init();
-	curl_easy_setopt( curl_handle, CURLOPT_VERBOSE, 1);
+	//curl_easy_setopt( curl_handle, CURLOPT_VERBOSE, 1);
 	curl_easy_setopt( curl_handle, CURLOPT_URL, url() );
 	curl_easy_setopt( curl_handle, CURLOPT_POSTFIELDS, msg );
 	curl_easy_setopt( curl_handle, CURLOPT_POSTFIELDSIZE, msgLen );

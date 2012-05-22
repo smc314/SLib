@@ -133,6 +133,9 @@ class DLLEXPORT File
 		/// Utility method to copy from one file location to another
 		static void Copy(const twine& from, const twine& to);
 
+		/// Utility method to move from one file location to another
+		static void Move(const twine& from, const twine& to);
+
 		/// Utility method to ensure all of the directories in a given path exist.
 		static void EnsurePath( const twine& fileName );
 
