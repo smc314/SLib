@@ -403,7 +403,13 @@ void File::EnsurePath(const twine& fileName)
 		}
 
 		// Check to see if the current segment exists:
-		vector<twine> folders = File::listFolders( startingPath );
+		vector<twine> folders;
+		try {
+			folders = File::listFolders( startingPath );
+		} catch (AnException& e){
+			// ignore empty lists.
+		}
+
 		bool found = false;
 		for(size_t j = 0; j < folders.size(); j++){
 			if(folders[j] == segments[i]){
