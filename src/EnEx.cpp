@@ -1,6 +1,8 @@
 /* C Standard Headers */
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
+
 
 /* C++ Standard Headers */
 #include <vector>
@@ -176,7 +178,7 @@ void EnterExit::PrintStackTrace(int channel)
 twine EnterExit::GetStackTrace(void)
 {
 	twine tmp, msg;
-	tmp.format("Stack trace for thread: %d\n", (int)Thread::CurrentThreadId() );
+	tmp.format("Stack trace for thread: " "%lu" "\n", (uintmax_t)Thread::CurrentThreadId() );
 	msg += tmp;
 	vector<const char*>* stack_trace = FindOurStackTrace();
 	for(int i = 0; i < (int)stack_trace->size(); i++){

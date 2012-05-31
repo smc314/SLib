@@ -181,14 +181,14 @@ void printMessage(LogMsg* lm)
 #else
 		strftime(local_tmp, 32, "%Y/%m/%d %H:%M:%S", localtime(&(lm->timestamp.tv_sec)));
 		printf("%s.%.3d|",
-			local_tmp, (int)lm->timestamp.tv_usec,
+			local_tmp, (int)lm->timestamp.tv_usec
 		);
 #endif
 	}
 
 	if(m_display_machine) printf("%s|", lm->machineName());
 	if(m_display_app) printf("%s|", lm->appName());
-	if(m_display_thread) printf("%ld|", lm->tid);
+	if(m_display_thread) printf("%ld|", (intptr_t)lm->tid);
 	if(m_display_file) printf("%s|", lm->file());
 	if(m_display_line) printf("%d|", lm->line);
 	if(m_display_channel) {
@@ -256,7 +256,7 @@ void filterAndPrint(LogMsg* lm)
 		}
 	}
 	if(filtersMatch && matchThreadID != 0){
-		if(lm->tid != matchThreadID){
+		if((intptr_t)lm->tid != matchThreadID){
 			filtersMatch = false;
 		}
 	}
@@ -348,7 +348,7 @@ int main(int argc, char** argv)
 			}
 		}
 		for(int i = oldest; i <= newest; i++){
-			dptr<LogMsg> lm = lf.getMessage(i);
+			dptr<LogMsg> lm; lm = lf.getMessage(i);
 			if(lm == NULL) continue;
 			filterAndPrint( lm );
 		}			
@@ -368,7 +368,7 @@ int main(int argc, char** argv)
 			int new_newest = lfWatch.getNewestMessageID();
 			if(new_newest > newest){
 				for(int i = newest + 1; i <= new_newest; i++){
-					dptr<LogMsg> lm = lfWatch.getMessage(i);
+					dptr<LogMsg> lm; lm = lfWatch.getMessage(i);
 					if(lm == NULL) continue;
 					filterAndPrint( lm );
 				}

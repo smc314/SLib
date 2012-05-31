@@ -82,7 +82,7 @@ class DLLEXPORT Timer
 			return tb.time * 1000000 + tb.millitm * 1000;
 		}
 #else
-		static __inline__ uint64_t GetCycleCount(void)
+		static __inline__ unsigned long long GetCycleCount(void)
 		{
 			struct timeval tv;
 			gettimeofday( &tv, NULL);

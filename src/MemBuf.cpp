@@ -412,7 +412,7 @@ MemBuf& MemBuf::encode64()
 
 	// Run the conversion
 	size_t len;
-	memptr< char > tmpspace = Base64::encode( (char*)m_data, size(), &len);
+	memptr< char > tmpspace; tmpspace = Base64::encode( (char*)m_data, size(), &len);
 	if(tmpspace == (char*)NULL){
 		throw AnException(0, FL, "Error base64 encoding.");
 	}
@@ -433,7 +433,7 @@ MemBuf& MemBuf::decode64()
 
 	// Run the conversion
 	size_t len;
-	memptr< char > tmpspace = Base64::decode( (char*)m_data, size(), &len);
+	memptr< char > tmpspace; tmpspace = Base64::decode( (char*)m_data, size(), &len);
 	if(tmpspace == (char*)NULL){
 		throw AnException(0, FL, "Error base64 decoding.");
 	}

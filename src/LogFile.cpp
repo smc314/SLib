@@ -952,7 +952,7 @@ void LogFile::writeMessageEntry(int which_index, LogMsgStripped& msg)
 #endif
 	write(msg.line);
 	write(msg.channel);
-	write((int) msg.tid);
+	write((intptr_t)msg.tid);
 
 	int flags = 0;
 	if (msg.app_id != -1) {
@@ -979,7 +979,7 @@ void LogFile::writeMessageEntry(int which_index, LogMsgStripped& msg)
 LogMsg* LogFile::readMessageEntry(IndexEntry* ie)
 {
 	int test, string_id;
-	dptr<LogMsg> msg = new LogMsg(); // don't leak memory
+	dptr<LogMsg> msg; msg = new LogMsg(); // don't leak memory
 	if(ie->offset == 0){
 		throw AnException(0, FL, "%d is not a valid index entry", ie->offset);
 	}
@@ -1004,7 +1004,7 @@ LogMsg* LogFile::readMessageEntry(IndexEntry* ie)
 #endif
 	msg->line = readInt();
 	msg->channel = readInt();
-	msg->tid = readInt();
+	msg->tid = (THREAD_ID_TYPE)readInt();
 
 	test = readInt();
 	if ((test & 1) == 1) { // first bit is for stringified app_id.

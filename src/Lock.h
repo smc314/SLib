@@ -85,6 +85,14 @@ class Lock
 			m_mut->lock();
 		}
 
+		/** This allows for manual unlocking of the mutex.
+		  */
+		void UnLock() {
+			if(m_has_mut == 1){
+				m_mut->unlock();
+				m_has_mut = 0;
+			}
+		}
 
 	private:
 

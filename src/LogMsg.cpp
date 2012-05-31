@@ -25,6 +25,10 @@ using namespace SLib;
 #include <unistd.h>
 #endif
 
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
 static twine staticAppName;
 static twine staticMachineName;
 
@@ -139,6 +143,11 @@ void LogMsg::SetAppMachine()
 		staticAppName.reserve(1024);
 		DWORD length = 1024;
 		GetModuleFileName(NULL, staticAppName.data(), length);
+		staticAppName.check_size();
+#elif defined(__APPLE__)
+		staticAppName.reserve(1024);
+		uint32_t length = 1024;
+		_NSGetExecutablePath( staticAppName.data(), &length );
 		staticAppName.check_size();
 #else
 		staticAppName.reserve(1024);

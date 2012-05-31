@@ -5,6 +5,8 @@ using namespace SLib;
 
 #ifdef _WIN32
 #include <direct.h>
+#else
+#include <dirent.h>
 #endif
 
 File::File()
@@ -264,6 +266,7 @@ vector<twine> File::listFiles(const twine& dirName)
 	EnEx ee("File::listFiles()");
 	vector<twine> ret;
 
+#ifdef _WIN32
 	// Works on windows:
 	twine wildCard = dirName + "\\*";
 
@@ -283,6 +286,20 @@ vector<twine> File::listFiles(const twine& dirName)
 
 	FindClose(hFind);
 
+#else
+	DIR* dirp = opendir( dirName() );
+	if(dirp == NULL){
+		throw AnException(0, FL, "Erorr opening directory (%s) to list files.", dirName() );
+	}
+	struct dirent* ent;
+	while( (ent = readdir(dirp)) != NULL){
+		if(ent->d_type == DT_REG){
+			ret.push_back( twine( ent->d_name ) );
+		}
+	}
+	closedir( dirp );
+#endif
+
 	return ret;
 }
 
@@ -291,6 +308,7 @@ vector<twine> File::listFolders(const twine& dirName)
 	EnEx ee("File::listFolders()");
 	vector<twine> ret;
 
+#ifdef _WIN32
 	// Works on windows:
 	twine wildCard = dirName + "\\*";
 
@@ -309,6 +327,20 @@ vector<twine> File::listFolders(const twine& dirName)
 	} while( FindNextFile(hFind, &ffd) != 0);
 
 	FindClose(hFind);
+
+#else
+	DIR* dirp = opendir( dirName() );
+	if(dirp == NULL){
+		throw AnException(0, FL, "Erorr opening directory (%s) to list directories.", dirName() );
+	}
+	struct dirent* ent;
+	while( (ent = readdir(dirp)) != NULL){
+		if(ent->d_type == DT_DIR){
+			ret.push_back( twine( ent->d_name ) );
+		}
+	}
+	closedir( dirp );
+#endif
 
 	return ret;
 }
@@ -417,7 +449,7 @@ void File::EnsurePath(const twine& fileName)
 #ifdef _WIN32
 			_mkdir( startingPath() );
 #else
-			mkdir( startingPath() );
+			mkdir( startingPath(), 0777 );
 #endif
 		}
 	}

@@ -1,10 +1,13 @@
 # Compiled Objects #
 ####################
 *.obj
+*.o
 *.dll
+*.so
 *.lib
 *.exp
 *.exe
+src/LogDump
 
 # VI Swap files #
 #################

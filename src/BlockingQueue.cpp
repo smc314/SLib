@@ -1,4 +1,5 @@
 #include "BlockingQueue.h"
+using namespace SLib;
 
 int testBlockingQueue(void)
 {

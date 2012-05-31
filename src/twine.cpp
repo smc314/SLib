@@ -1009,7 +1009,7 @@ twine& twine::encode64()
 
 	// Run the conversion
 	size_t len;
-	memptr< char > tmpspace = Base64::encode( (char*)m_data, size(), &len );
+	memptr< char > tmpspace; tmpspace = Base64::encode( (char*)m_data, size(), &len );
 
 	// Now copy the converted data over to ourself:
 	reserve(len + 1);
@@ -1026,7 +1026,7 @@ twine& twine::decode64()
 
 	// Run the conversion
 	size_t len;
-	memptr< char > tmpspace = Base64::decode( (char*)m_data, size(), &len);
+	memptr< char > tmpspace; tmpspace = Base64::decode( (char*)m_data, size(), &len);
 
 	// Now copy the converted data over to ourself:
 	reserve(len); // shouldn't be necessary, but just in case.
