@@ -435,7 +435,13 @@ void File::EnsurePath(const twine& fileName)
 		}
 
 		// Check to see if the current segment exists:
-		vector<twine> folders = File::listFolders( startingPath );
+		vector<twine> folders;
+		try {
+			folders = File::listFolders( startingPath );
+		} catch (AnException& e){
+			// ignore empty lists.
+		}
+
 		bool found = false;
 		for(size_t j = 0; j < folders.size(); j++){
 			if(folders[j] == segments[i]){
@@ -464,8 +470,18 @@ void File::RmDir(const twine& dirName)
 	}
 
 	// Ensure it is empty
-	vector<twine> files = File::listFiles( dirName );
-	vector<twine> folders = File::listFolders( dirName );
+	vector<twine> files; 
+	vector<twine> folders; 
+	try {
+		files = File::listFiles( dirName );
+	} catch (AnException& e){
+		// ignore this - it just means there are no files in the folder.
+	}
+	try {
+		folders = File::listFolders( dirName );
+	} catch (AnException& e){
+		// ignore this - it just means there are no folders in the folder.
+	}
 
 	for(size_t i = 0; i < files.size(); i++){
 		File::Delete( dirName + "/" + files[i] );
