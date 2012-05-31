@@ -1,7 +1,9 @@
 /* C Standard Headers */
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef _WIN32
 #include <inttypes.h>
+#endif
 
 
 /* C++ Standard Headers */

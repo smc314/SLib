@@ -952,7 +952,11 @@ void LogFile::writeMessageEntry(int which_index, LogMsgStripped& msg)
 #endif
 	write(msg.line);
 	write(msg.channel);
+#ifdef _WIN32
+	write((int)msg.tid);
+#else
 	write((intptr_t)msg.tid);
+#endif
 
 	int flags = 0;
 	if (msg.app_id != -1) {
