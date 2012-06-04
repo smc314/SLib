@@ -553,7 +553,11 @@ twine& twine::format(const char* f, va_list ap)
 		// Use a copy of the args list so that we can cycle through
 		// them as many times as we need to:
 		va_list apCopy;
+#ifdef _WIN32
+		memcpy(&apCopy, &ap, sizeof(va_list) );
+#else
 		va_copy(apCopy, ap);
+#endif
 
 		memset(m_data, 0, m_allocated_size);
 #ifdef _WIN32

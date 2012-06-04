@@ -56,7 +56,7 @@ char* Base64::encode(const char* data, size_t input_length, size_t* output_lengt
 	b64 = BIO_new(BIO_f_base64());
 	bmem = BIO_new(BIO_s_mem());
 	b64 = BIO_push(b64, bmem);
-	BIO_write(b64, data, input_length); // writing to the base64 filter encodes the data
+	BIO_write(b64, data, (int)input_length); // writing to the base64 filter encodes the data
 	BIO_flush(b64);
 	BIO_get_mem_ptr(b64, &bptr);
 
@@ -104,11 +104,11 @@ char* Base64::decode(const char* data, size_t input_length, size_t* output_lengt
 	memset(output_data, 0, input_length);
 
 	b64 = BIO_new(BIO_f_base64());
-	bmem = BIO_new_mem_buf((void*)data, input_length);
+	bmem = BIO_new_mem_buf((void*)data, (int)input_length);
 	bmem = BIO_push(b64, bmem);
 	
 	// The real output length is returned from the BIO_read function
-	*output_length = BIO_read(bmem, output_data, input_length);
+	*output_length = BIO_read(bmem, output_data, (int)input_length);
 
 	BIO_free_all(bmem);
 
