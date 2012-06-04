@@ -26,7 +26,6 @@
 #	define DLLEXPORT 
 #endif
 
-const int TWINE_NOT_FOUND = -1;
 #ifdef CRLF
 #undef CRLF
 #endif
@@ -44,6 +43,8 @@ using namespace std;
 
 #include "xmlinc.h"
 #include "Base64.h"
+
+const size_t TWINE_NOT_FOUND = ~size_t(0);
 
 namespace SLib {
 
@@ -124,6 +125,11 @@ class DLLEXPORT twine
 		  */
 		twine& operator=(const size_t i);
 			
+		/** Assignment from integer.  This will use the sprintf
+		  * "%d" to convert from the given integer.
+		  */
+		twine& operator=(const intptr_t i);
+			
 		/** Assignment from float. This will use the sprintf
 		  * "%f" to convert from the given float.
 		  */
@@ -148,6 +154,10 @@ class DLLEXPORT twine
 		/** Concatenation
 		  */
 		twine& operator+=(const size_t i);
+
+		/** Concatenation
+		  */
+		twine& operator+=(const intptr_t i);
 
 		/** Concatenation
 		  */

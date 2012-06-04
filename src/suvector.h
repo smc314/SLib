@@ -42,18 +42,18 @@ template < class T > class suvector :
 		virtual ~suvector() { };
 
 		virtual void push_back(T item) {
-			if(size() == 0){
-				vector<T>::push_back(item);
+			if(std::vector<T>::size() == 0){
+				std::vector<T>::push_back(item);
 			} else {
-				std::vector<T>::iterator lb = std::lower_bound(
+				typename std::vector<T>::iterator lb = std::lower_bound(
 					this->begin(), this->end(), item);
 				if(lb == this->end()){
-					vector<T>::insert(lb, item);
+					std::vector<T>::insert(lb, item);
 				} else {
 					if(*lb == item){
 						return;
 					} else {
-						vector<T>::insert(lb, item);
+						std::vector<T>::insert(lb, item);
 					}
 				}
 			}

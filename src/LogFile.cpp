@@ -94,7 +94,7 @@ int LogMsgStripped::length()
 
 LogFile::LogFile(twine FileName, int max_size, bool reuse, bool clear_at_startup)
 {
-	m_signature = "3141ZEDL";
+	m_signature = (char*)"3141ZEDL";
 	m_mutex = new Mutex();
 	m_file_name = FileName;
 	m_max_size = max_size;
@@ -152,7 +152,7 @@ LogFile::LogFile(twine FileName, int max_size, int max_entries,
 		int string_table_size, int max_strings, bool reuse,
 		bool clear_at_startup)
 {
-	m_signature = "3141ZEDL";
+	m_signature = (char*)"3141ZEDL";
 	m_mutex = new Mutex();
 	m_file_name = FileName;
 	m_max_size = max_size;
@@ -490,7 +490,7 @@ void LogFile::dumpMessageData()
 
 #ifdef _WIN32
 				strftime(local_tmp, 32, "%Y/%m/%d %H:%M:%S", localtime(&(lm->timestamp.time)));
-				printf("%d|%s.%.3d|%s|%s|%ld|%s|%d|%d|%s\n",
+				printf("%d|%s.%.3d|%s|%s|%d|%s|%d|%d|%s\n",
 					lm->id,
 					local_tmp, (int)lm->timestamp.millitm,
 					lm->machineName(),
@@ -503,7 +503,7 @@ void LogFile::dumpMessageData()
 				);
 #else
 				strftime(local_tmp, 32, "%Y/%m/%d %H:%M:%S", localtime(&(lm->timestamp.tv_sec)));
-				printf("%d|%s.%.3d|%s|%s|%ld|%s|%d|%d|%s\n",
+				printf("%d|%s.%.3d|%s|%s|%d|%s|%d|%d|%s\n",
 					lm->id,
 					local_tmp, (int)lm->timestamp.tv_usec,
 					lm->machineName(),
@@ -681,7 +681,6 @@ void LogFile::createFile()
 	// Message size (on average) 12 + 200
 
 	// Write the Index Header information
-	m_index_header;
 	m_index_header.record_count = 0;
 	m_index_header.index_count = m_max_entries;
 	m_index_header.oldest_entry = 0;
@@ -845,44 +844,23 @@ void LogFile::writeIndexEntry(int which_index)
 	write(ie->id);
 }
 
-void LogFile::write(int value)
+void LogFile::write(uint32_t value)
 {
 	if(m_log == NULL){
 		throw AnException(0, FL, "Trying to write to a log file that has not been opened.");
 	}
-	fwrite( &value, sizeof(int), 1, m_log);
+	fwrite( &value, sizeof(uint32_t), 1, m_log);
 }
 
-int LogFile::readInt()
+uint32_t LogFile::readInt()
 {
 	if(m_log == NULL){
 		throw AnException(0, FL, "Trying to write to a log file that has not been opened.");
 	}
 	int ret = 0;
-	size_t count = fread ( &ret, sizeof(int), 1, m_log);
+	size_t count = fread ( &ret, sizeof(uint32_t), 1, m_log);
 	if(count != 1){
 		throw AnException(0, FL, "Error reading an int from our log file.");
-	}
-	return ret;
-}
-
-void LogFile::write(long value)
-{
-	if(m_log == NULL){
-		throw AnException(0, FL, "Trying to write to a log file that has not been opened.");
-	}
-	fwrite( &value, sizeof(long), 1, m_log);
-}
-
-long LogFile::readLong()
-{
-	if(m_log == NULL){
-		throw AnException(0, FL, "Trying to write to a log file that has not been opened.");
-	}
-	long ret = 0;
-	size_t count = fread ( &ret, sizeof(long), 1, m_log);
-	if(count != 1){
-		throw AnException(0, FL, "Error reading a long from our log file.");
 	}
 	return ret;
 }
@@ -1000,15 +978,15 @@ LogMsg* LogFile::readMessageEntry(IndexEntry* ie)
 	msg->id = readInt();
 	test = readInt(); // index
 #ifdef _WIN32
-	msg->timestamp.time = readLong();
-	msg->timestamp.millitm = (unsigned short)readLong();
+	msg->timestamp.time = readInt();
+	msg->timestamp.millitm = (unsigned short)readInt();
 #else
-	msg->timestamp.tv_sec = readLong();
-	msg->timestamp.tv_usec = readLong();
+	msg->timestamp.tv_sec = readInt();
+	msg->timestamp.tv_usec = readInt();
 #endif
 	msg->line = readInt();
 	msg->channel = readInt();
-	msg->tid = (THREAD_ID_TYPE)readInt();
+	msg->tid = readInt();
 
 	test = readInt();
 	if ((test & 1) == 1) { // first bit is for stringified app_id.

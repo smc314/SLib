@@ -111,8 +111,7 @@ xmlDocPtr HttpClient::GetXml(const twine& url)
 {
 	EnEx ee(FL, "HttpClient::GetXml(const twine& url)");
 
-	dptr<char> contents = Get( url );
-	xmlDocPtr doc = xmlParseDoc( (xmlChar*) contents() );
+	xmlDocPtr doc = xmlParseDoc( (xmlChar*) Get(url) );
 	return doc;
 }
 

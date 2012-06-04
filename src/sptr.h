@@ -121,7 +121,7 @@ class sptr : public dptr<T>
 		  * @doc  Copy constructor transferrs ownership of the object
 		  *       to the destination.
 		  */
-		sptr(sptr& a) : dptr<T>(a) { }
+		sptr(const sptr& a) : dptr<T>(a) { }
 
 		/**
 		  * @memo Copy operation from another sptr to this one means
@@ -131,7 +131,7 @@ class sptr : public dptr<T>
 		  *       that we must first delete our own object, and then
 		  *       accept the transferr of ownership from the target.
 		  */
-		sptr& operator=(sptr& a) {
+		sptr& operator=(const sptr& a) {
 			if(&a == this){
 				return *this;  // benign action for self copy.
 			}

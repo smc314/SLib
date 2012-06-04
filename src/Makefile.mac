@@ -10,9 +10,9 @@ OPENSSLDIR=/usr
 SOCKET_LIB=
 
 CFLAGS=-g -Wall -D_REENTRANT -O2 -rdynamic -I$(OPENSSLDIR)/include \
-	-I/usr/include/libxml2
+	-I/usr/include/libxml2 -I/usr/include/curl
 LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
-	-lresolv -lxml2 -lz
+	-lresolv -lxml2 -lz -lcurl
 
 %.o:	%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -21,7 +21,7 @@ LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
 # on a mac before including it in this list.
 DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Tools.o twine.o Date.o \
 	Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o XmlHelpers.o BlockingQueue.o File.o \
-	LogFile.o ZipFile.o MemBuf.o
+	LogFile.o HttpClient.o ZipFile.o MemBuf.o
 
 MINIZIP_OH=ioapi.o mztools.o unzip.o zip.o
 
@@ -40,6 +40,18 @@ test_twine: test_string.o test_twine.o
 test_enex: test_enex.o $(DOTOH)
 	$(CC) -o test_enex test_enex.o -L. -lSLib $(LFLAGS)
 
+test_dptr: test_dptr.o $(DOTOH)
+	$(CC) -o test_dptr test_dptr.o -L. -lSLib $(LFLAGS)
+
+test_logfile: test_logfile.o $(DOTOH)
+	$(CC) -o test_logfile test_logfile.o -L. -lSLib $(LFLAGS)
+
+test_xml: test_xml.o $(DOTOH)
+	$(CC) -o test_xml test_xml.o -L. -lSLib $(LFLAGS)
+
+test_queue: test_queue.o $(DOTOH)
+	$(CC) -o test_queue test_queue.o -L. -lSLib $(LFLAGS)
+
 docs: 
 	cd ../doc
 	rm -f *.html
@@ -51,3 +63,9 @@ clean:
 	rm -f ../lib/libSLib.so
 	rm -f ../include/*.h
 	rm -f ../include/Pool.cpp
+
+install:
+	-mkdir -p ../../x64/lib
+	-mkdir -p ../../x64/bin
+	cp libSLib.so ../../x64/lib/
+	cp LogDump ../../x64/bin/

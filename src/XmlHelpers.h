@@ -351,7 +351,8 @@ class DLLEXPORT XmlHelpers {
 			xmlDocDumpFormatMemory(doc, &buffer, &buf_size, 1);
 			xmlIndentTreeOutput = 0;
 
-			twine ret(buffer);
+			twine ret;
+			ret.set((char*)buffer, buf_size);
 			xmlFree(buffer);
 
 			return ret;
@@ -366,42 +367,12 @@ class DLLEXPORT XmlHelpers {
 			int buf_size;
 			xmlDocDumpMemory(doc, &buffer, &buf_size);
 
-			twine ret(buffer);
+			twine ret;
+			ret.set((char*)buffer, buf_size);
 			xmlFree(buffer);
 
 			return ret;
 		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }; // End Class
 

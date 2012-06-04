@@ -91,7 +91,7 @@ int isLargeFile(const char* filename)
 	FILE* pFile = FOPEN_FUNC(filename, "rb");
 
 	if(pFile != NULL) {
-		int n = FSEEKO_FUNC(pFile, 0, SEEK_END);
+		FSEEKO_FUNC(pFile, 0, SEEK_END);
 		pos = FTELLO_FUNC(pFile);
 
 		//printf("File : %s is %lld bytes\n", filename, pos);
@@ -388,7 +388,7 @@ void ZipFile::ExtractCurrentFile( unzFile uf, const twine& targetDir)
     uInt size_buf;
 
     unz_file_info64 file_info;
-    uLong ratio=0;
+    
     err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
 
     if (err!=UNZ_OK)
@@ -419,7 +419,7 @@ void ZipFile::ExtractCurrentFile( unzFile uf, const twine& targetDir)
 		File::Delete( fullFileName );
 	}
 
-	int skip=0;
+
 
 	//printf("calling unzOpenCurrentFilePassword\n");
 	if( unzOpenCurrentFilePassword(uf,NULL) != UNZ_OK){
@@ -459,7 +459,7 @@ void ZipFile::Extract( const twine& zipName, const twine& targetDir)
     uLong i;
     unz_global_info64 gi;
     
-    FILE* fout=NULL;
+
 
 	if(zipName.length() == 0){
 		throw AnException(0, FL, "Given zipName is empty.");

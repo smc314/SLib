@@ -314,10 +314,7 @@ class DLLEXPORT LogFile {
 		LogMsg* readMessageEntry(IndexEntry* ie) ;
 
 		/** Writes an integer out to the current position of our log file stream */
-		void write(int value);
-
-		/** Writes a long out to the current position of our log file stream */
-		void write(long value);
+		void write(uint32_t value);
 
 		/** Writes a twine out to the current position of our log file stream */
 		void write(twine& value);
@@ -326,10 +323,7 @@ class DLLEXPORT LogFile {
 		void write(twine& value, int stringTableIndex);
 
 		/** Reads an integer from the current position of our log file stream */
-		int readInt();
-
-		/** Reads a long from the current position of our log file stream */
-		long readLong();
+		uint32_t readInt();
 
 		/** Reads a twine from the current position of our log file stream */
 		twine readTwine(size_t length);

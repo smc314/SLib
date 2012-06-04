@@ -29,7 +29,7 @@
 #include "AutoXMLChar.h"
 #include "memptr.h"
 
-const int MAX_INPUT_SIZE = 10240000;
+const size_t MAX_INPUT_SIZE = 10240000;
 
 using namespace SLib;
 
@@ -127,7 +127,9 @@ twine::~twine()
 {
 	EnEx ee("twine::~twine()");
 	if(m_allocated_size > 0 || m_data != NULL){
-		free(m_data);
+		if(m_data != NULL){
+			free(m_data);
+		}
 		m_allocated_size = 0;
 		m_data = NULL;
 	}
@@ -200,7 +202,17 @@ twine& twine::operator=(const size_t i)
 	EnEx ee("twine::operator=(const size_t i)");
 	reserve(15);
 	memset(m_data, 0, m_allocated_size);
-	sprintf(m_data, "%d", i);
+	sprintf(m_data, "%ld", i);
+	m_data_size = strlen(m_data);
+	return *this;
+}
+	
+twine& twine::operator=(const intptr_t i)
+{
+	EnEx ee("twine::operator=(const intptr_t i)");
+	reserve(15);
+	memset(m_data, 0, m_allocated_size);
+	sprintf(m_data, "%ld", i);
 	m_data_size = strlen(m_data);
 	return *this;
 }
@@ -251,7 +263,17 @@ twine& twine::operator+=(const size_t i)
 	EnEx ee("twine::operator+=(const size_t i)");
 	char tmp[16];
 	memset(tmp, 0, 16);
-	sprintf(tmp, "%d", i);
+	sprintf(tmp, "%ld", i);
+	append(tmp);
+	return *this;
+}
+
+twine& twine::operator+=(const intptr_t i)
+{
+	EnEx ee("twine::operator+=(const intptr_t i)");
+	char tmp[16];
+	memset(tmp, 0, 16);
+	sprintf(tmp, "%ld", i);
 	append(tmp);
 	return *this;
 }
@@ -528,11 +550,16 @@ twine& twine::format(const char* f, va_list ap)
 	reserve(256); // make sure we have a minimum amount of space
 
 	while(!success){
+		// Use a copy of the args list so that we can cycle through
+		// them as many times as we need to:
+		va_list apCopy;
+		va_copy(apCopy, ap);
+
 		memset(m_data, 0, m_allocated_size);
 #ifdef _WIN32
-		nsize = _vsnprintf(m_data, m_allocated_size - 1, f, ap);
+		nsize = _vsnprintf(m_data, m_allocated_size - 1, f, apCopy);
 #else
-		nsize = vsnprintf(m_data, m_allocated_size - 1, f, ap);
+		nsize = vsnprintf(m_data, m_allocated_size - 1, f, apCopy);
 #endif
 
 		if(nsize < 0) { // older C libraries

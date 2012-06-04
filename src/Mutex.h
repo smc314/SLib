@@ -111,11 +111,11 @@ class DLLEXPORT Mutex
 		/** Direct access to the mutex itself.
 		  */
 #ifdef _WIN32
-		HANDLE internalMutex(void) {
+		HANDLE* internalMutex(void) {
 #else
-		pthread_mutex_t internalMutex(void) {	
+		pthread_mutex_t* internalMutex(void) {	
 #endif
-			return m_mut;
+			return &m_mut;
 		}
 
 	private:

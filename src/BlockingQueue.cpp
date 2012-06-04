@@ -14,6 +14,11 @@ int testBlockingQueue(void)
 	val = testQueue.pop();
 
 	bool isEmpty = testQueue.empty();
+	if(isEmpty){
+		printf("Queue is empty.\n");
+	} else {
+		printf("Queue is not empty.\n");
+	}
 
 	return 0;
 }

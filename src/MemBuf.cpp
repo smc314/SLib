@@ -110,7 +110,9 @@ MemBuf::~MemBuf()
 {
 	EnEx ee("MemBuf::~MemBuf()");
 	if(m_data_size > 0 || m_data != NULL){
-		free(m_data);
+		if(m_data != NULL){
+			free(m_data);
+		}
 		m_data_size = 0;
 		m_data = NULL;
 	}
@@ -345,7 +347,9 @@ MemBuf& MemBuf::clear(void)
 	if(m_data_size == 0){
 		return *this; // nothing to do
 	}
-	free(m_data);
+	if(m_data != NULL){
+		free(m_data);
+	}
 	m_data = NULL;
 	m_data_size = 0;
 

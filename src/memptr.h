@@ -64,7 +64,7 @@ class memptr
 		  * @doc  Copy constructor transferrs ownership of the object
 		  *       to the destination.
 		  */
-		memptr(memptr& a) {
+		memptr(const memptr& a) {
 			m_ptr = a.release();
 		}	
 
@@ -73,7 +73,7 @@ class memptr
 		  *       that we must first free our own object, and then
 		  *       accept the transferr of ownership from the target.
 		  */
-		memptr& operator=(memptr& a) {
+		memptr& operator=(const memptr& a) {
 			if(&a == this){
 				return *this;  // benign action for self copy.
 			}
@@ -159,7 +159,7 @@ class memptr
 		  * @memo Relinquishes ownership of the object.
 		  * @doc  Relinquishes ownership of the object.
 		  */
-		virtual T* release(void){
+		virtual T* release(void) const {
 			T* tmp;
 			tmp = m_ptr;	
 			m_ptr = NULL;
@@ -170,7 +170,7 @@ class memptr
 
 	protected:
 
-		T* m_ptr;
+		mutable T* m_ptr;
 			
 };
 

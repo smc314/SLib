@@ -85,7 +85,7 @@ class AnException {
 			/* Keep the sleep value small so that performance*/
 			/* is not adversly affected.                     */
 			/* ********************************************* */
-			tid = (long int)CURRENT_THREAD_ID;			
+			tid = (uint32_t)(intptr_t)CURRENT_THREAD_ID;
 			if(tid < 10000) 
 				tid *= 10;
 			else
@@ -113,18 +113,18 @@ class AnException {
 
 			m_stack = EnEx::GetStackTrace()();
 
-			DEBUG(FL, 
-				"Generating exception:\n=====================\n"
-				"%s\n"
-				"=====================\n" 
-				"In File: %s\n"
-				"On Line: %d\n"
-				"With ID: %d\n"
-				"=====================\n"
-				"%s"
-				"=====================\n",
-				m_message.c_str(), m_file.c_str(), 
-				m_line, m_id, m_stack.c_str() );
+			twine dbgMsg = "Generating exception:\n=====================\n" ;
+			dbgMsg += m_message.c_str();
+			dbgMsg += "\n=====================\nIn File: ";
+			dbgMsg += m_file.c_str();
+			dbgMsg += "\nOn Line: ";
+			dbgMsg += (size_t)m_line;
+			dbgMsg += "\nWith ID: ";
+			dbgMsg += (size_t)m_id;
+			dbgMsg += "\n=====================\n";
+			dbgMsg += m_stack.c_str();
+			dbgMsg += "=====================\n";
+			DEBUG(FL, dbgMsg() );
 			
 		}	
 

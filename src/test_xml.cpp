@@ -42,7 +42,7 @@ int main (void)
 	printf("Dumping the doc to a jumbled string\n");
 	twine jumbled = XmlHelpers::docToString( doc );
 
-	printf("Dumping the doc to a jumbled string\n");
+	printf("Dumping the doc to a pretty string\n");
 	twine pretty = XmlHelpers::docToStringPretty( doc );
 
 	printf("Jumbled string: %s\n", jumbled() );

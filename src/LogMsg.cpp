@@ -29,26 +29,26 @@ using namespace SLib;
 #include <mach-o/dyld.h>
 #endif
 
-static twine staticAppName;
-static twine staticMachineName;
+static twine* staticAppName = NULL;
+static twine* staticMachineName = NULL;
 
 LogMsg::LogMsg()
 {
-	tid = CURRENT_THREAD_ID;
+	tid = (uint32_t)(intptr_t)CURRENT_THREAD_ID;
 	SetTimestamp();
 	SetAppMachine();
 
 	id = 0;
 	line = 0;
 	channel = 0;
-	appName = staticAppName;
-	machineName = staticMachineName;
+	appName = (*staticAppName)();
+	machineName = (*staticMachineName)();
 	msg_static = false;
 }
 
 LogMsg::LogMsg(const char* f, int l, twine& m)
 {
-	tid = CURRENT_THREAD_ID;
+	tid = (uint32_t)(intptr_t)CURRENT_THREAD_ID;
 	SetTimestamp();
 	SetAppMachine();
 
@@ -57,14 +57,14 @@ LogMsg::LogMsg(const char* f, int l, twine& m)
 	file = f;
 	line = l;
 	msg = m;
-	appName = staticAppName;
-	machineName = staticMachineName;
+	appName = (*staticAppName)();
+	machineName = (*staticMachineName)();
 	msg_static = false;
 }
 
 LogMsg::LogMsg(const char* f, int l)
 {
-	tid = CURRENT_THREAD_ID;
+	tid = (uint32_t)(intptr_t)CURRENT_THREAD_ID;
 	SetTimestamp();
 	SetAppMachine();
 
@@ -72,8 +72,8 @@ LogMsg::LogMsg(const char* f, int l)
 	channel = 0;
 	file = f;
 	line = l;
-	appName = staticAppName;
-	machineName = staticMachineName;
+	appName = (*staticAppName)();
+	machineName = (*staticMachineName)();
 	msg_static = false;
 }
 
@@ -124,37 +124,36 @@ void LogMsg::SetAppMachine()
 {
 	// Only do this once and store it in the static variable so that
 	// we pay the price only once, and then have it stored after that.
-	if(staticMachineName.length() == 0){
+	if(staticMachineName == NULL){
+		staticMachineName = new twine();
+		staticMachineName->reserve(512);
 #ifdef _WIN32
-		staticMachineName.reserve(512);
 		DWORD length = 512;
-		GetComputerName(staticMachineName.data(), &length);
-		staticMachineName.check_size();
+		GetComputerName(staticMachineName->data(), &length);
+		staticMachineName->check_size();
 #else
-		staticMachineName.reserve(512);
 		int length = 512;
-		gethostname(staticMachineName.data(), length);
-		staticMachineName.check_size();
+		gethostname(staticMachineName->data(), length);
+		staticMachineName->check_size();
 #endif
 	}
 
-	if(staticAppName.length() == 0){
+	if(staticAppName == NULL){
+		staticAppName = new twine();
+		staticAppName->reserve(1024);
 #ifdef _WIN32
-		staticAppName.reserve(1024);
 		DWORD length = 1024;
-		GetModuleFileName(NULL, staticAppName.data(), length);
-		staticAppName.check_size();
+		GetModuleFileName(NULL, staticAppName->data(), length);
+		staticAppName->check_size();
 #elif defined(__APPLE__)
-		staticAppName.reserve(1024);
 		uint32_t length = 1024;
-		_NSGetExecutablePath( staticAppName.data(), &length );
-		staticAppName.check_size();
+		_NSGetExecutablePath( staticAppName->data(), &length );
+		staticAppName->check_size();
 #else
-		staticAppName.reserve(1024);
 		// See this: http://stackoverflow.com/questions/1023306/finding-current-executables-path-without-proc-self-exe/1024937#1024937
-		readlink("/proc/self/exe", staticAppName.data(), 1024); // Linux
-		readlink("/proc/curproc/file", staticAppName.data(), 1024); // FreeBSD
-		readlink("/proc/self/path/a.out", staticAppName.data(), 1024); // Solaris
+		readlink("/proc/self/exe", staticAppName->data(), 1024); // Linux
+		readlink("/proc/curproc/file", staticAppName->data(), 1024); // FreeBSD
+		readlink("/proc/self/path/a.out", staticAppName->data(), 1024); // Solaris
 		_NSGetExecutablePath(); // Mac OS X
 		getexecname(); // Solaris
 #endif

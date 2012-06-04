@@ -147,7 +147,7 @@ extern int ZEXPORT unzRepair(
         /* Central directory entry */
         {
           char header[46];
-          char* comment = "";
+          char* comment = (char*)"";
           int comsize = (int) strlen(comment);
           WRITE_32(header, 0x02014b50);
           WRITE_16(header + 4, version);
@@ -222,7 +222,7 @@ extern int ZEXPORT unzRepair(
     {
       int entriesZip = entries;
       char header[22];
-      char* comment = ""; // "ZIP File recovered by zlib/minizip/mztools";
+      char* comment = (char*)""; // "ZIP File recovered by zlib/minizip/mztools";
       int comsize = (int) strlen(comment);
       if (entriesZip > 0xffff) {
         entriesZip = 0xffff;

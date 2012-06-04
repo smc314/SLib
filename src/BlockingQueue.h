@@ -33,6 +33,8 @@ class BlockingQueue
 #ifdef _WIN32
 			InitializeCriticalSection( &CritSection );
 			InitializeConditionVariable( &ConditionVar );
+#else
+			pthread_cond_init(&the_condition_variable, NULL);
 #endif
 		}
 
@@ -92,7 +94,7 @@ class BlockingQueue
 #ifdef _WIN32
 				SleepConditionVariableCS( &ConditionVar, &CritSection, INFINITE );
 #else
-				pthread_cond_wait(&the_condition_variable, &(the_mutex.internalMutex()) );
+				pthread_cond_wait(&the_condition_variable, the_mutex.internalMutex() );
 #endif
 			}
 

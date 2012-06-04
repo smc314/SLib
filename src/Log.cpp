@@ -52,8 +52,6 @@ static bool lazy_on = false;
 
 static MsgQueue<LogMsg*> log_queue;
 
-static twine time_stamp;
-
 void Log::TimeStamp(twine& t)
 {
 	t.reserve(64);
@@ -166,7 +164,7 @@ void Log::Persist(LogMsg* lm)
 			localtime(&(lm->timestamp.tv_sec)));
 		fprintf(logout, "%s.%.6d|%ld|%s|%d|%d|%s\n", 
 			local_tmp, (int)lm->timestamp.tv_usec,
-			lm->tid,
+			(intptr_t)lm->tid,
 			lm->file(),
 			lm->line,
 			lm->channel,

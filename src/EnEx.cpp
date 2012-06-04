@@ -48,37 +48,37 @@ SLib::Mutex hit_counter_list_add_mutex;
 
 
 EnterExit::EnterExit(const char* methodName) : 
-	m_methodName(methodName), 
-	m_saveToGlobal(false),
 	m_file(""),
-	m_line(0)
+	m_line(0),
+	m_methodName(methodName), 
+	m_saveToGlobal(false)
 {
 	Init();
 }
 
 EnterExit::EnterExit(const char* methodName, bool saveToGlobal) : 
-	m_methodName(methodName), 
-	m_saveToGlobal(saveToGlobal),
 	m_file(""),
-	m_line(0)
+	m_line(0),
+	m_methodName(methodName), 
+	m_saveToGlobal(saveToGlobal)
 {
 	Init();
 }
 
 EnterExit::EnterExit(const char* file, int line, const char* methodName) : 
-	m_methodName(methodName), 
-	m_saveToGlobal(false),
 	m_file(file),
-	m_line(line)
+	m_line(line),
+	m_methodName(methodName), 
+	m_saveToGlobal(false)
 {
 	Init();
 }
 
 EnterExit::EnterExit(const char* file, int line, const char* methodName, bool saveToGlobal) : 
-	m_methodName(methodName), 
-	m_saveToGlobal(saveToGlobal),
 	m_file(file),
-	m_line(line)
+	m_line(line),
+	m_methodName(methodName), 
+	m_saveToGlobal(saveToGlobal)
 {
 	Init();
 }
@@ -180,7 +180,7 @@ void EnterExit::PrintStackTrace(int channel)
 twine EnterExit::GetStackTrace(void)
 {
 	twine tmp, msg;
-	tmp.format("Stack trace for thread: " "%lu" "\n", (uintmax_t)Thread::CurrentThreadId() );
+	tmp.format("Stack trace for thread: %d\n", (uint32_t)(intptr_t)Thread::CurrentThreadId() );
 	msg += tmp;
 	vector<const char*>* stack_trace = FindOurStackTrace();
 	for(int i = 0; i < (int)stack_trace->size(); i++){

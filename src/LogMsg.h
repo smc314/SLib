@@ -78,8 +78,8 @@ class DLLEXPORT LogMsg {
 		/// Source File line of the log message
 		int line;
 
-		/// Thread ID of the creator of this log message
-		THREAD_ID_TYPE tid;
+		/// Thread ID of the creator of this log message (constrained to only the lower 32-bits)
+		uint32_t tid;
 
 		/// Time stamp of the time of this log message
 #ifdef _WIN32

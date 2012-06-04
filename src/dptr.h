@@ -70,7 +70,7 @@ class dptr
 		  * @doc  Copy constructor transferrs ownership of the object
 		  *       to the destination.
 		  */
-		dptr(dptr& a) {
+		dptr(const dptr& a) {
 			m_ptr = a.release();
 		}	
 
@@ -82,7 +82,7 @@ class dptr
 		  *       that we must first delete our own object, and then
 		  *       accept the transferr of ownership from the target.
 		  */
-		dptr& operator=(dptr& a) {
+		dptr& operator=(const dptr& a) {
 			if(&a == this){
 				return *this;  // benign action for self copy.
 			}
@@ -171,7 +171,7 @@ class dptr
 		  * @memo Relinquishes ownership of the object.
 		  * @doc  Relinquishes ownership of the object.
 		  */
-		virtual T* release(void){
+		virtual T* release(void) const {
 			T* tmp;
 			tmp = m_ptr;	
 			m_ptr = NULL;
@@ -182,7 +182,7 @@ class dptr
 
 	protected:
 
-		T* m_ptr;
+		mutable T* m_ptr;
 			
 };
 
