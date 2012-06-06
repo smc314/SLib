@@ -25,7 +25,7 @@ DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Tools.o twine.o Date.o \
 MINIZIP_OH=ioapi.o mztools.o unzip.o zip.o
 
 all: $(DOTOH) $(MINIZIP_OH) LogDump.o incs
-	$(CC) -shared -o libSLib.so $(DOTOH) $(LFLAGS)
+	$(CC) -shared -o libSLib.so $(DOTOH) $(MINIZIP_OH) $(LFLAGS)
 	$(CC) -o LogDump LogDump.o -L. -lSLib $(LFLAGS)
 	strip libSLib.so
 	cp libSLib.so ../lib
