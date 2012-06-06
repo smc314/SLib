@@ -12,16 +12,21 @@ SOCKET_LIB=
 CFLAGS=-g -Wall -D_REENTRANT -O2 -rdynamic -fPIC -I$(OPENSSLDIR)/include \
 	-I/usr/include/libxml2
 LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
-	-lresolv -lxml2 -lrt
+	-lresolv -lxml2 -lrt -lz -lcurl
 
 %.o:	%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Tools.o twine.o Date.o \
-	smtp.o Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o
+	smtp.o Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o \
+	XmlHelpers.o BlockingQueue.o File.o LogFile.o HttpClient.o \
+	ZipFile.o MemBuf.o
 
-all: $(DOTOH) incs
+MINIZIP_OH=ioapi.o mztools.o unzip.o zip.o
+
+all: $(DOTOH) $(MINIZIP_OH) LogDump.o incs
 	$(CC) -shared -o libSLib.so $(DOTOH) $(LFLAGS)
+	$(CC) -o LogDump LogDump.o -L. -lSLib $(LFLAGS)
 	strip libSLib.so
 	cp libSLib.so ../lib
 
@@ -29,12 +34,12 @@ incs:
 	cp *.h Pool.cpp ../include
 
 test_twine: test_string.o test_twine.o $(DOTOH)
-	$(CC) -o test_twine test_twine.o $(DOTOH) $(LFLAGS)
-	$(CC) -o test_string test_string.o $(DOTOH) $(LFLAGS)
+	$(CC) -o test_twine test_twine.o -L. -lSLib $(LFLAGS)
+	$(CC) -o test_string test_string.o -L. -lSLib $(LFLAGS)
 
 test_enex: test_enex.o thrash_timer.o $(DOTOH)
-	$(CC) -o test_enex test_enex.o $(DOTOH) $(LFLAGS)
-	$(CC) -o thrash_timer thrash_timer.o $(DOTOH) $(LFLAGS)
+	$(CC) -o test_enex test_enex.o -L. -lSLib $(LFLAGS)
+	$(CC) -o thrash_timer thrash_timer.o -L. -lSLib $(LFLAGS)
 
 docs: 
 	cd ../doc
@@ -47,3 +52,9 @@ clean:
 	rm -f ../lib/libSLib.so
 	rm -f ../include/*.h
 	rm -f ../include/Pool.cpp
+
+install:
+	-mkdir -p ../../x64/lib
+	-mkdir -p ../../x64/bin
+	cp libSLib.so ../../x64/lib/
+	cp LogDump ../../x64/bin/

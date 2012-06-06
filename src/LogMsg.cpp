@@ -16,6 +16,8 @@
  * along with this program.  See file COPYING for details.
  */
 
+#include <string.h>
+
 #include "LogMsg.h"
 using namespace SLib;
 
@@ -150,13 +152,17 @@ void LogMsg::SetAppMachine()
 		_NSGetExecutablePath( staticAppName->data(), &length );
 		staticAppName->check_size();
 #else
+		readlink("/proc/self/exe", staticAppName->data(), 1024); // Linux
+		staticAppName->check_size();
+#endif
+/*
 		// See this: http://stackoverflow.com/questions/1023306/finding-current-executables-path-without-proc-self-exe/1024937#1024937
 		readlink("/proc/self/exe", staticAppName->data(), 1024); // Linux
 		readlink("/proc/curproc/file", staticAppName->data(), 1024); // FreeBSD
 		readlink("/proc/self/path/a.out", staticAppName->data(), 1024); // Solaris
 		_NSGetExecutablePath(); // Mac OS X
 		getexecname(); // Solaris
-#endif
+*/
 	}
 
 }

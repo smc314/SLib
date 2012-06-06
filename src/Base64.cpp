@@ -22,6 +22,8 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 
+#include <string.h>
+
 #include "Base64.h"
 #include "Log.h"
 using namespace SLib;

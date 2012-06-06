@@ -17,7 +17,6 @@ static int STRINGTAB_HEADER_SIZE = 12;
 /// The size of our LogFile string table entry = 8.
 static int STRINGTAB_INDEX_ENTRY_SIZE = 8;
 
-static twine MESSAGE_ENTRY_EYE_CATCHER_STRING = "0BACADAB";
 static int MESSAGE_ENTRY_EYE_CATCHER = 0x0BACADAB;
 
 

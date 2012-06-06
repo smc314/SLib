@@ -37,6 +37,7 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdint.h>
 
 #include <vector>
 using namespace std;

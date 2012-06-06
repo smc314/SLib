@@ -1,6 +1,9 @@
 #include "BlockingQueue.h"
 using namespace SLib;
 
+#include <stdio.h>
+#include <stdlib.h>
+
 int testBlockingQueue(void)
 {
 	BlockingQueue<int> testQueue;
