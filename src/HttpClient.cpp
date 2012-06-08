@@ -70,6 +70,14 @@ size_t HttpClient_WriteMemoryCallback2(void* contents, size_t size, size_t nmemb
 	return realsize;
 }
 
+/** This one is used to report progress of downloads
+  */
+int HttpClient_ProgressCallback(void* clientp, double dltotal, double dlnow, double ultotal, double ulnow)
+{
+	HttpClient* client = (HttpClient*)clientp;
+	return client->Progress(dltotal, dlnow, ultotal, ulnow);
+}
+
 HttpClient::HttpClient()
 {
 	EnEx ee(FL, "HttpClient::HttpClient()");
@@ -88,6 +96,12 @@ HttpClient::~HttpClient()
 	curl_easy_cleanup( m_curl_handle );
 }
 
+int HttpClient::Progress(double dltotal, double dlnow, double ultotal, double ulnow)
+{
+	// If we return a non-zero value, it will abort the transfer.
+	return 0;
+}
+
 char* HttpClient::Get(const twine& url )
 {
 	EnEx ee(FL, "HttpClient::Get(const twine& url)");
@@ -96,6 +110,12 @@ char* HttpClient::Get(const twine& url )
 	curl_easy_setopt( m_curl_handle, CURLOPT_URL, url() );
 	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEFUNCTION, HttpClient_WriteMemoryCallback2 );
 	curl_easy_setopt( m_curl_handle, CURLOPT_WRITEDATA, this );
+
+	// For progress information
+	curl_easy_setopt( m_curl_handle, CURLOPT_NOPROGRESS, 0L);
+	curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSFUNCTION, HttpClient_ProgressCallback );
+	curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSDATA, this );
+
 	
 	// Ignore SSL cert issues
 	curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYPEER, false);
@@ -132,6 +152,11 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 		curl_easy_setopt( m_curl_handle, CURLOPT_WRITEDATA, this );
 		slist = curl_slist_append(slist, "Expect:");
 		curl_easy_setopt( m_curl_handle, CURLOPT_HTTPHEADER, slist);
+
+		// For progress information
+		curl_easy_setopt( m_curl_handle, CURLOPT_NOPROGRESS, 0L);
+		curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSFUNCTION, HttpClient_ProgressCallback );
+		curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSDATA, this );
 
 		// Ignore SSL cert issues
 		curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYPEER, false);

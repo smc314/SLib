@@ -50,6 +50,13 @@ class DLLEXPORT HttpClient
 		/// Standard Destructor
 		virtual ~HttpClient();
 
+		/** This is the callback that cURL invokes to tell us about up/down-load progress. A return
+		  * of anything other than 0 will cause the transfer to abort.  Our implementation of this
+		  * does nothing but return 0.  It is expected that sub-classes will override this and do
+		  * something more interesting.
+		  */
+		virtual int Progress(double dltotal, double dlnow, double ultotal, double ulnow);
+
 		/// Use this to download a page using Get
 		char* Get( const twine& url);
 
