@@ -593,7 +593,7 @@ void LogFile::openFile()
 
 void LogFile::readLogHeaders()
 {
-
+	//printf("reading log headers...\n");
 	if (m_log == NULL) {
 		return; // sanity check
 	}
@@ -603,6 +603,7 @@ void LogFile::readLogHeaders()
 		seek(8); // just past the signature
 
 		// Read the Index Header information
+		//printf("reading index headers...\n");
 		m_index_header.record_count = readInt();
 		m_index_header.index_count = readInt();
 		m_index_header.oldest_entry = readInt();
@@ -611,6 +612,12 @@ void LogFile::readLogHeaders()
 		// Read all of the indexes
 		clearIndexes();
 		clearLogIds();
+		//printf("Index Headers:\n");
+		//printf("Record Count: %d\n", m_index_header.record_count);
+		//printf("Index Count: %d\n", m_index_header.index_count);
+		//printf("Oldest Entry: %d\n", m_index_header.oldest_entry);
+		//printf("Newest Entry: %d\n", m_index_header.newest_entry);
+		//printf("loading index entries...\n");
 		for (int i = 0; i < m_index_header.index_count; i++) {
 			IndexEntry* ie = new IndexEntry();
 			ie->offset = readInt();
@@ -622,6 +629,7 @@ void LogFile::readLogHeaders()
 		}
 
 		// Read our String table
+		//printf("reading string table headers...\n");
 		m_string_table_header.total_size = readInt();
 		m_string_table_header.total_indexes = readInt();
 		m_string_table_header.index_in_use = readInt();

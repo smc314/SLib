@@ -328,6 +328,8 @@ int main(int argc, char** argv)
 	printf("=============================================\n");
 
 	try {
+		//printf("Opening log file: %s\n", logFileName() );
+		//printf("=============================================\n");
 		LogFile lf(logFileName,
 			1024 * 1024 * 10, // 10M max
 			10000, // entries max
@@ -337,6 +339,8 @@ int main(int argc, char** argv)
 			false // don't clear at startup
 		);
 
+		//printf("Dumping Index stats and String table:\n");
+		//printf("=============================================\n");
 		lf.dumpIndexAndStrings();
 
 		int oldest = lf.getOldestMessageID();
@@ -347,9 +351,15 @@ int main(int argc, char** argv)
 				oldest = 0;
 			}
 		}
+		//printf("Looping over messages %d to %d:\n", oldest, newest);
+		//printf("=============================================\n");
 		for(int i = oldest; i <= newest; i++){
+			//printf("Looking for message: %d\n", i);
 			dptr<LogMsg> lm; lm = lf.getMessage(i);
-			if(lm == NULL) continue;
+			if(lm == NULL) {
+				//printf("\tmessage %d not found!\n", i);
+				continue;
+			}
 			filterAndPrint( lm );
 		}			
 
