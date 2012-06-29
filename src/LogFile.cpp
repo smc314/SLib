@@ -279,7 +279,8 @@ void LogFile::writeMsg(LogMsg& msg)
 			// We've wrapped the log in terms of physical layout.
 			// calculate how many messages need to be removed to open up
 			// a gap big enough for us to write to.
-			throw AnException(0, FL, "Out of log space! Not Implemented Yet.");
+			//throw AnException(0, FL, "Out of log space! Not Implemented Yet.");
+			createNewFile();
 		}
 	} else {
 		// We've run out of indexes. Start a new file for logging.
