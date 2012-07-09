@@ -993,6 +993,18 @@ twine& twine::ucase(size_t i)
 	return *this;
 }
 
+void twine::ucase(char* input)
+{
+	EnEx ee("twine::ucase(char* input)");
+	if(input == NULL){
+		throw AnException(0, FL, "twine::ucase - input is NULL");
+	}
+	size_t len = strlen(input);
+	for(size_t i = 0; i < len; i++){
+		input[i] = toupper(input[i]);
+	}
+}
+
 vector < twine > twine::split(twine spliton)
 {
 	EnEx ee("twine::split(twine spliton)");

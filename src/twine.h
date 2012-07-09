@@ -458,6 +458,11 @@ class DLLEXPORT twine
 		  * Uppercases the character at i in the twine.
 		  */
 		twine& ucase(size_t i);
+
+		/**
+		  * Uppercases the given string in place.
+		  */
+		static void ucase(char* input);
 		
 		/**
 		* Splits the current twine into a vector of twines based
