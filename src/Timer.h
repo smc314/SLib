@@ -26,6 +26,7 @@
 #       define DLLEXPORT
 #endif
 
+#include <stdint.h>
 #include <time.h>
 #include <sys/timeb.h>
 #ifndef _WIN32
@@ -74,21 +75,7 @@ class DLLEXPORT Timer
 		  * ftime on windows only provides millisecond resolution, not microsecond
 		  * resolution.
 		  */
-#ifdef _WIN32
-		static inline unsigned long long GetCycleCount(void)
-		{
-			struct timeb tb;
-			ftime( &tb);
-			return tb.time * 1000000 + tb.millitm * 1000;
-		}
-#else
-		static __inline__ unsigned long long GetCycleCount(void)
-		{
-			struct timeval tv;
-			gettimeofday( &tv, NULL);
-			return tv.tv_sec * 1000000 + tv.tv_usec;
-		}
-#endif
+		static uint64_t GetCycleCount(void);
 
 #if 0
 		/** Use this method to retrieve the current CPU cycle count

@@ -59,6 +59,17 @@ float Timer::Duration(void)
 	return (float)f5;
 }
 
-
+uint64_t Timer::GetCycleCount(void)
+{
+#ifdef _WIN32
+	struct timeb tb;
+	ftime( &tb);
+	return (uint64_t)tb.time * (uint64_t)1000000 + (uint64_t)tb.millitm * (uint64_t)1000;
+#else
+	struct timeval tv;
+	gettimeofday( &tv, NULL);
+	return tv.tv_sec * 1000000 + tv.tv_usec;
+#endif
+}
 
 

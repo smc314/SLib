@@ -1,68 +1,53 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/time.h>
-#include <sys/times.h>
-#include <time.h>
-#include <sys/timeb.h>
 
+#include <vector>
+using namespace std;
+
+#include "EnEx.h"
 #include "Timer.h"
+#include "Thread.h"
 using namespace SLib;
 
-static __inline__ unsigned long GetCC(void)
-{
-	unsigned a, d;
-	asm volatile("rdtsc" : "=a" (a), "=d" (d));
-	return ((unsigned long)a) | (((unsigned long)d) << 32);
-}
+void *run_lots(void* v);
 
 int main(void)
 {
-	int i, count;
-	Timer t;
-	timespec rtclock;
-	timeb timerTime;
-	clock_t ticks;
-	unsigned long cc;
+	vector < Thread * > th_vect;
+	int thread_count = 30;
+	int i;
 
-
-	count = 10000000;
-
-	t.Start();
-	for(i = 0; i < count; i++){
-		clock_gettime(CLOCK_REALTIME, &rtclock);
+	for(i = 0; i < thread_count; i++){
+		Thread *t;
+		t = new Thread();
+		t->start(run_lots, NULL);
+		th_vect.push_back(t);
 	}
-	t.Finish();
+	printf("Threads started...\n");
 
-	printf("Time for %d clock_gettime calls is (%f)\n", 
-		count, t.Duration());
-
-	t.Start();
-	for(i = 0; i < count; i++){
-		ftime(&timerTime);
+	for(i = 0; i < thread_count; i++){
+		th_vect[i]->join();
 	}
-	t.Finish();
 
-	printf("Time for %d ftime calls is (%f)\n", 
-		count, t.Duration());
-
-	t.Start();
-	for(i = 0; i < count; i++){
-		ticks = times(NULL);
+	for(i = 0; i < thread_count; i++){
+		delete th_vect[i];
 	}
-	t.Finish();
-
-	printf("Time for %d times calls is (%f)\n", 
-		count, t.Duration());
-
-	t.Start();
-	for(i = 0; i < count; i++){
-		cc = GetCC();
-	}
-	t.Finish();
-
-	printf("Time for %d GetCC calls is (%f)\n", 
-		count, t.Duration());
-
-	return 0;
+	
 }
 
+void *run_lots(void* v)
+{
+	EnEx ee("run_lots()", true);
+	int i, j;
+	Timer tt;
+	int count = 20000000;
+
+	tt.Start();
+	for(j = 0; j < count; j++){
+		uint64_t cc = Timer::GetCycleCount();
+	}
+	tt.Finish();
+
+	printf("Time for %d calls to GetCycleCount() is: %f\n", count, tt.Duration() );
+	return NULL;
+}

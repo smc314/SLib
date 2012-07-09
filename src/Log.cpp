@@ -195,6 +195,9 @@ void Log::Panic(const char *file, int line, const char *msg, ...)
 	va_list ap;
 	va_start(ap, msg);
 	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
 	va_end(ap);
 	
 	lm->channel = 0; // Panic
@@ -220,6 +223,9 @@ void Log::Error(const char *file, int line, const char *msg, ...)
 	va_list ap;
 	va_start(ap, msg);
 	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
 	va_end(ap);
 	
 	lm->channel = 1; // Error
@@ -245,6 +251,9 @@ void Log::Warn(const char *file, int line, const char *msg, ...)
 	va_list ap;
 	va_start(ap, msg);
 	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
 	va_end(ap);
 	
 	lm->channel = 2; // Warn
@@ -270,6 +279,9 @@ void Log::Info(const char *file, int line, const char *msg, ...)
 	va_list ap;
 	va_start(ap, msg);
 	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
 	va_end(ap);
 	
 	lm->channel = 3; // Info
@@ -295,6 +307,9 @@ void Log::Debug(const char *file, int line, const char *msg, ...)
 	va_list ap;
 	va_start(ap, msg);
 	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
 	va_end(ap);
 	
 	lm->channel = 4; // Debug
@@ -320,6 +335,9 @@ void Log::Trace(const char *file, int line, const char *msg, ...)
 	va_list ap;
 	va_start(ap, msg);
 	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
 	va_end(ap);
 	
 	lm->channel = 5; // Trace
@@ -346,6 +364,9 @@ void Log::SqlTrace(const char *file, int line, const char *msg, ...)
 	va_list ap;
 	va_start(ap, msg);
 	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
 	va_end(ap);
 	
 	lm->channel = 6; // SqlTrace
