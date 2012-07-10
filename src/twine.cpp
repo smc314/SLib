@@ -993,11 +993,11 @@ twine& twine::ucase(size_t i)
 	return *this;
 }
 
-void twine::ucase(char* input)
+void twine::strupr(char* input)
 {
-	EnEx ee("twine::ucase(char* input)");
+	EnEx ee("twine::strupr(char* input)");
 	if(input == NULL){
-		throw AnException(0, FL, "twine::ucase - input is NULL");
+		throw AnException(0, FL, "twine::strupr - input is NULL");
 	}
 	size_t len = strlen(input);
 	for(size_t i = 0; i < len; i++){

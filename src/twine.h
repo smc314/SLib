@@ -462,7 +462,7 @@ class DLLEXPORT twine
 		/**
 		  * Uppercases the given string in place.
 		  */
-		static void ucase(char* input);
+		static void strupr(char* input);
 		
 		/**
 		* Splits the current twine into a vector of twines based
