@@ -158,11 +158,20 @@ class EnterExitLight {
 	public:
 		EnterExitLight(const char* methodName) {}
 		EnterExitLight(const char* methodName, bool saveToGlobal) {}
+		EnterExitLight(const char* file, int line, const char* methodName) {}
+		EnterExitLight(const char* file, int line, const char* methodName, bool saveToGlobal){}
+
 
 		virtual ~EnterExitLight() {}
 
 		static void PrintHitMap(void) {printf("Compiled with light version.  Doing no profiling.\n");}
 		static void PrintGlobalHitMap(void) {printf("Compiled with light version.  Doing no profiling.\n");}
+		static void PrintGlobalHitMap(twine& output){};
+		static void RecordGlobalHitMap(xmlNodePtr node) {}
+		static void PrintStackTrace(void){}
+		static void PrintStackTrace(int channel){}
+		static twine GetStackTrace(void) {return twine("");}
+		void SaveToGlobal(void) {}
 
 };
 

@@ -63,8 +63,13 @@ uint64_t Timer::GetCycleCount(void)
 {
 #ifdef _WIN32
 	struct timeb tb;
-	ftime( &tb);
-	return (uint64_t)tb.time * (uint64_t)1000000 + (uint64_t)tb.millitm * (uint64_t)1000;
+	uint64_t t1, t2;
+
+	ftime( &tb );
+
+	t1 = tb.time;
+	t2 = tb.millitm;
+	return t1 * 1000000 + t2 * 1000;
 #else
 	struct timeval tv;
 	gettimeofday( &tv, NULL);

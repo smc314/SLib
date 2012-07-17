@@ -465,6 +465,11 @@ class DLLEXPORT twine
 		static void strupr(char* input);
 		
 		/**
+		  * Lowercases the given string in place.
+		  */
+		static void strlwr(char* input);
+		
+		/**
 		* Splits the current twine into a vector of twines based
 		* on the given split string.
 		*/

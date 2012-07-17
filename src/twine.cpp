@@ -1005,6 +1005,18 @@ void twine::strupr(char* input)
 	}
 }
 
+void twine::strlwr(char* input)
+{
+	EnEx ee("twine::strlwr(char* input)");
+	if(input == NULL){
+		throw AnException(0, FL, "twine::strlwr - input is NULL");
+	}
+	size_t len = strlen(input);
+	for(size_t i = 0; i < len; i++){
+		input[i] = tolower(input[i]);
+	}
+}
+
 vector < twine > twine::split(twine spliton)
 {
 	EnEx ee("twine::split(twine spliton)");
