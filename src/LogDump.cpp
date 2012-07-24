@@ -41,6 +41,7 @@ bool m_display_thread;
 bool m_display_file;
 bool m_display_line;
 bool m_display_channel;
+bool m_show_stringtable;
 bool m_watch_mode;
 
 void printUsage(char* appName)
@@ -70,6 +71,7 @@ void printUsage(char* appName)
 	"\t-dl            Use this to display the log message line number\n"
 	"\t-dc            Use this to display the log message channel\n"
 	"\t-d1            Shortcut for -di -dd -dt -dc\n"
+	"\t-b             Use this to display the string table\n"
 	"\t-w             Use this to Watch for new messages\n"
 	"\n");
 }
@@ -99,6 +101,8 @@ void getArgs(int argc, char** argv)
 				continue;
 			} else if(argv[i][1] == 'w'){
 				m_watch_mode = true;
+			} else if(argv[i][1] == 'b'){
+				m_show_stringtable = true;
 			} else if(argv[i][1] == 'c'){
 				if(first_c){
 					// First one of these we hit, turn everything false:
@@ -282,6 +286,7 @@ int main(int argc, char** argv)
 	m_panic = m_error = m_warn = m_info = m_debug = m_trace = m_sqltrace = true;
 	m_display_id = m_display_date = m_display_machine = m_display_app = 
 		m_display_thread = m_display_file = m_display_line = m_display_channel = true;
+	m_show_stringtable = false;
 	m_watch_mode = false;
 
 	if(argc == 1){
@@ -341,7 +346,9 @@ int main(int argc, char** argv)
 
 		//printf("Dumping Index stats and String table:\n");
 		//printf("=============================================\n");
-		lf.dumpIndexAndStrings();
+		if(m_show_stringtable){
+			lf.dumpIndexAndStrings();
+		}
 
 		int oldest = lf.getOldestMessageID();
 		int newest = lf.getNewestMessageID();
