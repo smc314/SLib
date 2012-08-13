@@ -104,6 +104,10 @@ void Date::SetValue(const char *date)
 	m_TimeStruct->tm_year -= 1900;
 
 	m_TimeStruct->tm_mon -= 1; // months in struct are 0 based.
+	
+	// Ensure our TimeVal is also in sync.
+	m_TimeVal = mktime(m_TimeStruct);
+		
 }
 
 void Date::SetValue(const twine& date)
@@ -255,6 +259,9 @@ void Date::SetValue(const char* date, const char* format)
 	}
 	m_TimeStruct->tm_year -= 1900;
 	m_TimeStruct->tm_mon -= 1; // months in struct are 0 based.
+
+	// Ensure our TimeVal is also in sync.
+	m_TimeVal = mktime(m_TimeStruct);
 		
 }
 
