@@ -278,14 +278,13 @@ class DLLEXPORT LogFile {
 		 */
 		int addStringTableEntry(twine str);
 
-
-	private:
-
 		/** This will close our log file and move it to a new name so
 		 * that we can re-open a new log file.
 		 */
 		void createNewFile();
 	
+	private:
+
 		/**
 		 * This will look for the file to open as our log file. If it can't be
 		 * found, or doesn't match the signature of our log file, we'll set m_log to
