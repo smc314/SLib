@@ -29,6 +29,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#include <openssl/rsa.h>
+
 #include <vector>
 using namespace std;
 
@@ -214,6 +216,27 @@ class DLLEXPORT MemBuf
 		  * Unzip the contents of our MemBuf.
 		  */
 		MemBuf& unzip();
+
+		/** Encrypts the contents of our MemBuf using the given RSA keypair.  The contents
+		  * of this membuf could be much larger than the keysize allows for encrypting as a single
+		  * pass, so we chunk the encryption and save each chunk into an XML document that can
+		  * then be passed back to our Decrypt method for decrypting.  This method does not
+		  * change the contents of our MemBuf object.
+		  *
+		  * If you pass in false for usePublic, we will encrypt with the RSA private key.  If not,
+		  * we will encrypt with the RSA public key.
+		  */
+		xmlDocPtr Encrypt(RSA* keypair, bool usePublic = true);
+
+		/** This method uses the given RSA keypair to decrypt the contents of the given XML document.
+		  * The resulting decrypted data is written into this MemBuf object and our size is set to
+		  * the resulting size of all of the decrypted data.
+		  *
+		  * If you pass in false for usePrivate, we will decrypte with the RSA public key.  If not,
+		  * we will decrypt with the RSA private key.
+		  */
+		MemBuf& Decrypt(xmlDocPtr doc, RSA* keypair, bool usePrivate = true);
+
 
 	private:
 
