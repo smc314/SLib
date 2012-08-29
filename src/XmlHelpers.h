@@ -227,7 +227,7 @@ class DLLEXPORT XmlHelpers {
 				b64 = content;
 			}
 			b64.encode64();
-			twine tmp = b64();
+			twine tmp; tmp.set(b64(), b64.length());
 
 			// Then set it into a cdata block
 			XmlHelpers::setCDATASection(parent, tmp);
