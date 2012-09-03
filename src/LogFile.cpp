@@ -484,7 +484,7 @@ void LogFile::dumpMessageData()
 		IndexEntry* ie = (*m_indexes)[i];
 		if(ie->offset != 0){
 			try {
-				LogMsg* lm = readMessageEntry(ie);
+				dptr<LogMsg> lm = readMessageEntry(ie);
 				char local_tmp[32];
 				memset(local_tmp, 0, 32);
 

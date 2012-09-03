@@ -9,7 +9,7 @@ DOC=doc++
 OPENSSLDIR=/usr
 SOCKET_LIB=
 
-CFLAGS=-g -Wall -D_REENTRANT -O2 -rdynamic -I$(OPENSSLDIR)/include \
+CFLAGS=-g -Wall -D_REENTRANT -fPIC -O0 -rdynamic -I$(OPENSSLDIR)/include \
 	-I/usr/include/libxml2 -I/usr/include/curl
 LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
 	-lresolv -lxml2 -lz -lcurl
@@ -19,7 +19,7 @@ LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
 
 # smtp.o is not here because we need to find out how to compile it
 # on a mac before including it in this list.
-DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Tools.o twine.o Date.o \
+DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Mutex.o Tools.o twine.o Date.o \
 	Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o XmlHelpers.o BlockingQueue.o File.o \
 	LogFile.o HttpClient.o ZipFile.o MemBuf.o
 
@@ -32,6 +32,35 @@ all: $(DOTOH) $(MINIZIP_OH) LogDump.o incs
 
 incs:
 	cp *.h Pool.cpp ../include
+
+tests: test_64 test_date test_dptr test_enex test_log test_logfile test_membuf test_queue test_split test_string test_suvect test_timer test_twine test_xml test_zip thrash_timer thrash_twine
+
+test_64: test_64.o $(DOTOH)
+	$(CC) -o test_64 test_64.o -L. -lSLib $(LFLAGS)
+
+test_date: test_date.o $(DOTOH)
+	$(CC) -o test_date test_date.o -L. -lSLib $(LFLAGS)
+
+test_log: test_log.o $(DOTOH)
+	$(CC) -o test_log test_log.o -L. -lSLib $(LFLAGS)
+
+test_membuf: test_membuf.o $(DOTOH)
+	$(CC) -o test_membuf test_membuf.o -L. -lSLib $(LFLAGS)
+
+test_queue: test_queue.o $(DOTOH)
+	$(CC) -o test_queue test_queue.o -L. -lSLib $(LFLAGS)
+
+test_split: test_split.o $(DOTOH)
+	$(CC) -o test_split test_split.o -L. -lSLib $(LFLAGS)
+
+test_string: test_string.o $(DOTOH)
+	$(CC) -o test_string test_string.o -L. -lSLib $(LFLAGS)
+
+test_suvect: test_suvect.o $(DOTOH)
+	$(CC) -o test_suvect test_suvect.o -L. -lSLib $(LFLAGS)
+
+test_timer: test_timer.o $(DOTOH)
+	$(CC) -o test_timer test_timer.o -L. -lSLib $(LFLAGS)
 
 test_twine: test_string.o test_twine.o 
 	$(CC) -o test_twine test_twine.o -L. -lSLib $(LFLAGS)
@@ -46,11 +75,20 @@ test_dptr: test_dptr.o $(DOTOH)
 test_logfile: test_logfile.o $(DOTOH)
 	$(CC) -o test_logfile test_logfile.o -L. -lSLib $(LFLAGS)
 
+test_log: test_log.o $(DOTOH)
+	$(CC) -o test_log test_log.o -L. -lSLib $(LFLAGS)
+
 test_xml: test_xml.o $(DOTOH)
 	$(CC) -o test_xml test_xml.o -L. -lSLib $(LFLAGS)
 
-test_queue: test_queue.o $(DOTOH)
-	$(CC) -o test_queue test_queue.o -L. -lSLib $(LFLAGS)
+test_zip: test_zip.o $(DOTOH)
+	$(CC) -o test_zip test_zip.o -L. -lSLib $(LFLAGS)
+
+thrash_timer: thrash_timer.o $(DOTOH)
+	$(CC) -o thrash_timer thrash_timer.o -L. -lSLib $(LFLAGS)
+
+thrash_twine: thrash_twine.o $(DOTOH)
+	$(CC) -o thrash_twine thrash_twine.o -L. -lSLib $(LFLAGS)
 
 docs: 
 	cd ../doc

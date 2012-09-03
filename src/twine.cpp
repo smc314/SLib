@@ -877,13 +877,14 @@ twine& twine::rtrim(void)
 		return *this; // bail out early.
 	}
 	size_t i = m_data_size - 1;
-	while(i >= 0 && (isspace((unsigned char)m_data[i]) ||
-		m_data[i] == '\r' ||
-		m_data[i] == '\n')
-	) {
-		m_data[i] = '\0';
-		m_data_size --;
-		i--;
+	while(i >= 0){
+		if(isspace((unsigned char)m_data[i]) || m_data[i] == '\r' || m_data[i] == '\n') {
+			m_data[i] = '\0';
+			m_data_size --;
+			i--;
+		} else {
+			break; // found something that is not a space or newline.  we're done.
+		}
 	}
 	return *this;
 }

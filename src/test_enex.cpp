@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "EnEx.h"
+using namespace SLib;
 
 void func0(void);
 void func1(void);
@@ -20,7 +22,7 @@ void func0(void)
 {
 	EnEx ee("func0");
 
-	for(int i = 0; i < 200000; i++){
+	for(int i = 0; i < 2000; i++){
 		func1();
 		func2();
 		func3();

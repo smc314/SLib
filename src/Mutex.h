@@ -29,6 +29,7 @@
 #include "Thread.h"
 
 namespace SLib {
+
 	
 /**
   * @memo This is a small and simple wrapper class that provides a 
@@ -95,6 +96,13 @@ class DLLEXPORT Mutex
 			pthread_mutex_lock(&m_mut);
 #endif
 		}
+
+		/**
+		  * This function will attempt to lock the mutex with a given timeout.
+		  * If the timeout expires, we will throw an exception.  Timeout is measured
+		  * in milliseconds.
+		  */
+		void lock(long timeout);
 
 		/**
 		  * @memo This function will unlock the mutex.
