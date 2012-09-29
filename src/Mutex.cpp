@@ -34,6 +34,8 @@ void Mutex::lock(long timeout) {
 			throw AnException(0, FL, "Wait timed out on lock.");
 		}
 	}
+#elif __MACH__
+	
 #else
 	// get the time right now:
 	struct timespec abs_time;
