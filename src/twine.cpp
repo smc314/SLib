@@ -61,8 +61,7 @@ twine::twine(const twine& t) :
 	}
 	reserve(t.m_data_size);
 	m_data_size = t.m_data_size;
-	memset(m_data, 0, m_allocated_size);
-	strncpy(m_data, t.m_data, m_data_size);
+	memcpy(m_data, t.m_data, m_data_size);
 }
 
 twine::twine(const char* c) :
@@ -79,7 +78,7 @@ twine::twine(const char* c) :
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
 	reserve(csize);
-	strncpy(m_data, c, csize);
+	memcpy(m_data, c, csize);
 	m_data_size = csize;
 }
 
@@ -97,7 +96,7 @@ twine::twine(const xmlChar* c) :
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
 	reserve(csize);
-	strncpy(m_data, (const char*)c, csize);
+	memcpy(m_data, (const char*)c, csize);
 	m_data_size = csize;
 }
 
@@ -152,7 +151,7 @@ twine& twine::operator=(const twine& t)
 	reserve(t.m_data_size);
 	memset(m_data, 0, m_allocated_size);
 	m_data_size = t.m_data_size;
-	strncpy(m_data, t.m_data, m_data_size);
+	memcpy(m_data, t.m_data, m_data_size);
 	return *this;
 }
 
@@ -175,7 +174,7 @@ twine& twine::operator=(const char* c)
 	reserve(tsize);
 	memset(m_data, 0, m_allocated_size);
 	m_data_size = tsize;
-	strncpy(m_data, c, m_data_size);
+	memcpy(m_data, c, m_data_size);
 	return *this;
 }
 
@@ -192,7 +191,7 @@ twine& twine::operator<< (xmlChar* c)
 	reserve(tsize);
 	memset(m_data, 0, m_allocated_size);
 	m_data_size = tsize;
-	strncpy(m_data, (const char*)c, m_data_size);
+	memcpy(m_data, (const char*)c, m_data_size);
 	xmlFree(c);
 	return *this;
 }
@@ -474,7 +473,7 @@ twine& twine::set(const char* c, size_t n)
 	}
 	reserve(n);
 	memset(m_data, 0, m_allocated_size);
-	strncpy(m_data, c, n);
+	memcpy(m_data, c, n);
 	m_data_size = n;
 	return *this;
 }
@@ -834,7 +833,7 @@ twine& twine::insert(size_t p, const char* c)
 	for(size_t i = m_data_size - 1; i >= p; i--){
 		m_data[i+csize] = m_data[i];
 	}
-	strncpy(m_data + p, c, csize);
+	memcpy(m_data + p, c, csize);
 	m_data_size += csize;
 	m_data[m_data_size] = '\0';
 	return *this;
