@@ -5,14 +5,21 @@
 CC=g++
 AR=ar
 DOC=doc++
+UNAME := $(shell uname)
 
 OPENSSLDIR=/usr
 SOCKET_LIB=
 
 CFLAGS=-g -Wall -D_REENTRANT -fPIC -O0 -rdynamic -I$(OPENSSLDIR)/include \
 	-I/usr/include/libxml2 -I/usr/include/curl
-LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
-	-lresolv -lxml2 -lz -lcurl
+
+ifeq ($(UNAME),Linux)
+	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
+		-lresolv -lxml2 -lz -lcurl -lrt
+else
+	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
+		-lresolv -lxml2 -lz -lcurl
+endif
 
 %.o:	%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
