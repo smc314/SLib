@@ -35,13 +35,14 @@ DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
 	smtp.$(OHEXT) Interval.$(OHEXT) EMail.$(OHEXT) Timer.$(OHEXT) \
 	Parms.$(OHEXT) LogMsg.$(OHEXT) Hash.$(OHEXT) EnEx.$(OHEXT) XmlHelpers.$(OHEXT) \
 	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT) HttpClient.$(OHEXT) ZipFile.$(OHEXT) \
-	MemBuf.$(OHEXT)
+	MemBuf.$(OHEXT) sqlite3.$(OHEXT)
 
 MINIZIP_OH=ioapi.$(OHEXT) iowin32.$(OHEXT) mztools.$(OHEXT) unzip.$(OHEXT) zip.$(OHEXT)
 
-all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) incs 
+all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) SqlShell.$(OHEXT) incs 
 	$(LINK) $(LFLAGS) $(DOTOH) $(MINIZIP_OH) /OUT:libSLib.dll /DLL $(LLIBS)
 	$(CC) LogDump.$(OHEXT) libSLib.lib $(LFLAGS)
+	$(CC) SqlShell.$(OHEXT) libSLib.lib $(LFLAGS)
 	$(CP) libSLib.dll ..\lib
 	$(CP) libSLib.lib ..\lib
 
@@ -89,7 +90,7 @@ clean:
 	$(RM) ..\lib\libSLib.lib
 	$(RM) ..\include\*.h
 	$(RM) ..\include\Pool.cpp
-	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h ZipFile.h MemBuf.h
+	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h ZipFile.h MemBuf.h sqlite3.h sqlite3ext.h
 
 install:
 	$(CP) ..\include\*.h $(3PL)\include
@@ -97,6 +98,7 @@ install:
 	$(CP) ..\lib\libSLib.lib $(3PL)\lib
 	$(CP) ..\lib\libSLib.dll $(3PL)\bin
 	$(CP) LogDump.exe $(3PL)\bin
+	$(CP) SqlShell.exe $(3PL)\bin
 
 docs:
 	docxx --html --dir ..\..\appint\doc\slib *.h
