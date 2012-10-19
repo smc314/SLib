@@ -14,7 +14,7 @@ SOCKET_LIB=ws2_32.lib
 CDEBUG=/Od /Zi
 LDEBUG=-debug
 
-CFLAGS=-c $(CDEBUG) -Zp8 -EHsc -DWIN32 -D_MT -D_DLL -DLINT_ARGS -D_X86_=1 -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include" /analyze
+CFLAGS=-c $(CDEBUG) -Zp8 -EHsc -DWIN32 -D_MT -D_DLL -DLINT_ARGS -D_X86_=1 -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -D _USE_32BIT_TIME_T -I "$(3PL)\include" /analyze
 
 SSLLIBS=$(3PL)\lib\libeay32.lib $(3PL)\lib\ssleay32.lib \
 	$(3PL)\lib\libxml2.lib $(3PL)\lib\libcurl_imp.lib \

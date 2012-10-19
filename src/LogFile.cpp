@@ -634,6 +634,15 @@ void LogFile::readLogHeaders()
 		m_string_table_header.total_size = readInt();
 		m_string_table_header.total_indexes = readInt();
 		m_string_table_header.index_in_use = readInt();
+		if(m_string_table_header.total_size == 0 ||
+			m_string_table_header.total_indexes == 0
+		){
+			// Something is wrong with this log file. There is no string table, and nothing
+			// in use.  Set the total indexes and index in use to 1 so that we'll avoid trying
+			// to add anything else to this string table:
+			m_string_table_header.total_indexes = 1;
+			m_string_table_header.index_in_use = 1;
+		}
 		
 		clearStringIndexes();
 		clearStringTable();
@@ -852,21 +861,21 @@ void LogFile::writeIndexEntry(int which_index)
 	write(ie->id);
 }
 
-void LogFile::write(uint32_t value)
+void LogFile::write(int32_t value)
 {
 	if(m_log == NULL){
 		throw AnException(0, FL, "Trying to write to a log file that has not been opened.");
 	}
-	fwrite( &value, sizeof(uint32_t), 1, m_log);
+	fwrite( &value, sizeof(int32_t), 1, m_log);
 }
 
-uint32_t LogFile::readInt()
+int32_t LogFile::readInt()
 {
 	if(m_log == NULL){
 		throw AnException(0, FL, "Trying to write to a log file that has not been opened.");
 	}
 	int ret = 0;
-	size_t count = fread ( &ret, sizeof(uint32_t), 1, m_log);
+	size_t count = fread ( &ret, sizeof(int32_t), 1, m_log);
 	if(count != 1){
 		throw AnException(0, FL, "Error reading an int from our log file.");
 	}

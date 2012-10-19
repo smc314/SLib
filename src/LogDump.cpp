@@ -42,6 +42,7 @@ bool m_display_file;
 bool m_display_line;
 bool m_display_channel;
 bool m_show_stringtable;
+bool m_dump_data;
 bool m_watch_mode;
 
 void printUsage(char* appName)
@@ -72,6 +73,7 @@ void printUsage(char* appName)
 	"\t-dc            Use this to display the log message channel\n"
 	"\t-d1            Shortcut for -di -dd -dt -dc\n"
 	"\t-b             Use this to display the string table\n"
+	"\t-x             Use this to export a dump of the message data directly\n"
 	"\t-w             Use this to Watch for new messages\n"
 	"\n");
 }
@@ -103,6 +105,8 @@ void getArgs(int argc, char** argv)
 				m_watch_mode = true;
 			} else if(argv[i][1] == 'b'){
 				m_show_stringtable = true;
+			} else if(argv[i][1] == 'x'){
+				m_dump_data = true;
 			} else if(argv[i][1] == 'c'){
 				if(first_c){
 					// First one of these we hit, turn everything false:
@@ -287,6 +291,7 @@ int main(int argc, char** argv)
 	m_display_id = m_display_date = m_display_machine = m_display_app = 
 		m_display_thread = m_display_file = m_display_line = m_display_channel = true;
 	m_show_stringtable = false;
+	m_dump_data = false;
 	m_watch_mode = false;
 
 	if(argc == 1){
@@ -369,6 +374,10 @@ int main(int argc, char** argv)
 			}
 			filterAndPrint( lm );
 		}			
+
+		if(m_dump_data){
+			lf.dumpMessageData();
+		}
 
 		lf.close();
 
