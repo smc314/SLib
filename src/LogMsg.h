@@ -99,6 +99,9 @@ class DLLEXPORT LogMsg {
 		/// A Machine name
 		twine machineName;
 
+		/// An app specific unique id - usually like a session or connection token
+		twine appSession;
+
 		/// The actual log message
 		twine msg;
 

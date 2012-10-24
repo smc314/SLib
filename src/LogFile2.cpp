@@ -124,6 +124,7 @@ void LogFile2::Setup(void)
 			"channel int, "
 			"appName varchar(10), "
 			"machineName varchar(10), "
+			"appSession varchar(10), "
 			"msg varchar(10) "
 			");"
 		);
@@ -192,9 +193,9 @@ void LogFile2::writeOneMsg(LogMsg& msg)
 	if(m_insert_stmt == NULL){
 		twine sql = 
 			"insert into logtable (file, line, tid, timestamp_a, timestamp_b, channel, "
-			" appName, machineName, msg ) "
+			" appName, machineName, appSession, msg ) "
 			" values ( ?, ?, ?, ?, ?, ?, "
-			" ?, ?, ? ) "
+			" ?, ?, ?, ? ) "
 		;
 		check_err(
 			sqlite3_prepare( m_db, sql(), (int)sql.length(), &m_insert_stmt, NULL)
@@ -237,7 +238,10 @@ void LogFile2::writeOneMsg(LogMsg& msg)
 		sqlite3_bind_text(m_insert_stmt, 8, msg.machineName(), (int)msg.machineName.length(), SQLITE_STATIC)
 	);
 	check_err( 
-		sqlite3_bind_text(m_insert_stmt, 9, msg.msg(), (int)msg.msg.length(), SQLITE_STATIC)
+		sqlite3_bind_text(m_insert_stmt, 9, msg.appSession(), (int)msg.appSession.length(), SQLITE_STATIC)
+	);
+	check_err( 
+		sqlite3_bind_text(m_insert_stmt, 10, msg.msg(), (int)msg.msg.length(), SQLITE_STATIC)
 	);
 
 	// Run the insert.
@@ -380,7 +384,7 @@ LogMsg* LogFile2::getMessage(int id)
 	try {
 		twine sql; sql.format(
 			"select id, file, line, tid, timestamp_a, timestamp_b, channel, "
-			"       appName, machineName, msg "
+			"       appName, machineName, appSession, msg "
 			"from logtable "
 			"where id = %d;", id);
 		check_err(
@@ -394,7 +398,7 @@ LogMsg* LogFile2::getMessage(int id)
 		} else {
 			// Ensure we have a sane list of columns:
 			int colCount = sqlite3_column_count(stmt);
-			if(colCount != 10){
+			if(colCount != 11){
 				WARN(FL, "We don't understand the layout of logtable table in the current log file.");
 				sqlite3_finalize( stmt );
 				return NULL;
@@ -419,8 +423,10 @@ LogMsg* LogFile2::getMessage(int id)
 				(const char*)sqlite3_column_text(stmt, 7), (size_t)sqlite3_column_bytes(stmt, 7) );
 			ret->machineName.set( 
 				(const char*)sqlite3_column_text(stmt, 8), (size_t)sqlite3_column_bytes(stmt, 8) );
-			ret->msg.set( 
+			ret->appSession.set( 
 				(const char*)sqlite3_column_text(stmt, 9), (size_t)sqlite3_column_bytes(stmt, 9) );
+			ret->msg.set( 
+				(const char*)sqlite3_column_text(stmt, 10), (size_t)sqlite3_column_bytes(stmt, 10) );
 
 			sqlite3_finalize( stmt );
 			return ret.release();
@@ -443,7 +449,7 @@ vector<LogMsg*>* LogFile2::getMessages(const twine& whereClause, int limit, int 
 	sqlite3_stmt* stmt;
 	try {
 		twine sql; sql.format(
-			"select id, file, line, tid, timestamp_a, timestamp_b, channel, appName, machineName, msg "
+			"select id, file, line, tid, timestamp_a, timestamp_b, channel, appName, machineName, appSession, msg "
 			"from logtable "
 			" %s ",
 			whereClause()
@@ -463,7 +469,7 @@ vector<LogMsg*>* LogFile2::getMessages(const twine& whereClause, int limit, int 
 		} else {
 			// Ensure we have a sane list of columns:
 			int colCount = sqlite3_column_count(stmt);
-			if(colCount != 10){
+			if(colCount != 11){
 				WARN(FL, "We don't understand the layout of logtable table in the current log file.");
 				sqlite3_finalize( stmt );
 				return ret;
@@ -489,8 +495,10 @@ vector<LogMsg*>* LogFile2::getMessages(const twine& whereClause, int limit, int 
 					(const char*)sqlite3_column_text(stmt, 7), (size_t)sqlite3_column_bytes(stmt, 7) );
 				msg->machineName.set( 
 					(const char*)sqlite3_column_text(stmt, 8), (size_t)sqlite3_column_bytes(stmt, 8) );
-				msg->msg.set( 
+				msg->appSession.set( 
 					(const char*)sqlite3_column_text(stmt, 9), (size_t)sqlite3_column_bytes(stmt, 9) );
+				msg->msg.set( 
+					(const char*)sqlite3_column_text(stmt, 10), (size_t)sqlite3_column_bytes(stmt, 10) );
 
 				ret->push_back( msg.release() );
 

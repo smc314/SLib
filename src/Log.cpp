@@ -204,6 +204,25 @@ void Log::Panic(const char *file, int line, const char *msg, ...)
 	Persist(lm);
 }	
 
+void Log::Panic(const twine& appSession, const char *file, int line, const char *msg, ...)
+{
+	if(!panicon) return;
+
+	LogMsg* lm = new LogMsg(file, line);
+	lm->appSession = appSession;
+
+	va_list ap;
+	va_start(ap, msg);
+	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
+	va_end(ap);
+	
+	lm->channel = 0; // Panic
+	Persist(lm);
+}	
+
 void Log::SetError(bool	onoff)
 {
 	erroron = onoff;
@@ -219,6 +238,25 @@ void Log::Error(const char *file, int line, const char *msg, ...)
 	if(!erroron) return;
 
 	LogMsg* lm = new LogMsg(file, line);
+
+	va_list ap;
+	va_start(ap, msg);
+	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
+	va_end(ap);
+	
+	lm->channel = 1; // Error
+	Persist(lm);
+}	
+
+void Log::Error(const twine& appSession, const char *file, int line, const char *msg, ...)
+{
+	if(!erroron) return;
+
+	LogMsg* lm = new LogMsg(file, line);
+	lm->appSession = appSession;
 
 	va_list ap;
 	va_start(ap, msg);
@@ -260,6 +298,25 @@ void Log::Warn(const char *file, int line, const char *msg, ...)
 	Persist(lm);
 }	
 
+void Log::Warn(const twine& appSession, const char *file, int line, const char *msg, ...)
+{
+	if(!warnon) return;
+
+	LogMsg* lm = new LogMsg(file, line);
+	lm->appSession = appSession;
+
+	va_list ap;
+	va_start(ap, msg);
+	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
+	va_end(ap);
+	
+	lm->channel = 2; // Warn
+	Persist(lm);
+}	
+
 void Log::SetInfo(bool	onoff)
 {
 	infoon = onoff;
@@ -288,6 +345,25 @@ void Log::Info(const char *file, int line, const char *msg, ...)
 	Persist(lm);
 }	
 
+void Log::Info(const twine& appSession, const char *file, int line, const char *msg, ...)
+{
+	if(!infoon) return;
+
+	LogMsg* lm = new LogMsg(file, line);
+	lm->appSession = appSession;
+
+	va_list ap;
+	va_start(ap, msg);
+	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
+	va_end(ap);
+	
+	lm->channel = 3; // Info
+	Persist(lm);
+}	
+
 void Log::SetDebug(bool	onoff)
 {
 	debugon = onoff;
@@ -303,6 +379,25 @@ void Log::Debug(const char *file, int line, const char *msg, ...)
 	if(!debugon) return;
 
 	LogMsg* lm = new LogMsg(file, line);
+
+	va_list ap;
+	va_start(ap, msg);
+	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
+	va_end(ap);
+	
+	lm->channel = 4; // Debug
+	Persist(lm);
+}	
+
+void Log::Debug(const twine& appSession, const char *file, int line, const char *msg, ...)
+{
+	if(!debugon) return;
+
+	LogMsg* lm = new LogMsg(file, line);
+	lm->appSession = appSession;
 
 	va_list ap;
 	va_start(ap, msg);
@@ -345,6 +440,26 @@ void Log::Trace(const char *file, int line, const char *msg, ...)
 	Persist(lm);
 }	
 
+void Log::Trace(const twine& appSession, const char *file, int line, const char *msg, ...)
+{
+	if(!traceon) return;
+
+	LogMsg* lm = new LogMsg(file, line);
+	lm->appSession = appSession;
+
+	va_list ap;
+	va_start(ap, msg);
+	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
+	va_end(ap);
+	
+	lm->channel = 5; // Trace
+
+	Persist(lm);
+}	
+
 void Log::SetSqlTrace(bool onoff)
 {
 	sqltraceon = onoff;
@@ -360,6 +475,25 @@ void Log::SqlTrace(const char *file, int line, const char *msg, ...)
 	if(!sqltraceon) return;
 
 	LogMsg* lm = new LogMsg(file, line);
+
+	va_list ap;
+	va_start(ap, msg);
+	lm->msg.format(msg, ap);
+	if(lm->msg.length() == strlen(msg)){
+		lm->msg_static = true;
+	}
+	va_end(ap);
+	
+	lm->channel = 6; // SqlTrace
+	Persist(lm);
+}	
+
+void Log::SqlTrace(const twine& appSession, const char *file, int line, const char *msg, ...)
+{
+	if(!sqltraceon) return;
+
+	LogMsg* lm = new LogMsg(file, line);
+	lm->appSession = appSession;
 
 	va_list ap;
 	va_start(ap, msg);

@@ -89,6 +89,7 @@ LogMsg::LogMsg(const LogMsg& c)
 	line = c.line;
 	appName = c.appName;
 	machineName = c.machineName;
+	appSession = c.appSession;
 	msg = c.msg;
 	msg_static = c.msg_static;
 }
@@ -103,6 +104,7 @@ LogMsg& LogMsg::operator=(const LogMsg& c)
 	line = c.line;
 	appName = c.appName;
 	machineName = c.machineName;
+	appSession = c.appSession;
 	msg = c.msg;
 	msg_static = c.msg_static;
 	return *this;

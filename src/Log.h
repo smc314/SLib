@@ -125,6 +125,7 @@ class DLLEXPORT Log {
 		  * @param ... Any arguments to the log message follow.
 		  */
 		static void Panic(const char *file, int line, const char *msg, ...);
+		static void Panic(const twine& appSession, const char *file, int line, const char *msg, ...);
 
 		/// Indicates whether panic is on or not.
 		static bool PanicOn(void);
@@ -143,6 +144,7 @@ class DLLEXPORT Log {
 		  * control.
 		  */
 		static void Error(const char *file, int line, const char *msg, ...);
+		static void Error(const twine& appSession, const char *file, int line, const char *msg, ...);
 
 		/// Indicates whether error is on or not.
 		static bool ErrorOn(void);
@@ -161,6 +163,7 @@ class DLLEXPORT Log {
 		  * warnings.
 		  */
 		static void Warn(const char *file, int line, const char *msg, ...);
+		static void Warn(const twine& appSession, const char *file, int line, const char *msg, ...);
 
 		/// Indicates whethere warn is on or not.
 		static bool WarnOn(void);
@@ -178,6 +181,7 @@ class DLLEXPORT Log {
 		  * the logs for various reasons.
 		  */
 		static void Info(const char *file, int line, const char *msg, ...);
+		static void Info(const twine& appSession, const char *file, int line, const char *msg, ...);
 
 		/// Indicates whethere info is on or not.
 		static bool InfoOn(void);
@@ -195,6 +199,7 @@ class DLLEXPORT Log {
 		  * certain pieces of potentially troublesome code.
 		  */
 		static void Debug(const char *file, int line, const char *msg, ...);
+		static void Debug(const twine& appSession, const char *file, int line, const char *msg, ...);
 
 		/// Indicates whethere Debug is on or not.
 		static bool DebugOn(void);
@@ -211,6 +216,7 @@ class DLLEXPORT Log {
 		  * are used to log function and method entry/exit.
 		  */
 		static void Trace(const char *file, int line, const char *msg, ...);
+		static void Trace(const twine& appSession, const char *file, int line, const char *msg, ...);
 
 		/// Indicates whethere trace is on or not.
 		static bool TraceOn(void);
@@ -227,6 +233,7 @@ class DLLEXPORT Log {
 		  * are used to log sql statement executions, and durations.
 		  */
 		static void SqlTrace(const char *file, int line, const char *msg, ...);
+		static void SqlTrace(const twine& appSession, const char *file, int line, const char *msg, ...);
 
 		/// Indicates whethere SqlTrace is on or not.
 		static bool SqlTraceOn(void);
