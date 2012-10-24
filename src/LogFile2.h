@@ -18,6 +18,14 @@
   * along with this program.  See file COPYING for details.
   */
 
+#ifdef _WIN32
+#	ifndef DLLEXPORT
+#		define DLLEXPORT __declspec(dllexport)
+#	endif
+#else
+#	define DLLEXPORT
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -42,7 +50,7 @@ namespace SLib {
   *
   * @author Steven M. Cherry
   */
-class LogFile2
+class DLLEXPORT LogFile2
 {
 	private:
 		/// copy constructor is private to prevent use
