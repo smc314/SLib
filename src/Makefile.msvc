@@ -39,9 +39,10 @@ DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
 
 MINIZIP_OH=ioapi.$(OHEXT) iowin32.$(OHEXT) mztools.$(OHEXT) unzip.$(OHEXT) zip.$(OHEXT)
 
-all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) SqlShell.$(OHEXT) incs 
+all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) SLogDump.$(OHEXT) SqlShell.$(OHEXT) incs 
 	$(LINK) $(LFLAGS) $(DOTOH) $(MINIZIP_OH) /OUT:libSLib.dll /DLL $(LLIBS)
 	$(CC) LogDump.$(OHEXT) libSLib.lib $(LFLAGS)
+	$(CC) SLogDump.$(OHEXT) libSLib.lib $(LFLAGS)
 	$(CC) SqlShell.$(OHEXT) libSLib.lib $(LFLAGS)
 	$(CP) libSLib.dll ..\lib
 	$(CP) libSLib.lib ..\lib
@@ -98,6 +99,7 @@ install:
 	$(CP) ..\lib\libSLib.lib $(3PL)\lib
 	$(CP) ..\lib\libSLib.dll $(3PL)\bin
 	$(CP) LogDump.exe $(3PL)\bin
+	$(CP) SLogDump.exe $(3PL)\bin
 	$(CP) SqlShell.exe $(3PL)\bin
 
 docs:

@@ -34,9 +34,10 @@ DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Mutex.o Tools.o twine.o Date.o 
 
 MINIZIP_OH=ioapi.o mztools.o unzip.o zip.o
 
-all: $(DOTOH) $(MINIZIP_OH) LogDump.o SqlShell.o incs
+all: $(DOTOH) $(MINIZIP_OH) LogDump.o SLogDump.o SqlShell.o incs
 	$(CC) -shared -o libSLib.so $(DOTOH) $(MINIZIP_OH) $(LFLAGS)
 	$(CC) -o LogDump LogDump.o -L. -lSLib $(LFLAGS)
+	$(CC) -o SLogDump SLogDump.o -L. -lSLib $(LFLAGS)
 	$(CC) -o SqlShell SqlShell.o -L. -lSLib $(LFLAGS)
 	cp libSLib.so ../lib
 
@@ -117,3 +118,4 @@ install:
 	-mkdir -p ../../x64/bin
 	cp libSLib.so ../../x64/lib/
 	cp LogDump ../../x64/bin/
+	cp SLogDump ../../x64/bin/

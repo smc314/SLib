@@ -38,9 +38,10 @@ DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
 	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT) HttpClient.$(OHEXT) ZipFile.$(OHEXT) \
 	MemBuf.$(OHEXT) sqlite3.$(OHEXT) LogFile2.$(OHEXT)
 
-all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) SqlShell.$(OHEXT) incs
+all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) SLogDump.$(OHEXT) SqlShell.$(OHEXT) incs
 	$(LINK) $(LFLAGS) $(DOTOH) $(MINIZIP_OH) /OUT:libSLib.dll /DLL $(LLIBS)
 	$(CC) LogDump.$(OHEXT) libSLib.lib $(LFLAGS)
+	$(CC) SLogDump.$(OHEXT) libSLib.lib $(LFLAGS)
 	$(CC) SqlShell.$(OHEXT) libSLib.lib $(LFLAGS)
 	$(CP) libSLib.dll ..\lib
 	$(CP) libSLib.lib ..\lib
@@ -101,6 +102,7 @@ install:
 	$(CP) ..\lib\libSLib.lib $(3PL)\x64\lib
 	$(CP) ..\lib\libSLib.dll $(3PL)\x64\bin
 	$(CP) LogDump.exe $(3PL)\x64\bin
+	$(CP) SLogDump.exe $(3PL)\x64\bin
 	$(CP) SqlShell.exe $(3PL)\x64\bin
 
 docs:

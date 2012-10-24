@@ -33,6 +33,7 @@ LogFile2::LogFile2(const twine& logFileName, size_t maxFileSize)
 
 	m_logFileName = logFileName;
 	m_maxFileSize = maxFileSize;
+	m_readOnly = false;
 	m_db = NULL;
 	m_stmt = NULL;
 	m_insert_stmt = NULL;
@@ -45,6 +46,21 @@ LogFile2::LogFile2(const twine& logFileName, size_t maxFileSize)
 		//printf("createNewFile\n");
 		createNewFile(); // try to get it out of the way so we can create it from scratch.
 	}
+}
+
+LogFile2::LogFile2(bool readOnly, const twine& logFileName)
+{
+	//printf("LogFile2::LogFile2(const twine& logFileName, size_t maxFileSize)\n");
+
+	m_logFileName = logFileName;
+	m_maxFileSize = 50 * 1024 * 1024;
+	m_readOnly = readOnly;
+	m_db = NULL;
+	m_stmt = NULL;
+	m_insert_stmt = NULL;
+	m_mutex = new Mutex();
+
+	Setup(); // any exception trying to open the file is passed back in read-only mode.
 }
 
 LogFile2::~LogFile2()
@@ -97,9 +113,15 @@ void LogFile2::Setup(void)
 	sqlite3_initialize();
 
 	// Open/Create the database:
-	check_err(
-		sqlite3_open( m_logFileName(), &m_db)
-	);
+	if(m_readOnly){
+		check_err(
+			sqlite3_open_v2( m_logFileName(), &m_db, SQLITE_OPEN_READONLY, NULL)
+		);
+	} else {
+		check_err(
+			sqlite3_open( m_logFileName(), &m_db)
+		);
+	}
 	
 	// Check for our mainframe log table:
 	twine stmt = "select name from sqlite_master where type='table' and name='logtable'";
@@ -109,6 +131,9 @@ void LogFile2::Setup(void)
 
 	rc = check_err( sqlite3_step( m_stmt ));
 	if(rc == 0){
+		if(m_readOnly){
+			throw AnException(0, FL, "logtable does not exist - not creating in readonly mode.");
+		}
 		// table doesn't exist, create it:
 		sqlite3_finalize( m_stmt );
 		m_stmt = NULL;
@@ -161,6 +186,9 @@ int LogFile2::check_err(int rc)
 void LogFile2::writeMsg(LogMsg& msg)
 {
 	//printf("LogFile2::writeMsg()\n");
+	if(m_readOnly){
+		throw AnException(0, FL, "writeMsg is not allowed in readonly mode.");
+	}
 	Lock theLock(m_mutex);
 
 	begin_transaction();
@@ -174,6 +202,9 @@ void LogFile2::writeMsg(LogMsg& msg)
 void LogFile2::writeMsg(vector<LogMsg*>* messages)
 {
 	//printf("LogFile2::writeMsg(vector<LogMsg*>* messages)\n");
+	if(m_readOnly){
+		throw AnException(0, FL, "writeMsg is not allowed in readonly mode.");
+	}
 	Lock theLock(m_mutex);
 
 	begin_transaction();
@@ -189,6 +220,9 @@ void LogFile2::writeMsg(vector<LogMsg*>* messages)
 void LogFile2::writeOneMsg(LogMsg& msg)
 {
 	//printf("LogFile2::writeOneMsg()\n");
+	if(m_readOnly){
+		throw AnException(0, FL, "writeMsg is not allowed in readonly mode.");
+	}
 
 	if(m_insert_stmt == NULL){
 		twine sql = 
@@ -254,6 +288,9 @@ void LogFile2::writeOneMsg(LogMsg& msg)
 void LogFile2::begin_transaction()
 {
 	//printf("LogFile2::begin_transaction()\n");
+	if(m_readOnly){
+		throw AnException(0, FL, "begin_transaction is not allowed in readonly mode.");
+	}
 	
 	sqlite3_stmt* stmt;
 	try {
@@ -275,6 +312,9 @@ void LogFile2::begin_transaction()
 void LogFile2::commit_transaction()
 {
 	//printf("LogFile2::commit_transaction()\n");
+	if(m_readOnly){
+		throw AnException(0, FL, "commit_transaction is not allowed in readonly mode.");
+	}
 	
 	sqlite3_stmt* stmt;
 	try {
@@ -578,6 +618,9 @@ int LogFile2::getNewestMessageID()
 void LogFile2::createNewFile()
 {
 	//printf("LogFile2::createNewFile()\n");
+	if(m_readOnly){
+		throw AnException(0, FL, "createNewFile is not allowed in readonly mode.");
+	}
 
 	// Close off our log file
 	if(m_stmt != NULL){

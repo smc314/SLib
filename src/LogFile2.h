@@ -64,7 +64,13 @@ class DLLEXPORT LogFile2
 		  * Our standard constructor with defaults for the logFileName, and maxFileSize
 		  * parameters.
 		  */
-		LogFile2(const twine& logFileName = "IvoryHubDirector.log", size_t maxFileSize = 100 * 1024 * 1024);
+		LogFile2(const twine& logFileName = "SLib.log", size_t maxFileSize = 50 * 1024 * 1024);
+
+		/**
+		  * If you would like to (or need to) open the log file in read-only mode, use
+		  * this version of the constructor.
+		  */
+		LogFile2(bool readOnly, const twine& logFileName = "SLib.log");
 
 		/// Standard destructor
 		virtual ~LogFile2();
@@ -131,6 +137,9 @@ class DLLEXPORT LogFile2
 
 		/// Our mutex to ensure single-threadded access to our database
 		Mutex* m_mutex;
+
+		/// Are we in read-only mode?
+		bool m_readOnly;
 
 		/// Our SQLite database interface
 		sqlite3* m_db;
