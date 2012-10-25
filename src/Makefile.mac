@@ -119,3 +119,4 @@ install:
 	cp libSLib.so ../../x64/lib/
 	cp LogDump ../../x64/bin/
 	cp SLogDump ../../x64/bin/
+	cp SqlShell ../../x64/bin/
