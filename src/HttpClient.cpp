@@ -130,8 +130,14 @@ char* HttpClient::Get(const twine& url )
 xmlDocPtr HttpClient::GetXml(const twine& url)
 {
 	EnEx ee(FL, "HttpClient::GetXml(const twine& url)");
+	char nullTerm[10];
+	memset(nullTerm, 0, 10);
 
-	xmlDocPtr doc = xmlParseDoc( (xmlChar*) Get(url) );
+	Get(url);
+	// Ensure we null terminate the buffer before trying to parse as XML:
+	ResponseBuffer.append(nullTerm, 10);
+	
+	xmlDocPtr doc = xmlParseDoc( (xmlChar*) ResponseBuffer() );
 	return doc;
 }
 
@@ -175,8 +181,13 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)
 {
 	EnEx ee(FL, "HttpClient::Post(const twine& url, const char* msg, size_t msgLen)");
+	char nullTerm[10];
+	memset(nullTerm, 0, 10);
 
 	PostRaw( url, msg, msgLen );
+	// ensure we null terminate the buffer before trying to parse as XML:
+	ResponseBuffer.append(nullTerm, 10);
+
 	xmlDocPtr doc = xmlParseDoc( (xmlChar*) ResponseBuffer() );
 	return doc;
 }
@@ -243,6 +254,7 @@ xmlDocPtr HttpClient::PostPage(const twine& url, const char* msg, size_t msgLen)
 	curl_slist_free_all(slist);
 
 	dptr<char> contents = chunk.memory;
+	chunk.memory[ chunk.size ] = 0; // Remember to null terminate before tyring to parse as XML.
 	xmlDocPtr doc = xmlParseDoc( (xmlChar*) contents() );
 	return doc;
 }
