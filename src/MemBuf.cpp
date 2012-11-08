@@ -253,6 +253,56 @@ MemBuf& MemBuf::set(const char* c, size_t n)
 
 }
 	
+MemBuf& MemBuf::replace(size_t start, const MemBuf& rep, size_t count)
+{
+	EnEx ee("MemBuf::replace(size_t start, const MemBuf& rep, size_t count)");
+	bounds_check(start);
+	
+	if((start+count) >= m_data_size){
+		erase(start);
+		append(rep);
+	} else {	
+		size_t len = rep.size();
+		if(len >= count){
+			memcpy( (char*)m_data + start, rep(), count );
+		} else if (len < count) {
+			memcpy( (char*)m_data + start, rep(), len );
+		}
+	}
+
+	return *this;
+}	
+
+MemBuf& MemBuf::replace(size_t start, const twine& rep, size_t count)
+{
+	EnEx ee("MemBuf::replace(size_t start, const twine& rep, size_t count)");
+	bounds_check(start);
+	
+	if((start+count) >= m_data_size){
+		erase(start);
+		append(rep);
+	} else {	
+		size_t len = rep.size();
+		if(len >= count){
+			memcpy( (char*)m_data + start, rep(), count );
+		} else if (len < count) {
+			memcpy( (char*)m_data + start, rep(), len );
+		}
+	}
+
+	return *this;
+}	
+
+MemBuf& MemBuf::replace(size_t pos, const char n)
+{
+	EnEx ee("MemBuf::replace(size_t pos, const char n)");
+
+	bounds_check(pos);
+	((char*)m_data)[ pos ] = n;
+
+	return *this;
+}
+
 MemBuf& MemBuf::append(const char* c)
 {
 	EnEx ee("MemBuf::append(const char* c)");

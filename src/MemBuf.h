@@ -140,6 +140,22 @@ class DLLEXPORT MemBuf
 		  */
 		MemBuf& set(const char* c, size_t n);
 
+		/** Replaces the contents of this bufer starting at start, and going for
+		  * count characters, pulling the data from rep.  Note if rep.length() < count,
+		  * then only rep.length() characters will be overwritten.
+		  */
+		MemBuf& replace(size_t start, const MemBuf& rep, size_t count);
+
+		/** Replaces the contents of this bufer starting at start, and going for
+		  * count characters, pulling the data from rep.  Note if rep.length() < count,
+		  * then only rep.length() characters will be overwritten.
+		  */
+		MemBuf& replace(size_t start, const twine& rep, size_t count);
+
+		/** Replaces a single character in this buffer at position pos with the value n.
+		  */
+		MemBuf& replace(size_t pos, const char n);
+
 		/** Appends a const char* to the end of the MemBuf - this will use strlen() to determine size.
 		  */
 		MemBuf& append(const char* c);
