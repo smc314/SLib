@@ -662,6 +662,10 @@ void Date::Normalize(void)
 			break;
 		}
 	}
+	
+	// Ensure our TimeVal is also in sync.
+	m_TimeVal = mktime(m_TimeStruct);
+		
 }
 
 time_t Date::Epoch(void)
