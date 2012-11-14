@@ -442,6 +442,11 @@ void Date::Day(int d)
 	Normalize();
 }
 
+int Date::DayW(void) const
+{
+	return m_TimeStruct->tm_wday;
+}
+
 int Date::Hour(void) const
 {
 	return m_TimeStruct->tm_hour;

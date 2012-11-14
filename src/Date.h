@@ -367,6 +367,9 @@ class DLLEXPORT Date
 		virtual int Day(void) const;
 		virtual void Day(int);
 
+		/// Returns the 0-based day of week
+		virtual int DayW(void) const;
+
 		/**
 		  * Use this to query the hour value by number.
 		  * Hours start at 0 = Midnight , ... , 23.
