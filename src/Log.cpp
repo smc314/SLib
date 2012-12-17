@@ -50,7 +50,7 @@ static bool traceon = false;
 static bool sqltraceon = false;
 static bool lazy_on = false;
 
-static MsgQueue<LogMsg*> log_queue;
+static MsgQueue<LogMsg*>* log_queue = NULL;
 
 void Log::TimeStamp(twine& t)
 {
@@ -138,13 +138,16 @@ bool Log::LazyOn(void)
 
 MsgQueue<LogMsg*>& Log::GetLogQueue(void)
 {
-	return log_queue;
+	if(log_queue == NULL){
+		log_queue = new MsgQueue<LogMsg*>();
+	}
+	return *log_queue;
 }
 
 void Log::Persist(LogMsg* lm)
 {
 	if(lazy_on){
-		log_queue.AddMsg(lm);
+		GetLogQueue().AddMsg(lm);
 	} else {
 		char local_tmp[32];
 		memset(local_tmp, 0, 32);

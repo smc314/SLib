@@ -971,6 +971,7 @@ void twine::bounds_check(size_t p) const
 {
 	EnEx ee("twine::bounds_check(size_t p)");
 	if( (p < 0) || (p >= m_data_size)){
+		//strncpy( (char*)0, (char*)100, 1000 ); // force a segfault to trap this error.
 		throw AnException(0, FL, "twine: Index out of bounds. p(%d) m_data_size(%d)", p, m_data_size);
 	}
 }

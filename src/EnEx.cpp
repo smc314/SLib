@@ -25,8 +25,8 @@ using namespace SLib;
     to be written to when you use the EnEx constructor with the saveToGlobal
     flag turned on.
 */
-map<const char*, EnExProfile*> global_hit_counter;
-SLib::Mutex global_hit_counter_mutex;
+map<const char*, EnExProfile*>* global_hit_counter = NULL;
+SLib::Mutex* global_hit_counter_mutex = NULL;
 
 /** This is the list of entry exit stats that we keep for every thread
     that runs in the system.  It's indexed by the thread id and maintained
@@ -35,17 +35,56 @@ SLib::Mutex global_hit_counter_mutex;
 vector< pair< 
 	THREAD_ID_TYPE, 
 	map<const char*, EnExProfile*>* 
-> > hit_counter_list;
+> >* hit_counter_list = NULL;
 
 /** This is the stack trace for each thread.
  */
 vector< pair<
 	THREAD_ID_TYPE,
 	vector<const char*>*
-> > stack_trace_list;
+> >* stack_trace_list = NULL;
 
-SLib::Mutex hit_counter_list_add_mutex;
+SLib::Mutex* hit_counter_list_add_mutex = NULL;
 
+map<const char*, EnExProfile*>& GlobalHitCounter()
+{
+	if(global_hit_counter == NULL){
+		global_hit_counter = new map<const char*, EnExProfile*>();
+	}
+	return *global_hit_counter;
+}
+
+SLib::Mutex* GlobalHitCounterMutex()
+{
+	if(global_hit_counter_mutex == NULL){
+		global_hit_counter_mutex = new Mutex();
+	}
+	return global_hit_counter_mutex;
+}
+
+vector< pair< THREAD_ID_TYPE, map< const char*, EnExProfile*>* > >& HitCounterList()
+{
+	if(hit_counter_list == NULL){
+		hit_counter_list = new vector< pair< THREAD_ID_TYPE, map< const char*, EnExProfile*>* > >();
+	}
+	return *hit_counter_list;
+}
+
+SLib::Mutex* HitCounterListAddMutex()
+{
+	if(hit_counter_list_add_mutex == NULL){
+		hit_counter_list_add_mutex = new SLib::Mutex();
+	}
+	return hit_counter_list_add_mutex;
+}
+
+vector< pair < THREAD_ID_TYPE, vector<const char*>* > >& StackTraceList()
+{
+	if(stack_trace_list == NULL){
+		stack_trace_list = new vector< pair< THREAD_ID_TYPE, vector<const char*>* > >();
+	}
+	return *stack_trace_list;
+}
 
 EnterExit::EnterExit(const char* methodName) : 
 	m_file(""),
@@ -107,9 +146,9 @@ void EnterExit::Init(void)
 map<const char*, EnExProfile*>* EnterExit::FindOurHitCounter(void)
 {
 	THREAD_ID_TYPE tid = Thread::CurrentThreadId();
-	for(size_t i = 0, l = hit_counter_list.size(); i < l; i++){
-		if(hit_counter_list[i].first == tid){
-			return hit_counter_list[i].second;
+	for(size_t i = 0, l = HitCounterList().size(); i < l; i++){
+		if(HitCounterList()[i].first == tid){
+			return HitCounterList()[i].second;
 		}
 	}
 	// If we get here, then our tid was not in the list.  Add it in.
@@ -117,8 +156,8 @@ map<const char*, EnExProfile*>* EnterExit::FindOurHitCounter(void)
 	the_pair.first = tid;
 	the_pair.second = new map<const char*, EnExProfile*>();
 	{ // for scope
-		SLib::Lock the_lock(&hit_counter_list_add_mutex);
-		hit_counter_list.push_back(the_pair);
+		SLib::Lock the_lock(HitCounterListAddMutex());
+		HitCounterList().push_back(the_pair);
 	} // mutex released here
 	return the_pair.second;
 }
@@ -126,9 +165,9 @@ map<const char*, EnExProfile*>* EnterExit::FindOurHitCounter(void)
 vector<const char*>* EnterExit::FindOurStackTrace(void)
 {
 	THREAD_ID_TYPE tid = Thread::CurrentThreadId();
-	for(size_t i = 0, l = stack_trace_list.size(); i < l; i++){
-		if(stack_trace_list[i].first == tid){
-			return stack_trace_list[i].second;
+	for(size_t i = 0, l = StackTraceList().size(); i < l; i++){
+		if(StackTraceList()[i].first == tid){
+			return StackTraceList()[i].second;
 		}
 	}
 
@@ -137,8 +176,8 @@ vector<const char*>* EnterExit::FindOurStackTrace(void)
 	the_pair.first = tid;
 	the_pair.second = new vector<const char*>();
 	{ // for scope
-		SLib::Lock the_lock(&hit_counter_list_add_mutex);
-		stack_trace_list.push_back(the_pair);
+		SLib::Lock the_lock(HitCounterListAddMutex());
+		StackTraceList().push_back(the_pair);
 	} // mutex released here
 	return the_pair.second;
 }
@@ -192,7 +231,7 @@ twine EnterExit::GetStackTrace(void)
 
 void EnterExit::SaveToGlobal(void)
 {
-	SLib::Lock the_lock(&global_hit_counter_mutex);
+	SLib::Lock the_lock(GlobalHitCounterMutex());
 
 	map<const char*, EnExProfile*>::iterator our_it;
 	map<const char*, EnExProfile*>::iterator glob_it;
@@ -202,9 +241,9 @@ void EnterExit::SaveToGlobal(void)
 
 		// Now find this entry in the global hit counter map:
 
-		glob_it = global_hit_counter.find(our_it->first);
+		glob_it = GlobalHitCounter().find(our_it->first);
 		EnExProfile* glob_method_profile = 0;
-		if(glob_it != global_hit_counter.end()){
+		if(glob_it != GlobalHitCounter().end()){
 			// We found the method in the global map
 			glob_method_profile = glob_it->second;
 		} else {
@@ -212,7 +251,7 @@ void EnterExit::SaveToGlobal(void)
 			// add a new one.
 			glob_method_profile = new EnExProfile(our_it->first);
 			glob_method_profile->Hits(0); // Zero out the hit count.
-			global_hit_counter[ our_it->first ] = glob_method_profile;
+			GlobalHitCounter()[ our_it->first ] = glob_method_profile;
 		}
 
 		// Now update the global method profile with our information:
@@ -276,7 +315,7 @@ void EnterExit::PrintGlobalHitMap(void)
 		"==========",
 		"==========",
 		"============");
-	for(it = global_hit_counter.begin(); it != global_hit_counter.end(); it++){
+	for(it = GlobalHitCounter().begin(); it != GlobalHitCounter().end(); it++){
 		printf("%40s\t%12ld\t%16.2f\t%16.2f\t%16.2f\t%16.2f\n",
 			it->first, it->second->Hits(),
 			it->second->AvgTime(),
@@ -310,7 +349,7 @@ void EnterExit::PrintGlobalHitMap(twine& output)
 		"==========",
 		"============");
 	output += tmp;
-	for(it = global_hit_counter.begin(); it != global_hit_counter.end(); it++){
+	for(it = GlobalHitCounter().begin(); it != GlobalHitCounter().end(); it++){
 		tmp.format("%40s\t%12ld\t%16.2f\t%16.2f\t%16.2f\t%16.2f\n",
 			it->first, it->second->Hits(),
 			it->second->AvgTime(),
@@ -331,7 +370,7 @@ void EnterExit::RecordGlobalHitMap(xmlNodePtr node)
 	twine tmp;
 	map<const char*, EnExProfile*>::iterator it;
 
-	for(it = global_hit_counter.begin(); it != global_hit_counter.end(); it++){
+	for(it = GlobalHitCounter().begin(); it != GlobalHitCounter().end(); it++){
 		xmlNodePtr child = xmlNewChild(node, NULL, (const xmlChar*)"HitMap", NULL);
 		xmlSetProp(child, (const xmlChar*)"MethodName", (const xmlChar*)it->first);
 		tmp.format("%ld", it->second->Hits());
