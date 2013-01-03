@@ -38,6 +38,8 @@ LogFile2::LogFile2(const twine& logFileName, size_t maxFileSize)
 	m_stmt = NULL;
 	m_insert_stmt = NULL;
 	m_mutex = new Mutex();
+	m_cacheSize = 100;
+	m_cacheTime = 100;
 
 	try {
 		Setup();
@@ -59,6 +61,8 @@ LogFile2::LogFile2(bool readOnly, const twine& logFileName)
 	m_stmt = NULL;
 	m_insert_stmt = NULL;
 	m_mutex = new Mutex();
+	m_cacheSize = 100;
+	m_cacheTime = 100;
 
 	Setup(); // any exception trying to open the file is passed back in read-only mode.
 }
@@ -66,17 +70,23 @@ LogFile2::LogFile2(bool readOnly, const twine& logFileName)
 LogFile2::~LogFile2()
 {
 	//printf("LogFile2::~LogFile2()\n");
+	{ // used for mutex scope
+		Lock theLock(m_mutex);
 
-	// Close off our log file
-	if(m_stmt != NULL){
-		sqlite3_finalize( m_stmt );
-	}
-	if(m_insert_stmt != NULL){
-		sqlite3_finalize( m_insert_stmt );
-	}
-	if(m_db != NULL){
-		sqlite3_close(m_db);
-	}
+		flushInternal(); // anything left in the cache goes to the disk
+
+		// Close off our log file
+		if(m_stmt != NULL){
+			sqlite3_finalize( m_stmt );
+		}
+		if(m_insert_stmt != NULL){
+			sqlite3_finalize( m_insert_stmt );
+		}
+		if(m_db != NULL){
+			sqlite3_close(m_db);
+		}
+
+	} // mutex unlocked here
 
 	delete m_mutex;
 
@@ -87,6 +97,8 @@ void LogFile2::close()
 {
 	//printf("LogFile2::close()\n");
 	Lock theLock(m_mutex);
+
+	flushInternal(); // anything left in the cache goes to the disk
 
 	// Close off our log file
 	if(m_stmt != NULL){
@@ -183,6 +195,69 @@ int LogFile2::check_err(int rc)
 	throw AnException(0, FL, "Sqlite3 Error: %s", sqlite3_errmsg( m_db ) );
 }
 
+void LogFile2::flush()
+{
+	Lock theLock(m_mutex);
+	flushInternal();
+}
+
+void LogFile2::setCacheSize( size_t cacheSize )
+{
+	if(cacheSize >= 0 && cacheSize <= 10000){
+		m_cacheSize = cacheSize;
+	} 
+}
+
+void LogFile2::setCacheTime( size_t cacheTime )
+{
+	if(cacheTime >= 0 && cacheTime <= 1000){
+		m_cacheTime = cacheTime;
+	}
+}
+
+void LogFile2::flushInternal()
+{
+	if(m_cache.size() != 0 && m_db != NULL){
+		begin_transaction();
+		for(size_t i = 0; i < m_cache.size(); i++){
+			writeOneMsg( m_cache[i] );
+		}
+		commit_transaction();
+		m_cache.clear();
+		CheckSize();
+	}
+}
+
+void LogFile2::checkFlushCache()
+{
+	if(m_cache.size() >= m_cacheSize){ // Is the cache large enough to be written?
+		flushInternal();
+	} else {
+		if(m_cache.size() > 1) { // more than one message
+			// Check the time difference between the newest and oldest messages in the cache
+			LogMsg& lm1 = m_cache[ m_cache.size() - 1 ]; // most recent log message.
+			LogMsg& lm2 = m_cache[ 0 ];                  // oldest log message.
+#ifdef _WIN32
+			if(lm1.timestamp.time > lm2.timestamp.time){
+				// If the seconds are greater at all, then flush the cache.
+				flushInternal();
+			} else if(lm1.timestamp.millitm >= (lm2.timestamp.millitm + m_cacheTime)){
+				// seconds are the same, but milliseconds have elapsed more than m_cacheTime
+				flushInternal();
+			}
+#else
+			if(lm1.timestamp.tv_sec > lm2.timestamp.tv_sec){
+				// If the seconds are greater at all, then flush the cache.
+				flushInternal();
+			} else if(lm1.timestamp.tv_usec >= (lm2.timestamp.tv_usec + (m_cacheTime * 1000) )){
+				// seconds are the same, but milliseconds have elapsed more than m_cacheTime
+				flushInternal();
+			}
+#endif
+		}
+	}
+}
+
 void LogFile2::writeMsg(LogMsg& msg)
 {
 	//printf("LogFile2::writeMsg()\n");
@@ -191,12 +266,9 @@ void LogFile2::writeMsg(LogMsg& msg)
 	}
 	Lock theLock(m_mutex);
 
-	begin_transaction();
-
-	writeOneMsg( msg );
-
-	commit_transaction();
-	CheckSize();
+	LogMsg msgCopy( msg );
+	m_cache.push_back( msgCopy );
+	checkFlushCache();
 }
 
 void LogFile2::writeMsg(vector<LogMsg*>* messages)
@@ -207,14 +279,12 @@ void LogFile2::writeMsg(vector<LogMsg*>* messages)
 	}
 	Lock theLock(m_mutex);
 
-	begin_transaction();
-
 	for(size_t i = 0; i < messages->size(); i++){
-		writeOneMsg( *messages->at( i ) );
+		LogMsg msgCopy( *messages->at( i ) );
+		m_cache.push_back( msgCopy );
 	}
 
-	commit_transaction();
-	CheckSize();
+	checkFlushCache();
 }
 
 void LogFile2::writeOneMsg(LogMsg& msg)

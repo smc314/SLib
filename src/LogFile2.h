@@ -113,6 +113,28 @@ class DLLEXPORT LogFile2
 		 */
 		void close();
 
+		/** This log file interface will cache incomming log messages so that we can write more
+		  * efficiently to the disk in batches of log messages rather than one at a time.  This
+		  * can significantly increase disk write performance when there are a lot of log messages
+		  * flowing into the file.  By default the cache size is 10.  If you need to increase or
+		  * decrease this size, then you can use this setting to adjust it.
+		  */
+		void setCacheSize( size_t cacheSize );
+
+		/** When we are caching messages, we also check to see how long it has been since we last
+		  * accepted a message into the cache.  If the newest message in the cache is older than
+		  * the cache timeout, we'll write everything to the disk now - even if there is less than
+		  * cacheSize entries in the cache.  This ensures that messages don't linger in the cache
+		  * for too long. This value is set in milliseconds.
+		  */
+		void setCacheTime( size_t cacheTime );
+
+		/** This method allows you to force us to write anything in our cache out to the disk.
+		  * If you know that no messages are forthcomming for a while, this is a good thing to 
+		  * do.
+		  */
+		void flush();
+
 	protected:
 
 		/// This method initializes our log file and ensures everything is properly setup
@@ -132,6 +154,12 @@ class DLLEXPORT LogFile2
 
 		/// Checks the current size of the database, and calls createNewFile if necessary.
 		void CheckSize();
+
+		/// Flushes the internal cache.
+		void flushInternal();
+
+		/// Checks to see if the internal cache is ready to be written to disk - if so flushes the cache.
+		void checkFlushCache();
 
 	private:
 
@@ -155,6 +183,15 @@ class DLLEXPORT LogFile2
 
 		/// The max log file size
 		size_t m_maxFileSize;
+
+		/// The number of log messages we should cache before writing to disk
+		size_t m_cacheSize;
+
+		/// The number of milliseconds we should wait on cached records before writing to the disk
+		size_t m_cacheTime;
+
+		/// Our log message cache:
+		vector<LogMsg> m_cache;
 
 };
 

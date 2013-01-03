@@ -14,13 +14,13 @@ SOCKET_LIB=ws2_32.lib
 CDEBUG=/Od /Zi
 LDEBUG=-debug
 
-CFLAGS=-c $(CDEBUG) -Zp8 -EHsc -DWIN32 -D_MT -D_DLL -DLINT_ARGS -D_X86_=1 -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -D _USE_32BIT_TIME_T -I "$(3PL)\include" /analyze
+CFLAGS=-c $(CDEBUG) -Zp8 -EHsc -GS -DWIN32 -D_MT -D_DLL -DLINT_ARGS -D_X86_=1 -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D "_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES" -D CS_NO_LARGE_IDENTIFIERS -D _USE_32BIT_TIME_T -I "$(3PL)\include" /analyze
 
 SSLLIBS=$(3PL)\lib\libeay32.lib $(3PL)\lib\ssleay32.lib \
 	$(3PL)\lib\libxml2.lib $(3PL)\lib\libcurl_imp.lib \
 	$(3PL)\lib\zdll.lib
 
-LFLAGS=-machine:i386 -subsystem:console $(LDEBUG)
+LFLAGS=-machine:i386 -subsystem:console -SafeSEH -NXCompat -DynamicBase $(LDEBUG)
 LLIBS=$(SSLLIBS) $(SOCKET_LIB)
 
 .cpp.obj:
@@ -68,6 +68,9 @@ test_membuf: test_membuf.$(OHEXT)
 
 test_logfile: test_logfile.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_logfile.exe test_logfile.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_logfile2: test_logfile2.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_logfile2.exe test_logfile2.$(OHEXT) libSLib.lib $(LLIBS)
 
 test_date: test_date.$(OHEXT)
 	$(LINK) /OUT:test_date.exe test_date.$(OHEXT) libSLib.lib $(LFLAGS)

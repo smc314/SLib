@@ -13,13 +13,14 @@ RM=del /Q
 SOCKET_LIB=ws2_32.lib
 
 
-CFLAGS=-c -Zp8 -EHsc -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include"
+CFLAGS=-c -Zp8 -EHsc -GS -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D "_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include"
 
 SSLLIBS=$(3PL)\x64\lib\libeay32.lib $(3PL)\x64\lib\ssleay32.lib \
 	$(3PL)\x64\lib\libxml2.lib $(3PL)\x64\lib\libcurl_imp.lib \
 	$(3PL)\x64\lib\zdll.lib
 
-LFLAGS=-machine:x64 -subsystem:console
+# Note -SafeSEH not required/available on x64 targets
+LFLAGS=-machine:x64 -subsystem:console -NXCompat -DynamicBase
 LLIBS=$(SSLLIBS) $(SOCKET_LIB)
 
 .cpp.obj:
