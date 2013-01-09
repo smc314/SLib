@@ -32,6 +32,8 @@
 #endif
 
 #include "sptr.h"
+#include "twine.h"
+
 
 namespace SLib
 {
@@ -112,6 +114,9 @@ class DLLEXPORT Tools {
 
 		/// Generate a random number in a specific range
 		static int rand(int max, int min = 0);
+
+		/// Take a given memory pointer and print out the hex memory dump of a given size:
+		static twine hexDump(void* ptr, char* name, size_t prior, size_t length);
 
 }; 
 

@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include "Tools.h"
+#include "twine.h"
 
 using namespace SLib;
 
@@ -66,3 +67,31 @@ int Tools::rand(int max, int min)
 	return ret;
 }
 
+twine Tools::hexDump(void* ptr, char* name, size_t prior, size_t length)
+{
+	twine tmp;
+	twine ret;
+
+	if(ptr == NULL){
+		return ret; 
+	}
+
+	char* bptr = (char*)ptr; // so that indexing works
+	char* aptr = bptr - prior;
+	char* cptr = bptr + length;
+	
+	tmp.format("hexDump: %s - [%p - _%p_ - %p)\n", name, aptr, bptr, cptr );
+	ret += tmp;
+	ret += "        +00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n";
+	while(aptr < cptr ){
+		tmp.format("   %p ", aptr);
+		ret += tmp;
+		for(int i = 0; i < 16 && aptr < cptr; i++, aptr++ ){
+			tmp.format("%.2X ", (unsigned)(unsigned char)aptr[ 0 ] );
+			ret += tmp;
+		}
+		ret += "\n";
+	}
+
+	return ret;
+}
