@@ -81,6 +81,12 @@ test_compile: test_compile.$(OHEXT)
 test_xml: test_xml.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_xml.exe test_xml.$(OHEXT) libSLib.lib $(LLIBS)
 
+test_socket: test_socket.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_socket.exe test_socket.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_hexdump: test_hexdump.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_hexdump.exe test_hexdump.$(OHEXT) libSLib.lib $(LLIBS)
+
 incs:
 	$(CP) *.h ..\include
 	$(CP) Pool.cpp ..\include

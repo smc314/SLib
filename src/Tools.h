@@ -116,7 +116,7 @@ class DLLEXPORT Tools {
 		static int rand(int max, int min = 0);
 
 		/// Take a given memory pointer and print out the hex memory dump of a given size:
-		static twine hexDump(void* ptr, char* name, size_t prior, size_t length);
+		static twine hexDump(void* ptr, char* name, size_t prior, size_t length, bool asciiPrint = false, bool ebcdicPrint = false);
 
 }; 
 

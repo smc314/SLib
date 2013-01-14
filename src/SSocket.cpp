@@ -275,7 +275,7 @@ SSocket::SSocket(int port)
 	/* Then do the regular initialization.            */
 	/* ********************************************** */
 
-	the_socket = socket(AF_INET, SOCK_STREAM, 0);
+	the_socket = socket(AF_INET, SOCK_STREAM, 6);
 	if (the_socket < 0) {
 		throw AnException(0, FL, "Server Socket Creation Failed!");
 	}

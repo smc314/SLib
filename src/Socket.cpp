@@ -50,21 +50,11 @@ void fini_winsock();
 
 void init_winsock()
 {
-	WORD wVerReq;
 	WSADATA wsaData;
 	int err;
 
-	wVerReq = MAKEWORD(2,0);
-	err = WSAStartup(wVerReq, &wsaData);
+	err = WSAStartup(MAKEWORD(2,2), &wsaData);
 	if(err != 0){
-		printf("No usable WinSock DLL found\n");
-		return;
-	}
-
-	if(LOBYTE(wsaData.wVersion) != 2 ||
-		HIBYTE(wsaData.wVersion) != 0)
-	{
-		WSACleanup();
 		printf("No usable WinSock DLL found\n");
 		return;
 	}
@@ -108,31 +98,35 @@ Socket::Socket(int port)
 	}
 #endif
 
-	the_socket = socket(AF_INET, SOCK_STREAM, 0);
+	the_socket = socket(AF_INET, SOCK_STREAM, 6);
 	if (the_socket < 0) {
 		throw AnException(0, FL, "Server Socket Creation Failed!");
+	}
+
+	BOOL reuseaddr = true;
+	if( 0 != setsockopt( the_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseaddr, sizeof(reuseaddr) ) ){
+		throw AnException(0, FL, "Error setting SO_REUSEADDR on socket.");
 	}
 
 	SOCKADDR_IN this_addr;
 
 #ifdef _WIN32
+	memset(&this_addr, 0, sizeof(SOCKADDR) );
 	this_addr.sin_family = AF_INET;
 	this_addr.sin_port = htons(port);
-	this_addr.sin_addr.s_addr = INADDR_ANY;
+	this_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	if (bind(the_socket, (const struct sockaddr *)&this_addr,
-	         sizeof(SOCKADDR)) == SOCKET_ERROR ) 
+	if (bind(the_socket, (const struct sockaddr *)&this_addr, sizeof(SOCKADDR)) == SOCKET_ERROR ) 
 	{
-		err = errno;
+		err = WSAGetLastError();
 
 #else
 	this_addr = (SOCKADDR_IN)malloc(sizeof(struct sockaddr_in));
 	this_addr->sin_family = AF_INET;
 	this_addr->sin_port = htons(port);
-	this_addr->sin_addr.s_addr = INADDR_ANY;
+	this_addr->sin_addr.s_addr = htonl(INADDR_ANY);
 
-	if (bind(the_socket, (const struct sockaddr *)this_addr,
-	         sizeof(sockaddr)) < 0) 
+	if (bind(the_socket, (const struct sockaddr *)this_addr, sizeof(sockaddr)) < 0) 
 	{
 		err = errno;
 		free(this_addr);
@@ -145,7 +139,32 @@ Socket::Socket(int port)
 				throw AnException(EBADF, FL,
 				                  "Error binding to socket on port: %d Error = EBADF", port);
 				break;
-#ifndef _WIN32
+#ifdef _WIN32
+			case WSANOTINITIALISED:
+				throw AnException(WSANOTINITIALISED, FL,
+				                  "Error binding to socket on port: %d Error = WSANOTINITIALISED", port);
+				break;
+			case WSAENETDOWN:
+				throw AnException(WSAENETDOWN, FL,
+				                  "Error binding to socket on port: %d Error = WSAENETDOWN", port);
+				break;
+			case WSAEACCES:
+				throw AnException(WSAEACCES, FL,
+				                  "Error binding to socket on port: %d Error = WSAEACCES", port);
+				break;
+			case WSAEADDRINUSE:
+				throw AnException(WSAEADDRINUSE, FL,
+				                  "Error binding to socket on port: %d Error = WSAEADDRINUSE", port);
+				break;
+			case WSAEADDRNOTAVAIL:
+				throw AnException(WSAEADDRNOTAVAIL, FL,
+				                  "Error binding to socket on port: %d Error = WSAEADDRNOTAVAIL", port);
+				break;
+			case WSAEFAULT:
+				throw AnException(WSAEFAULT, FL,
+				                  "Error binding to socket on port: %d Error = WSAEFAULT", port);
+				break;
+#else
 			case ENOTSOCK:
 				throw AnException(ENOTSOCK, FL,
 				                  "Error binding to socket on port: %d Error = ENOTSOCK", port);
@@ -214,8 +233,8 @@ Socket::Socket(int port, bool useUDP, char *localipaddr)
 	/* Use UDP of useUDP paramerter is TRUE, else     */
 	/* use TCP.		     							  */
 	/* ********************************************** */
-	if(!useUDP) the_socket = socket(AF_INET, SOCK_STREAM, 0);
-	else the_socket = socket(AF_INET, SOCK_DGRAM, 0);
+	if(!useUDP) the_socket = socket(AF_INET, SOCK_STREAM, 6);
+	else the_socket = socket(AF_INET, SOCK_DGRAM, 17);
 	if (the_socket < 0) {
 		throw AnException(0, FL, "Server Socket Creation Failed!");
 	}
