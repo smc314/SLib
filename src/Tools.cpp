@@ -23,6 +23,7 @@
 #	include <sys/time.h>
 #	include <sys/types.h>
 #	include <unistd.h>
+#	include <ctype.h>
 #endif
 
 #include <stdlib.h>
