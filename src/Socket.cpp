@@ -29,9 +29,6 @@
 #include <arpa/inet.h>
 
 #endif  // ! _WIN32
-#ifndef BOOL
-#define BOOL bool
-#endif
 
 #ifdef AIX
 #include <strings.h> // For bzero
@@ -70,6 +67,9 @@ void fini_winsock()
 	
 #endif // _WIN32
 	
+#ifndef BOOL
+#define BOOL bool
+#endif
 
 
 
