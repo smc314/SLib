@@ -115,7 +115,7 @@ twine Tools::hexDump(void* ptr, char* name, size_t prior, size_t length, bool as
 			tmp.format("%.2X ", (unsigned)(unsigned char)aptr[ 0 ] );
 			ret += tmp;
 			if(asciiPrint){
-				if(isalnum(aptr[0]) || ispunct(aptr[0]) ){
+				if(isalnum(aptr[0]) || ispunct(aptr[0]) || isspace(aptr[0]) ){
 					tmpa += aptr[0];
 				} else {
 					tmpa += '.';
@@ -123,7 +123,7 @@ twine Tools::hexDump(void* ptr, char* name, size_t prior, size_t length, bool as
 			}
 			if(ebcdicPrint){
 				char asciiChar = (char)e2a_hex[ (int)(aptr[0]) & 0xFF ];
-				if(isalnum(asciiChar) || ispunct(asciiChar) ){
+				if(isalnum(asciiChar) || ispunct(asciiChar) || isspace(asciiChar) ){
 					tmpe += asciiChar;
 				} else {
 					tmpe += '.';
