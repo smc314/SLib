@@ -186,7 +186,7 @@ class DLLEXPORT XmlHelpers {
 		static twine getBase64( xmlNodePtr node ){
 			EnEx ee(FL, "XmlHelpers::getBase64(xmlNodePtr node)");
 			if(node == NULL){
-				throw AnException(0, FL, "NULL node passed to XmlHelpers::getBase64()");
+				return "";
 			}
 			// First pick up the data in a CDATA section
 			twine b64 = XmlHelpers::getCDATASection( node );
