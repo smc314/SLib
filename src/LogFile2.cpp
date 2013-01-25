@@ -37,13 +37,16 @@ LogFile2::LogFile2(const twine& logFileName, size_t maxFileSize)
 	m_db = NULL;
 	m_stmt = NULL;
 	m_insert_stmt = NULL;
+	m_stmt_begintran = NULL;
+	m_stmt_committran = NULL;
+	m_stmt_rollbacktran = NULL;
 	m_mutex = new Mutex();
 	m_cacheSize = 100;
 	m_cacheTime = 100;
 
 	try {
 		Setup();
-	} catch (AnException& e){
+	} catch (AnException&){
 		//printf("Caught exception calling Setup\n");
 		//printf("createNewFile\n");
 		createNewFile(); // try to get it out of the way so we can create it from scratch.
@@ -60,6 +63,9 @@ LogFile2::LogFile2(bool readOnly, const twine& logFileName)
 	m_db = NULL;
 	m_stmt = NULL;
 	m_insert_stmt = NULL;
+	m_stmt_begintran = NULL;
+	m_stmt_committran = NULL;
+	m_stmt_rollbacktran = NULL;
 	m_mutex = new Mutex();
 	m_cacheSize = 100;
 	m_cacheTime = 100;
@@ -81,6 +87,15 @@ LogFile2::~LogFile2()
 		}
 		if(m_insert_stmt != NULL){
 			sqlite3_finalize( m_insert_stmt );
+		}
+		if(m_stmt_begintran != NULL){
+			sqlite3_finalize( m_stmt_begintran );
+		}
+		if(m_stmt_committran != NULL){
+			sqlite3_finalize( m_stmt_committran );
+		}
+		if(m_stmt_rollbacktran != NULL){
+			sqlite3_finalize( m_stmt_rollbacktran );
 		}
 		if(m_db != NULL){
 			sqlite3_close(m_db);
@@ -109,6 +124,18 @@ void LogFile2::close()
 		sqlite3_finalize( m_insert_stmt );
 		m_insert_stmt = NULL;
 	}
+	if(m_stmt_begintran != NULL){
+		sqlite3_finalize( m_stmt_begintran );
+		m_stmt_begintran = NULL;
+	}
+	if(m_stmt_committran != NULL){
+		sqlite3_finalize( m_stmt_committran );
+		m_stmt_committran = NULL;
+	}
+	if(m_stmt_rollbacktran != NULL){
+		sqlite3_finalize( m_stmt_rollbacktran );
+		m_stmt_rollbacktran = NULL;
+	}
 	if(m_db != NULL){
 		sqlite3_close(m_db);
 		m_db = NULL;
@@ -126,22 +153,22 @@ void LogFile2::Setup(void)
 
 	// Open/Create the database:
 	if(m_readOnly){
-		check_err(
+		check_err( "sqlite3_open_v2 - readonly",
 			sqlite3_open_v2( m_logFileName(), &m_db, SQLITE_OPEN_READONLY, NULL)
 		);
 	} else {
-		check_err(
+		check_err( "sqlite3_open - readwrite",
 			sqlite3_open( m_logFileName(), &m_db)
 		);
 	}
 	
 	// Check for our mainframe log table:
 	twine stmt = "select name from sqlite_master where type='table' and name='logtable'";
-	check_err(
+	check_err( "prepare-check for our log table",
 		sqlite3_prepare( m_db, stmt(), (int)stmt.length(), &m_stmt, NULL)
 	);
 
-	rc = check_err( sqlite3_step( m_stmt ));
+	rc = check_err( "execute-check for our log table", sqlite3_step( m_stmt ));
 	if(rc == 0){
 		if(m_readOnly){
 			throw AnException(0, FL, "logtable does not exist - not creating in readonly mode.");
@@ -165,10 +192,10 @@ void LogFile2::Setup(void)
 			"msg varchar(10) "
 			");"
 		);
-		check_err(
+		check_err( "prepare - create log table",
 			sqlite3_prepare( m_db, stmt(), (int)stmt.length(), &m_stmt, NULL)
 		);
-		check_err( sqlite3_step( m_stmt ));
+		check_err( "execute - create log table", sqlite3_step( m_stmt ));
 
 	} else {
 		// table exists, find out stuff about it
@@ -177,7 +204,7 @@ void LogFile2::Setup(void)
 	}
 }
 
-int LogFile2::check_err(int rc)
+int LogFile2::check_err(const twine& doingWhat, int rc)
 {
 	//printf("LogFile2::check_err(int rc)\n");
 
@@ -188,11 +215,11 @@ int LogFile2::check_err(int rc)
 	} else if(rc == SQLITE_DONE){
 		return 0; // everything is fine - no more data
 	} else if(rc == SQLITE_MISUSE){
-		throw AnException(0, FL, "Programming problem using the sqlite3 interface.");
+		throw AnException(0, FL, "Programming problem using the sqlite3 interface doing: %s", doingWhat());
 	}
 
 	// Otherwise, look up the error message and convert to an exception:
-	throw AnException(0, FL, "Sqlite3 Error: %s", sqlite3_errmsg( m_db ) );
+	throw AnException(0, FL, "Sqlite3 Error doing: %s: %s", doingWhat(), sqlite3_errmsg( m_db ) );
 }
 
 void LogFile2::flush()
@@ -218,11 +245,52 @@ void LogFile2::setCacheTime( size_t cacheTime )
 void LogFile2::flushInternal()
 {
 	if(m_cache.size() != 0 && m_db != NULL){
-		begin_transaction();
-		for(size_t i = 0; i < m_cache.size(); i++){
-			writeOneMsg( m_cache[i] );
+		try {
+			begin_transaction();
+		} catch(AnException&){
+			// If we hit an error beginning the transaction - there is probably something else
+			// outstanding that was not committed properly.  Roll it back, and start the new one.
+			rollback_transaction();
+			begin_transaction();
 		}
-		commit_transaction();
+		try {
+			for(size_t i = 0; i < m_cache.size(); i++){
+				writeOneMsg( m_cache[i] );
+			}
+			bool commitSuccess = false;
+			int commitTries = 0;
+			while(!commitSuccess){
+				try {
+					commit_transaction();
+					commitSuccess = true;
+					break;
+				} catch (AnException& e){
+					twine emsg = e.Msg();
+					if(emsg.find("database is locked") != TWINE_NOT_FOUND){
+						// This is a database locked error - this can happen occasionally if
+						// the SLogDump program is reading our logs at the same time we are
+						// writing to them.  A simple retry is usually sufficient to handle
+						// this.
+						commitSuccess = false;
+						commitTries ++;
+						if(commitTries > 10){
+							// 10 tries should be enough - if not, something else is likely going
+							// on.  throw the exception back up.
+							printf("Commit failure - 10 tries exceeded.\n");
+							throw e;
+						}
+					} else {
+						// This is a different error - rethrow the exction to the main handler.
+						throw e;
+					}
+				}
+			}
+		} catch (AnException& e){
+			// If we hit an error during the insert, we have little choice but to say something
+			// about it with printf and then rollback the transaction.
+			printf("Error writing (%d) messages to database: %s\n", (int)m_cache.size(), e.Msg() );
+			rollback_transaction();
+		}
 		m_cache.clear();
 		CheckSize();
 	}
@@ -301,55 +369,55 @@ void LogFile2::writeOneMsg(LogMsg& msg)
 			" values ( ?, ?, ?, ?, ?, ?, "
 			" ?, ?, ?, ? ) "
 		;
-		check_err(
+		check_err( "prepare insert",
 			sqlite3_prepare( m_db, sql(), (int)sql.length(), &m_insert_stmt, NULL)
 		);
 	} else {
 		sqlite3_reset(m_insert_stmt);
 	}
 
-	check_err( 
+	check_err( "bind parm 1",
 		sqlite3_bind_text(m_insert_stmt, 1, msg.file(), (int)msg.file.length(), SQLITE_STATIC)
 	);
-	check_err( 
+	check_err( "bind parm 2",
 		sqlite3_bind_int(m_insert_stmt, 2, msg.line )
 	);
-	check_err( 
+	check_err( "bind parm 3",
 		sqlite3_bind_int(m_insert_stmt, 3, (int)msg.tid)
 	);
 #ifdef _WIN32
-	check_err( 
+	check_err( "bind parm 4",
 		sqlite3_bind_int(m_insert_stmt, 4, (int)msg.timestamp.time)
 	);
-	check_err( 
+	check_err( "bind parm 5",
 		sqlite3_bind_int(m_insert_stmt, 5, (int)msg.timestamp.millitm)
 	);
 #else
-	check_err( 
+	check_err( "bind parm 4",
 		sqlite3_bind_int(m_insert_stmt, 4, (int)msg.timestamp.tv_sec)
 	);
-	check_err( 
+	check_err( "bind parm 5",
 		sqlite3_bind_int(m_insert_stmt, 5, (int)msg.timestamp.tv_usec)
 	);
 #endif
-	check_err( 
+	check_err( "bind parm 6",
 		sqlite3_bind_int(m_insert_stmt, 6, msg.channel )
 	);
-	check_err( 
+	check_err( "bind parm 7",
 		sqlite3_bind_text(m_insert_stmt, 7, msg.appName(), (int)msg.appName.length(), SQLITE_STATIC)
 	);
-	check_err( 
+	check_err( "bind parm 8",
 		sqlite3_bind_text(m_insert_stmt, 8, msg.machineName(), (int)msg.machineName.length(), SQLITE_STATIC)
 	);
-	check_err( 
+	check_err( "bind parm 9",
 		sqlite3_bind_text(m_insert_stmt, 9, msg.appSession(), (int)msg.appSession.length(), SQLITE_STATIC)
 	);
-	check_err( 
+	check_err( "bind parm 10",
 		sqlite3_bind_text(m_insert_stmt, 10, msg.msg(), (int)msg.msg.length(), SQLITE_STATIC)
 	);
 
 	// Run the insert.
-	check_err( sqlite3_step( m_insert_stmt ));
+	check_err( "exec insert", sqlite3_step( m_insert_stmt ));
 
 	// Update the Message to indicate what the new ID is:
 	msg.id = (int)sqlite3_last_insert_rowid( m_db );
@@ -362,21 +430,16 @@ void LogFile2::begin_transaction()
 		throw AnException(0, FL, "begin_transaction is not allowed in readonly mode.");
 	}
 	
-	sqlite3_stmt* stmt;
-	try {
+	if(m_stmt_begintran == NULL){
 		twine sql = "begin transaction;";
-		check_err(
-			sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL)
+		check_err( "prep-begin tran", 
+			sqlite3_prepare( m_db, sql(), (int)sql.length(), &m_stmt_begintran, NULL)
 		);
-		check_err( sqlite3_step( stmt ));
-		sqlite3_finalize(stmt);
-	} catch (AnException& e){
-		if(stmt != NULL){
-			sqlite3_finalize( stmt );
-			stmt = NULL;
-		}
-		throw e;
+	} else {
+		sqlite3_reset(m_stmt_begintran);
 	}
+
+	check_err( "exec-begin trans", sqlite3_step( m_stmt_begintran ));
 }
 
 void LogFile2::commit_transaction()
@@ -385,22 +448,36 @@ void LogFile2::commit_transaction()
 	if(m_readOnly){
 		throw AnException(0, FL, "commit_transaction is not allowed in readonly mode.");
 	}
-	
-	sqlite3_stmt* stmt;
-	try {
+
+	if(m_stmt_committran == NULL){
 		twine sql = "commit transaction;";
-		check_err(
-			sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL)
+		check_err( "prep-commit tran",
+			sqlite3_prepare( m_db, sql(), (int)sql.length(), &m_stmt_committran, NULL)
 		);
-		check_err( sqlite3_step( stmt ));
-		sqlite3_finalize(stmt);
-	} catch (AnException& e){
-		if(stmt != NULL){
-			sqlite3_finalize( stmt );
-			stmt = NULL;
-		}
-		throw e;
+	} else {
+		sqlite3_reset(m_stmt_committran);
 	}
+
+	check_err( "exec-commit tran", sqlite3_step( m_stmt_committran ));
+}
+
+void LogFile2::rollback_transaction()
+{
+	//printf("LogFile2::rollback_transaction()\n");
+	if(m_readOnly){
+		throw AnException(0, FL, "rollback_transaction is not allowed in readonly mode.");
+	}
+
+	if(m_stmt_rollbacktran == NULL){
+		twine sql = "rollback transaction;";
+		check_err( "prep-rollback tran",
+			sqlite3_prepare( m_db, sql(), (int)sql.length(), &m_stmt_rollbacktran, NULL)
+		);
+	} else {
+		sqlite3_reset(m_stmt_rollbacktran);
+	}
+
+	check_err( "exec-rollback tran", sqlite3_step( m_stmt_rollbacktran ));
 }
 
 void LogFile2::CheckSize()
@@ -411,14 +488,14 @@ void LogFile2::CheckSize()
 	sqlite3_stmt* stmt;
 	try {
 		twine sql = "pragma page_size;";
-		check_err( sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL));
-		check_err( sqlite3_step( stmt ));
+		check_err( sql, sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL));
+		check_err( sql, sqlite3_step( stmt ));
 		page_size = sqlite3_column_int( stmt, 0 );
 		sqlite3_finalize(stmt);
 
 		sql = "pragma page_count;";
-		check_err( sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL));
-		check_err( sqlite3_step( stmt ));
+		check_err( sql, sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL));
+		check_err( sql, sqlite3_step( stmt ));
 		page_count = sqlite3_column_int( stmt, 0 );
 		sqlite3_finalize(stmt);
 
@@ -445,10 +522,10 @@ int LogFile2::messageCount()
 	sqlite3_stmt* stmt;
 	try {
 		twine sql = "select count(1) from logtable;";
-		check_err(
+		check_err( sql,
 			sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL)
 		);
-		check_err( sqlite3_step( stmt ));
+		check_err( sql, sqlite3_step( stmt ));
 		int rc = sqlite3_column_int( stmt, 0 );
 		sqlite3_finalize(stmt);
 		return rc;
@@ -469,10 +546,10 @@ int LogFile2::messageCount(const twine& whereClause)
 	sqlite3_stmt* stmt;
 	try {
 		twine sql = "select count(1) from logtable " + whereClause + ";";
-		check_err(
+		check_err( sql,
 			sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL)
 		);
-		check_err( sqlite3_step( stmt ));
+		check_err( sql, sqlite3_step( stmt ));
 		int rc = sqlite3_column_int( stmt, 0 );
 		sqlite3_finalize(stmt);
 		return rc;
@@ -497,10 +574,10 @@ LogMsg* LogFile2::getMessage(int id)
 			"       appName, machineName, appSession, msg "
 			"from logtable "
 			"where id = %d;", id);
-		check_err(
+		check_err( sql,
 			sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL)
 		);
-		int rc = check_err( sqlite3_step( stmt ));
+		int rc = check_err( sql, sqlite3_step( stmt ));
 		if(rc == 0){
 			// Didn't find the log message:
 			sqlite3_finalize( stmt );
@@ -568,10 +645,10 @@ vector<LogMsg*>* LogFile2::getMessages(const twine& whereClause, int limit, int 
 			twine limitClause; limitClause.format(" limit %d offset %d ", limit, offset);
 			sql.append( limitClause );
 		}
-		check_err(
+		check_err( "getMessages-prep",
 			sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL)
 		);
-		int rc = check_err( sqlite3_step( stmt ));
+		int rc = check_err( "getMessages-exec", sqlite3_step( stmt ));
 		if(rc == 0){
 			// Didn't find the log message:
 			sqlite3_finalize( stmt );
@@ -613,7 +690,7 @@ vector<LogMsg*>* LogFile2::getMessages(const twine& whereClause, int limit, int 
 				ret->push_back( msg.release() );
 
 				// Fetch the next row:
-				rc = check_err( sqlite3_step ( stmt ) );
+				rc = check_err( "getMessages-next", sqlite3_step ( stmt ) );
 			}
 
 			sqlite3_finalize( stmt );
@@ -643,10 +720,10 @@ int LogFile2::getOldestMessageID()
 	try {
 
 		twine sql = "select min(id) from logtable;";
-		check_err(
+		check_err(sql,
 			sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL)
 		);
-		check_err( sqlite3_step( stmt ));
+		check_err( sql, sqlite3_step( stmt ));
 		int rc = sqlite3_column_int( stmt, 0 );
 		sqlite3_finalize( stmt );
 		return rc;
@@ -668,10 +745,10 @@ int LogFile2::getNewestMessageID()
 	try {
 
 		twine sql = "select max(id) from logtable;";
-		check_err(
+		check_err(sql,
 			sqlite3_prepare( m_db, sql(), (int)sql.length(), &stmt, NULL)
 		);
-		check_err( sqlite3_step( stmt ));
+		check_err( sql, sqlite3_step( stmt ));
 		int rc = sqlite3_column_int( stmt, 0 );
 		sqlite3_finalize( stmt );
 		return rc;
@@ -700,6 +777,18 @@ void LogFile2::createNewFile()
 	if(m_insert_stmt != NULL){
 		sqlite3_finalize( m_insert_stmt );
 		m_insert_stmt = NULL;
+	}
+	if(m_stmt_begintran != NULL){
+		sqlite3_finalize( m_stmt_begintran );
+		m_stmt_begintran = NULL;
+	}
+	if(m_stmt_committran != NULL){
+		sqlite3_finalize( m_stmt_committran );
+		m_stmt_committran = NULL;
+	}
+	if(m_stmt_rollbacktran != NULL){
+		sqlite3_finalize( m_stmt_rollbacktran );
+		m_stmt_rollbacktran = NULL;
 	}
 	if(m_db != NULL){
 		sqlite3_close(m_db);

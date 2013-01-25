@@ -141,13 +141,16 @@ class DLLEXPORT LogFile2
 		void Setup();
 
 		/// Our common error checking routine for the SQLite calls - converts errors into exceptions
-		int check_err(int rc);
+		int check_err(const twine& doingWhat, int rc);
 
 		/// Begins a transaction
 		void begin_transaction();
 
 		/// Commits an outstanding transaction
 		void commit_transaction();
+
+		/// Rollsback an outstanding transaction
+		void rollback_transaction();
 
 		/// Does the work of writing a single message to the logs
 		void writeOneMsg(LogMsg& msg);
@@ -177,6 +180,15 @@ class DLLEXPORT LogFile2
 
 		/// Our SQLite statement handle for inserting messages
 		sqlite3_stmt* m_insert_stmt;
+
+		/// Our SQLite statement handle for starting a transaction
+		sqlite3_stmt* m_stmt_begintran;
+
+		/// Our SQLite statement handle for committing a transaction
+		sqlite3_stmt* m_stmt_committran;
+
+		/// Our SQLite statement handle for rolling back a transaction
+		sqlite3_stmt* m_stmt_rollbacktran;
 
 		/// The Log file name
 		twine m_logFileName;
