@@ -820,6 +820,19 @@ twine& twine::append(const char* c)
 	return *this;
 }
 
+twine& twine::append(const char* c, size_t count)
+{
+	EnEx ee("twine::append(const char* c, size_t count)");
+	if(c == NULL){
+		return *this; // nothing to append
+	}
+	reserve(m_data_size + count);
+	memcpy(m_data + m_data_size, c, count);
+	m_data_size += count;
+	m_data[m_data_size] = '\0';
+	return *this;
+}
+
 twine& twine::insert(size_t p, const char* c)
 {
 	EnEx ee("twine::insert(size_t p, const char* c)");

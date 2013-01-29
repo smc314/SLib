@@ -387,6 +387,10 @@ class DLLEXPORT twine
 		/** Appends a const char* to the end of the twine
 		  */
 		twine& append(const char* c);
+
+		/** Appends the first n chars to the end of the twine
+		  */
+		twine& append(const char* c, size_t count);
 			
 		/** Appends a const twine& to the end of the twine
 		  */
