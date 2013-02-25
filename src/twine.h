@@ -46,6 +46,8 @@ using namespace std;
 #include "Base64.h"
 
 const size_t TWINE_NOT_FOUND = ~size_t(0);
+// space, tab, carriage return, newline
+#define TWINE_WS " \t\r\n" 
 
 namespace SLib {
 
@@ -478,6 +480,13 @@ class DLLEXPORT twine
 		* on the given split string.
 		*/
 		vector < twine > split(twine spliton);
+
+		/** A more sophisticated version of split, which allows you to pass in
+		  * a string containing a list of token separators that we will use to parse
+		  * up the string into a list of tokens.  You can use the constant TWINE_WS
+		  * (twine white-space) to get a default list of whitespace separators.
+		  */
+		vector < twine > tokenize(const twine& tokensep) const;
 
 		/**
 		  * Handles converting the contents of our twine into a base64 encoded

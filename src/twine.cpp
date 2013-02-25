@@ -29,7 +29,7 @@
 #include "AutoXMLChar.h"
 #include "memptr.h"
 
-const size_t MAX_INPUT_SIZE = 10240000;
+const size_t MAX_INPUT_SIZE = 1024000000;
 
 using namespace SLib;
 
@@ -1053,6 +1053,46 @@ vector < twine > twine::split(twine spliton)
 	}
 	return v;
 }
+
+vector < twine > twine::tokenize(const twine& tokensep) const
+{
+	EnEx ee("twine::tokenize(const twine& tokensep)");
+	vector < twine > v;
+	size_t idx1, idx2;
+
+	idx1 = 0;
+	idx2 = 0;
+
+	do {
+		// Find the first non-token-separator to start the first token:
+		while( idx1 < m_data_size && tokensep.find( m_data[idx1] ) != TWINE_NOT_FOUND ){
+			idx1++;
+		}
+		if(idx1 < m_data_size){
+			// Found the beginning of a token
+
+			// Now walk until we find the end of the token
+			idx2 = idx1 + 1;
+			while( idx2 < m_data_size && tokensep.find( m_data[idx2] ) == TWINE_NOT_FOUND ){
+				idx2++;
+			}
+
+			if(idx2 < m_data_size){
+				// pull out the sub-string
+				v.push_back( substr( idx1, idx2-idx1 ) );
+			} else {
+				// The entire rest of the string is the last token:
+				v.push_back( substr( idx1 ) );
+				break;
+			}
+
+			idx1 = idx2 + 1; // advance past the end of this token to search for the next
+		}
+	}  while( idx1 < m_data_size );
+
+	return v;
+}
+
 
 twine& twine::getAttribute(xmlNodePtr node, const char* attrName)
 {

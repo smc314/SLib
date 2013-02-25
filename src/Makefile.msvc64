@@ -47,9 +47,11 @@ all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) SLogDump.$(OHEXT) SqlShell.$(OHEXT)
 	$(CP) libSLib.dll ..\lib
 	$(CP) libSLib.lib ..\lib
 
-test_twine: test_string.$(OHEXT) test_twine.$(OHEXT) $(DOTOH)
+test_twine: test_split.$(OHEXT) test_tokenize.$(OHEXT) test_string.$(OHEXT) test_twine.$(OHEXT) $(DOTOH)
 	$(LINK) $(LFLAGS) /OUT:test_twine.exe test_twine.$(OHEXT) libSLib.lib $(LLIBS)
 	$(LINK) $(LFLAGS) /OUT:test_string.exe test_string.$(OHEXT) libSLib.lib $(LLIBS)
+	$(LINK) $(LFLAGS) /OUT:test_split.exe test_split.$(OHEXT) libSLib.lib $(LLIBS)
+	$(LINK) $(LFLAGS) /OUT:test_tokenize.exe test_tokenize.$(OHEXT) libSLib.lib $(LLIBS)
 
 test_enex: test_enex.$(OHEXT) $(DOTOH)
 	$(CC) test_enex.$(OHEXT) libSLib.lib $(LFLAGS)
