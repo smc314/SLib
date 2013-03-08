@@ -26,6 +26,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 
 #endif  // ! _WIN32
@@ -109,6 +110,11 @@ Socket::Socket(int port)
 	BOOL reuseaddr = true;
 	if( 0 != setsockopt( the_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseaddr, sizeof(reuseaddr) ) ){
 		throw AnException(0, FL, "Error setting SO_REUSEADDR on socket.");
+	}
+
+	int nodelay = 1;
+	if( 0 != setsockopt( the_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) ) ){
+		throw AnException(0, FL, "Error setting TCP_NODELAY on socket.");
 	}
 
 	SOCKADDR_IN this_addr;
@@ -770,6 +776,11 @@ GSocket *Socket::Listen(void)
 	if (new_sock < 0) {
 		throw AnException(0, FL,
 		                  "Error during accept of connection in Listen");
+	}
+
+	int nodelay = 1;
+	if( 0 != setsockopt( new_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) ) ){
+		throw AnException(0, FL, "Error setting TCP_NODELAY on new socket returned from accept.");
 	}
 
 
