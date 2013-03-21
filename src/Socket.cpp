@@ -107,10 +107,12 @@ Socket::Socket(int port)
 		throw AnException(0, FL, "Server Socket Creation Failed!");
 	}
 
+#ifdef _WIN32
 	BOOL reuseaddr = true;
 	if( 0 != setsockopt( the_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseaddr, sizeof(reuseaddr) ) ){
 		throw AnException(0, FL, "Error setting SO_REUSEADDR on socket.");
 	}
+#endif
 
 	int nodelay = 1;
 	if( 0 != setsockopt( the_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) ) ){
