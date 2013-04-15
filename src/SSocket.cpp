@@ -1098,6 +1098,113 @@ GSocket *SSocket::Listen(void)
 	return tmp.release();
 }
 
+GSocket *SSocket::Listen(int timeout)
+{
+	int err;
+	char *str;
+	SOCKET new_sock;
+	SOCKADDR_IN new_addr;
+	dptr<SSocket> tmp; // don't leak memory
+	// On a SUN system, this has to be int:
+	//      int addr_size;
+	// On a Linux system, this has to be socklen_t
+#ifdef _WIN32
+	//int addr_size;
+#else
+	socklen_t addr_size;
+#endif
+
+	X509* the_cert;
+
+	TRACE(FL, "Enter SSocket::Listen()");
+
+	if (SocketType != SERVER_SOCK) {
+		throw AnException(0, FL, "Listen: Not a server socket");
+	}
+
+	DEBUG(FL, "Socket calling listen on (%d)", the_socket);
+	err = listen(the_socket, 5);
+	if (err < 0) {
+		throw AnException(0, FL, "Error listening on socket");
+	}
+
+
+	if( IsDataThere( timeout ) <= 0 ){
+		// No inbound sockets in the given timeout.
+		return NULL;
+	}
+
+	DEBUG(FL, "Socket calling accept on socket\n");
+
+#ifdef _WIN32
+	new_sock = accept(the_socket,
+	                  (struct sockaddr *) & new_addr, NULL);
+#else
+	addr_size = sizeof(new_addr);
+	new_sock = accept(the_socket,
+	                  (struct sockaddr *) & new_addr, &addr_size);
+#endif
+
+	if (new_sock < 0) {
+		throw AnException(0, FL,
+		                  "Error during accept of connection in Listen");
+	}
+
+	DEBUG(FL, "Socket instantiating new Socket\n");
+
+	tmp = new SSocket();
+
+	tmp->the_socket = new_sock;
+	tmp->SocketType = SERVER_SOCK;
+
+	/* ******************************************************** */
+	/* Then do the SSL specific stuff.                          */
+	/* ******************************************************** */
+
+	tmp->m_ssl = SSL_new(ctx_common);
+	if (tmp->m_ssl == NULL)
+		throw AnException(0, FL, "SSL structure is null after init.");
+
+	DEBUG(FL, "Setting up the m_ssl with fd: (%d)", tmp->the_socket);
+	SSL_set_fd(tmp->m_ssl, tmp->the_socket);
+	err = SSL_accept(tmp->m_ssl);
+	if (err < 0) {
+		ERR_print_errors_fp(Log::FileHandle());
+		delete tmp;
+		throw AnException(0, FL, "Error accepting new socket connection.  See above SSL error dump.");
+	}
+
+	INFO(FL, "SSL connection using %s", SSL_get_cipher (tmp->m_ssl));
+
+	// Get client's certificate (note: beware of dynamic allocation) - opt
+
+	the_cert = SSL_get_peer_certificate (tmp->m_ssl);
+	if (the_cert != NULL) {
+		str = X509_NAME_oneline ( X509_get_subject_name(the_cert),
+		                          0, 0);
+		if (str != NULL) {
+			INFO(FL, "Client Cert: subject: %s", str);
+			free (str);
+		}
+		str = X509_NAME_oneline (X509_get_issuer_name(the_cert),
+		                         0, 0);
+		if (str != NULL) {
+			INFO(FL, "Client Cert: issuer: %s", str);
+			free (str);
+		}
+
+		// We could do all sorts of certificate verification
+		// stuff here before deallocating the certificate.
+
+		X509_free(the_cert);
+	} else {
+		INFO(FL, "Client does not have certificate.");
+	}
+
+	TRACE(FL, "Exit SSocket::Listen()");
+	return tmp.release();
+}
+
 void SSocket::InitOurSSL(void)
 {
 	TRACE(FL, "Enter SSocket::InitOurSSL(void)");

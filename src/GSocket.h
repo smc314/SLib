@@ -207,6 +207,13 @@ class DLLEXPORT GSocket
 		  */
 		virtual GSocket *Listen(void) = 0;
 
+		/** Use this version of Listen when you want to check for a period of time
+		  * for an incomming socket connection.  If the new socket connection is not
+		  * forthcomming within the given timeout, this will return NULL.  The timeout
+		  * is measured in milliseconds.
+		  */
+		virtual GSocket *Listen(int timeout) = 0;
+
 	protected:
 
 		/**

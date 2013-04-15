@@ -219,6 +219,13 @@ class DLLEXPORT SSocket : public GSocket
 		  */
 		virtual GSocket *Listen(void);
 
+		/** Use this version of Listen when you want to check for a period of time
+		  * for an incomming socket connection.  If the new socket connection is not
+		  * forthcomming within the given timeout, this will return NULL.  The timeout
+		  * is measured in milliseconds.
+		  */
+		virtual GSocket *Listen(int timeout);
+
 		/**
 		  * @memo This method allows you to set the name of the
 		  *       certificate file used.  This should only be done

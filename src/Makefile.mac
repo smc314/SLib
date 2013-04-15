@@ -10,7 +10,7 @@ UNAME := $(shell uname)
 OPENSSLDIR=/usr
 SOCKET_LIB=
 
-CFLAGS=-g -Wall -D_REENTRANT -fPIC -O0 -rdynamic -I$(OPENSSLDIR)/include \
+CFLAGS=-g -Wall -D_REENTRANT -fPIC -O2 -rdynamic -I$(OPENSSLDIR)/include \
 	-I/usr/include/libxml2 -I/usr/include/curl
 
 ifeq ($(UNAME),Linux)

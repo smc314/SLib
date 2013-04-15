@@ -794,6 +794,64 @@ GSocket *Socket::Listen(void)
 	return tmp;
 }
 
+GSocket *Socket::Listen(int timeout)
+{
+	int err;
+	SOCKET new_sock;
+	SOCKADDR_IN new_addr;
+	Socket *tmp;
+	// On a SUN system, this has to be int:
+	//	int addr_size;
+	// On a Linux system, this has to be socklen_t
+#ifdef _WIN32
+	//int addr_size;
+#else
+	socklen_t addr_size;
+#endif
+
+	if (SocketType != SERVER_SOCK) {
+		throw AnException(0, FL, "Listen: Not a server socket");
+	}
+
+	err = listen(the_socket, 5);
+	if (err < 0) {
+		throw AnException(0, FL, "Error listening on socket");
+	}
+
+	// Wait to verify that there is a new socket to be accepted:
+	if( IsDataThere( timeout ) <= 0 ){
+		// No incomming sockets to be accepted.
+		return NULL;
+	}
+
+#ifdef _WIN32
+	new_sock = accept(the_socket,
+	                  (struct sockaddr *) & new_addr, NULL);
+#else
+	addr_size = sizeof(new_addr);
+	new_sock = accept(the_socket,
+	                  (struct sockaddr *) & new_addr, &addr_size);
+#endif
+
+	if (new_sock < 0) {
+		throw AnException(0, FL,
+		                  "Error during accept of connection in Listen");
+	}
+
+	int nodelay = 1;
+	if( 0 != setsockopt( new_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) ) ){
+		throw AnException(0, FL, "Error setting TCP_NODELAY on new socket returned from accept.");
+	}
+
+
+	tmp = new Socket();
+
+	tmp->the_socket = new_sock;
+	tmp->SocketType = SERVER_SOCK;
+
+	return tmp;
+}
+
 int Socket::IsDataThere(void)
 {
 	/* **************************************** */
