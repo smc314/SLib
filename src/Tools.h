@@ -31,6 +31,9 @@
 #	define DLLEXPORT 
 #endif
 
+#include <vector>
+using namespace std;
+
 #include "sptr.h"
 #include "twine.h"
 
@@ -117,6 +120,27 @@ class DLLEXPORT Tools {
 
 		/// Take a given memory pointer and print out the hex memory dump of a given size:
 		static twine hexDump(void* ptr, char* name, size_t prior, size_t length, bool asciiPrint = false, bool ebcdicPrint = false);
+
+		/** This will run the given command and collect the standard output and
+		  * standard error from the command.  When the command is done we will return
+		  * the combined results. Note that we will parse the given command string to split
+		  * it up into the command and a list of arguments.  If you want to do this directly,
+		  * then call the alternate version of RunCommand and provide your own list of args.
+		  */
+		static vector<twine> RunCommand( const twine& cmd, int* exitCode );
+
+		/** This is the same as above, only the given input sring will be passed to the child process
+		  * on standard input before we start reading the standard output and error of the child
+		  * process.
+		  */
+		static vector<twine> RunCommand( const twine& cmd, const twine& inputString, int* exitCode );
+
+		/** This will run the given command with the given list of arguments and collect
+		  * standard output and standard error from the command.  The given input string will
+		  * be sent to the command on standard input if it is not empty.  When the command is done
+		  * we will return the combined results.
+		  */
+		static vector<twine> RunCommand( const twine& cmd, vector<twine> args, const twine& inputString, int* exitCode);
 
 }; 
 

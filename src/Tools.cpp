@@ -22,6 +22,7 @@
 #else
 #	include <sys/time.h>
 #	include <sys/types.h>
+#	include <sys/wait.h>
 #	include <unistd.h>
 #	include <ctype.h>
 #endif
@@ -29,8 +30,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "AnException.h"
 #include "Tools.h"
 #include "twine.h"
+#include "Log.h"
+#include "MemBuf.h"
 
 using namespace SLib;
 
@@ -153,3 +157,293 @@ twine Tools::hexDump(void* ptr, char* name, size_t prior, size_t length, bool as
 
 	return ret;
 }
+
+vector<twine> Tools::RunCommand(const twine& cmd, int* exitCode)
+{
+	return RunCommand( cmd, "", exitCode );
+}
+
+vector<twine> Tools::RunCommand(const twine& cmd, const twine& inputString, int* exitCode)
+{
+	// We parse up the command to create cmd + args.
+	vector<twine> tokens = cmd.tokenize( TWINE_WS );
+
+	// First one is the command:
+	twine runCommand = tokens[ 0 ];
+
+	// The rest is our array of arguments:
+	vector<twine> args;
+	for(size_t i = 1; i < tokens.size(); i++){
+		args.push_back( tokens[i] );
+	}
+
+	return RunCommand( runCommand, args, inputString, exitCode );
+}
+
+#ifdef _WIN32
+// This is how we do this on windows:
+vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twine& inputString, int* exitCode)
+{
+	HANDLE proc_writepipe = INVALID_HANDLE_VALUE;
+	HANDLE writepipe = INVALID_HANDLE_VALUE;
+	HANDLE hRP = INVALID_HANDLE_VALUE;
+	PSECURITY_DESCRIPTOR pSD;
+	SECURITY_ATTRIBUTES sa;
+	DWORD dwCreateFlags;
+	DWORD uLen;
+	STARTUPINFO stStartupInfo;
+	PROCESS_INFORMATION stProcessInfo;
+	DWORD lastErr;
+	BOOL rc, bRC;
+		
+	// Open a pipe whose handle will be given as stdout to the invoked program
+	pSD = (PSECURITY_DESCRIPTOR)LocalAlloc( LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH );
+	if(pSD == NULL){
+		throw AnException(0, FL, "Error creating security descriptor.");
+	}
+	if(!InitializeSecurityDescriptor( pSD, SECURITY_DESCRIPTOR_REVISION )){
+		LocalFree( (HLOCAL)pSD );
+		throw AnException(0, FL, "Error initializing security descriptor.");
+	}
+	if(!SetSecurityDescriptorDacl( pSD, TRUE, (PACL)NULL, TRUE )){
+		LocalFree( (HLOCAL)pSD );
+		throw AnException(0, FL, "Error setting security descriptor Dacl.");
+	}
+	sa.nLength = sizeof(sa);
+	sa.lpSecurityDescriptor = pSD;
+
+	// Create the pipe as non-inheritable, then dup the pipe as inheritable to pass to proc
+	sa.bInheritHandle = FALSE;
+	rc = CreatePipe( &hRP, &writepipe, &sa, 32000L );
+	if(!rc){
+		LocalFree( (HLOCAL)pSD );
+		throw AnException(0, FL, "Error creating pipe for child process.");
+	}
+	rc = DuplicateHandle( GetCurrentProcess(), writepipe, GetCurrentProcess(), &proc_writepipe, 0, TRUE,
+			DUPLICATE_SAME_ACCESS );
+	if(!rc){
+		CloseHandle( writepipe );
+		LocalFree( (HLOCAL)pSD );
+		throw AnException(0, FL, "Error duplicating pipe for child process.");
+	}
+	CloseHandle( writepipe ); // we no longer need this - it's for the child process.
+	writepipe = INVALID_HANDLE_VALUE; // just in case - so we don't use it by accident
+
+	// Prepare Process info for the child process:
+	memset( (void*)&stStartupInfo, 0, sizeof(stStartupInfo) );
+	stStartupInfo.cb = sizeof( stStartupInfo );
+	stStartupInfo.lpReserved = NULL;
+	stStartupInfo.lpDesktop = NULL;
+	dwCreateFlags = NORMAL_PRIORITY_CLASS;
+	stStartupInfo.dwFlags = STARTF_USESTDHANDLES;
+	stStartupInfo.hStdInput = NULL; // FIXME - update this so we can write to stdin
+	stStartupInfo.hStdOutput = proc_writepipe;
+	stStartupInfo.hStdError = GetStdHandle( STD_ERROR_HANDLE );
+
+	// Prepare command line arguments and start the proc
+	twine cmdLine = cmd;
+	for(size_t i = 0; i < args.size(); i++){
+		cmdLine.append( " " );
+		cmdLine.append( args[ i ] );
+	}
+	rc = CreateProcess( cmd(), cmdLine(), &sa, &sa, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL,
+		&stStartupInfo, &stProcessInfo );
+	if(!rc){
+		CloseHandle( proc_writepipe );
+		LocalFree( (HLOCAL)pSD );
+		throw AnException(0, FL, "Error calling CreateProcess for child process: %d", GetLastError() );
+	}
+
+	// Close our handle for the pipe passed to the proc
+	CloseHandle( proc_writepipe );
+	proc_writepipe = INVALID_HANDLE_VALUE; // just in case - so we don't use it by accident
+
+	// Read the output of the child process here until there is no more.
+	twine output;
+	MemBuf readbuffer; readbuffer.reserve( 4096 );
+	ssize_t readRet = 0;
+	while(1){
+		bRC = ReadFile( hRP, readbuffer.data(), readbuffer.size(), &uLen, NULL );
+		if(uLen == 0) break; // end of the file
+		if(!bRC){
+			CloseHandle( hRP );
+			LocalFree( (HLOCAL)pSD );
+			throw AnException(0, FL, "Error reading from child process output" );
+		}
+
+		output.append( readbuffer.data(), readRet);
+	}
+
+	// Close our handle for the read pipe
+	CloseHandle( hRP );
+	hRP = INVALID_HANDLE_VALUE; // just in case - so we don't use it by accident
+
+	// Wait for the process to finish
+	do {
+		bRC = GetExitCodeProcess( stProcessInfo.hProcess, exitCode );
+		if(!bRC){
+			LocalFree( (HLOCAL)pSD );
+			throw AnException(0, FL, "Error getting exit code for child process." );
+		}
+		if(*exitCode == STILL_ACTIVE){
+			Sleep( 200 );
+		}
+	} while( *exitCode == STILL_ACTIVE );
+			
+
+	// Split up the output on newlines:
+	vector<twine> ret = output.split('\n');
+
+	// Trim each line
+	for(size_t i = 0; i < ret.size(); i++){
+		ret[ i ].rtrim(); // trim trailing spaces/tabs/\r/\n chars
+		if(ret[ i ].size() == 0){
+			// remove any completely empty lines
+			ret.erase( ret.begin() + i );
+			i --; // keep the loop counter in sync.
+		}
+	}
+
+	// Free up our pSD
+	LocalFree( (HLOCAL)pSD );
+
+	// Return the outputs
+	return ret;
+}
+#else
+// this is how we do this on unix:
+#define PIPE_READ 0
+#define PIPE_WRITE 1
+vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twine& inputString, int* exitCode)
+{
+	int aStdinPipe[2];
+	int aStdoutPipe[2];
+	pid_t nChild, w;
+	char nChar;
+	int nResult;
+
+	if(pipe(aStdinPipe) < 0){
+		throw AnException(0, FL, "Error allocating a pipe for child input redirect.");
+	}
+	if(pipe(aStdoutPipe) < 0){
+		// close the stdin pipe first
+		close(aStdinPipe[PIPE_READ]);
+		close(aStdinPipe[PIPE_WRITE]);
+		throw AnException(0, FL, "Error allocating a pipe for child output redirect.");
+	}
+
+	nChild = fork();
+	if(nChild < 0){
+		// Error from the fork function - close pipes and abort.
+		close(aStdinPipe[PIPE_READ]);
+		close(aStdinPipe[PIPE_WRITE]);
+		close(aStdoutPipe[PIPE_READ]);
+		close(aStdoutPipe[PIPE_WRITE]);
+		throw AnException(0, FL, "Error calling fork() to create a new child process.");
+
+	} else if(0 == nChild){
+		// Child process continues here
+		
+		// redirect stdin
+		if(dup2(aStdinPipe[PIPE_READ], STDIN_FILENO) == -1){
+			ERRORL(FL, "Error redirecting stdin within the child process - exiting.");
+			exit(EXIT_FAILURE); // We are the child process, so just abort at this point.
+		}
+
+		// redirect stdout
+		if(dup2(aStdoutPipe[PIPE_WRITE], STDOUT_FILENO) == -1){
+			ERRORL(FL, "Error redirecting stdout within the child process - exiting.");
+			exit(EXIT_FAILURE); // we are the child process, so just abort at this point.
+		}
+
+		// redirect stderr
+		if(dup2(aStdoutPipe[PIPE_WRITE], STDERR_FILENO) == -1){
+			ERRORL(FL, "Error redirecting stderr within the child process - exiting.");
+			exit(EXIT_FAILURE); // we are the child process, so just abort at this point.
+		}
+
+		// All of these are for use by the parent only
+		close(aStdinPipe[PIPE_READ]);
+		close(aStdinPipe[PIPE_WRITE]);
+		close(aStdoutPipe[PIPE_READ]);
+		close(aStdoutPipe[PIPE_WRITE]);
+
+		// Prepare the arguments array:
+		char* argv[ args.size() + 2];
+		argv[ 0 ] = (char*)cmd.c_str(); // first argument is always the command to run
+		for(size_t i = 0; i < args.size(); i++){
+			argv[ i + 1 ] = args[i].data();
+		}
+		argv[ args.size() + 1 ] = NULL; // last one is null to signal the end of the array.
+
+		// Run the child process image
+		nResult = execvp(cmd(), argv);
+
+		// If we get here at all an error occurred, but we are in the child process,
+		// so we just exit.
+		ERRORL(FL, "Error executing child process command: %s", cmd() );
+		exit( nResult );
+
+	} else if(nChild > 0){
+		// Parent process continues here
+
+		// Close unused file descriptors, these are for child only
+		close(aStdinPipe[PIPE_READ]);
+		close(aStdoutPipe[PIPE_WRITE]);
+
+		// Send the input to the new child process on stdin:
+		if(inputString.length() != 0){
+			write(aStdinPipe[PIPE_WRITE], inputString(), inputString.length() );
+		}
+
+		// Read the output of the child process here until there is no more.
+		twine output;
+		MemBuf readbuffer; readbuffer.reserve( 4096 );
+		ssize_t readRet = 0;
+		while((readRet = read(aStdoutPipe[PIPE_READ], readbuffer.data(), readbuffer.size())) != 0){
+			output.append( readbuffer.data(), readRet);
+		}
+
+		// Now wait for the child exit code:
+		do {
+			w = waitpid( nChild, &nResult, WUNTRACED | WCONTINUED);
+			if(w == -1){
+				throw AnException(0, FL, "Error waiting for child process to exit.");
+			}
+			if( WIFEXITED(nResult) ){
+				*exitCode = (int) WEXITSTATUS( nResult );
+			} else if( WIFSIGNALED(nResult) ){
+				// child process was killed by a signal - use WTERMSIG(nResult) if you want to find out which one.
+				*exitCode = (int) EXIT_FAILURE; 
+			} else if( WIFSTOPPED(nResult) ){
+				// child process has been suspended/stopped by a signal - keep watching until it
+				// continues or exits
+			} else if( WIFCONTINUED(nResult) ){
+				// child process has been continued after being suspended - keep watching
+				// until it exits
+			}
+		} while( !WIFEXITED(nResult) && !WIFSIGNALED(nResult) );
+
+		// When we are done talking with the child we close these
+		close( aStdinPipe[PIPE_WRITE] );
+		close( aStdoutPipe[PIPE_READ] );
+
+		// Split up the output on newlines:
+		vector<twine> ret = output.split('\n');
+
+		// Trim each line
+		for(size_t i = 0; i < ret.size(); i++){
+			ret[ i ].rtrim(); // trim trailing spaces/tabs/\r/\n chars
+			if(ret[ i ].size() == 0){
+				// remove any completely empty lines
+				ret.erase( ret.begin() + i );
+				i --; // keep the loop counter in sync.
+			}
+		}
+
+		// Return the outputs
+		return ret;
+	}
+
+}
+#endif // _WIN32/Unix for RunCommand

@@ -101,6 +101,10 @@ thrash_timer: thrash_timer.o $(DOTOH)
 thrash_twine: thrash_twine.o $(DOTOH)
 	$(CC) -o thrash_twine thrash_twine.o -L. -lSLib $(LFLAGS)
 
+test_runcmd: test_runcmd.o test_echoargs.o $(DOTOH)
+	$(CC) -o test_echoargs test_echoargs.o -L. -lSLib $(LFLAGS)
+	$(CC) -o test_runcmd test_runcmd.o -L. -lSLib $(LFLAGS)
+
 docs: 
 	cd ../doc
 	rm -f *.html
