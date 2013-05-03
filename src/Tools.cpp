@@ -193,7 +193,7 @@ vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twin
 	DWORD uLen;
 	STARTUPINFO stStartupInfo;
 	PROCESS_INFORMATION stProcessInfo;
-	DWORD lastErr;
+	DWORD lastErr, procExitCode;
 	BOOL rc, bRC;
 		
 	// Open a pipe whose handle will be given as stdout to the invoked program
@@ -246,7 +246,7 @@ vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twin
 		cmdLine.append( " " );
 		cmdLine.append( args[ i ] );
 	}
-	rc = CreateProcess( cmd(), cmdLine(), &sa, &sa, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL,
+	rc = CreateProcess( cmd(), cmdLine.data(), &sa, &sa, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL,
 		&stStartupInfo, &stProcessInfo );
 	if(!rc){
 		CloseHandle( proc_writepipe );
@@ -261,7 +261,6 @@ vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twin
 	// Read the output of the child process here until there is no more.
 	twine output;
 	MemBuf readbuffer; readbuffer.reserve( 4096 );
-	ssize_t readRet = 0;
 	while(1){
 		bRC = ReadFile( hRP, readbuffer.data(), readbuffer.size(), &uLen, NULL );
 		if(uLen == 0) break; // end of the file
@@ -271,7 +270,7 @@ vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twin
 			throw AnException(0, FL, "Error reading from child process output" );
 		}
 
-		output.append( readbuffer.data(), readRet);
+		output.append( readbuffer.data(), (size_t)uLen);
 	}
 
 	// Close our handle for the read pipe
@@ -280,16 +279,16 @@ vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twin
 
 	// Wait for the process to finish
 	do {
-		bRC = GetExitCodeProcess( stProcessInfo.hProcess, exitCode );
+		bRC = GetExitCodeProcess( stProcessInfo.hProcess, &procExitCode );
 		if(!bRC){
 			LocalFree( (HLOCAL)pSD );
 			throw AnException(0, FL, "Error getting exit code for child process." );
 		}
-		if(*exitCode == STILL_ACTIVE){
+		if(procExitCode == STILL_ACTIVE){
 			Sleep( 200 );
 		}
-	} while( *exitCode == STILL_ACTIVE );
-			
+	} while( procExitCode == STILL_ACTIVE );
+	*exitCode = procExitCode;
 
 	// Split up the output on newlines:
 	vector<twine> ret = output.split('\n');

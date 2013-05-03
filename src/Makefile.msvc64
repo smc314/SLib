@@ -21,7 +21,7 @@ SSLLIBS=$(3PL)\x64\lib\libeay32.lib $(3PL)\x64\lib\ssleay32.lib \
 
 # Note -SafeSEH not required/available on x64 targets
 LFLAGS=-machine:x64 -subsystem:console -NXCompat -DynamicBase
-LLIBS=$(SSLLIBS) $(SOCKET_LIB)
+LLIBS=$(SSLLIBS) $(SOCKET_LIB) advapi32.lib
 
 .cpp.obj:
 	$(CC) $(CFLAGS) $<
