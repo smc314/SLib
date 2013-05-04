@@ -21,7 +21,7 @@ SSLLIBS=$(3PL)\lib\libeay32.lib $(3PL)\lib\ssleay32.lib \
 	$(3PL)\lib\zdll.lib
 
 LFLAGS=-machine:i386 -subsystem:console -SafeSEH -NXCompat -DynamicBase $(LDEBUG)
-LLIBS=$(SSLLIBS) $(SOCKET_LIB)
+LLIBS=$(SSLLIBS) $(SOCKET_LIB) advapi32.lib
 
 .cpp.obj:
 	$(CC) $(CFLAGS) $<
@@ -83,6 +83,10 @@ test_compile: test_compile.$(OHEXT)
 
 thrash_timer: thrash_timer.$(OHEXT)
 	$(LINK) /OUT:thrash_timer.exe thrash_timer.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_runcmd: test_runcmd.$(OHEXT) test_echoargs.$(OHEXT)
+	$(LINK) /OUT:test_echoargs.exe test_echoargs.$(OHEXT) libSLib.lib $(LLIBS)
+	$(LINK) /OUT:test_runcmd.exe test_runcmd.$(OHEXT) libSLib.lib $(LLIBS)
 
 incs:
 	$(CP) *.h ..\include
