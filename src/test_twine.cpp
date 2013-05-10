@@ -127,6 +127,7 @@ void *run_lots(void* v)
 		EnEx eeo("run_lots() - main loop");
 		vector < data_class * > *myvect;
 		myvect = new vector < data_class * >;
+		twine accumulator;
 		for(i = 0; i < 60000; i++){
 			EnEx eei("run_lots() - inner loop");
 			data_class *dat = new data_class();
@@ -134,20 +135,24 @@ void *run_lots(void* v)
 			dat->field2 = "field 2 value";
 			dat->field3 = dat->field1;
 			dat->field3 += dat->field2;
-			dat->field4 = 57.89f;
-			dat->field5.format("%s %d %f", "A string", 35, 38.99);
+			dat->field4 = "57.89f";
+			dat->field5 = "A string ";
+			dat->field5 += "35 ";
+			dat->field5 += "38.99";
 			dat->i1 = 18;
 			dat->i2 = 19;
 			dat->i3 = dat->i1 * dat->i2;
-			dat->field6 = (size_t)dat->i1 + dat->i2 + dat->i3;
-			dat->field7 = "interesting";
-			dat->field8 = (size_t)i * j;
+			dat->field6 = "ANumber";
+			dat->field7 = "AnotherNumber";
+			dat->field8 = "AThirdNumber";
 			dat->field9 = dat->field2.substr(3, 5);
 			if(dat->field1 > dat->field2)
 				dat->fielda = "true";
 			else
 				dat->fielda = "false";
 			myvect->push_back(dat);	
+
+			accumulator += dat->field1;
 		}
 		for(i = 0; i < (int)myvect->size(); i++){
 			delete (*myvect)[i];

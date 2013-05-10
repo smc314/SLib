@@ -28,6 +28,8 @@ using namespace std;
 #include "Thread.h"
 #include "sptr.h"
 #include "Timer.h"
+#include "Log.h"
+#include "EnEx.h"
 using namespace SLib;
 
 void *run_lots(void *);
@@ -95,18 +97,28 @@ int main (void)
 	for(int i = 0; i < thread_count; i++){
 		delete th_vect[i];
 	}
+	
+	EnEx::PrintGlobalHitMap();
+	{ // for scope
+		EnEx ee(FL, "main_end");
+
+	}
 }
 
 void *run_lots(void* v)
 {
+	EnEx ee("run_lots()", true);
 	int i, j;
 	Timer tt;
 	
 	tt.Start();
 	for(j = 0; j < 20; j++){
+		EnEx eeo("run_lots() - main loop");
 		vector < data_class * > *myvect;
 		myvect = new vector < data_class * >;
+		string accumulator;
 		for(i = 0; i < 60000; i++){
+			EnEx eei("run_lots() - inner loop");
 			data_class *dat = new data_class();
 			dat->field1 = "field 1 value";
 			dat->field2 = "field 2 value";
@@ -128,6 +140,7 @@ void *run_lots(void* v)
 			else
 				dat->fielda = "false";
 			myvect->push_back(dat);	
+			accumulator += dat->field8;
 		}
 		for(i = 0; i < (int)myvect->size(); i++){
 			delete (*myvect)[i];

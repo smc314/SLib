@@ -86,9 +86,6 @@ test_dptr: test_dptr.o $(DOTOH)
 test_logfile: test_logfile.o $(DOTOH)
 	$(CC) -o test_logfile test_logfile.o -L. -lSLib $(LFLAGS)
 
-test_log: test_log.o $(DOTOH)
-	$(CC) -o test_log test_log.o -L. -lSLib $(LFLAGS)
-
 test_xml: test_xml.o $(DOTOH)
 	$(CC) -o test_xml test_xml.o -L. -lSLib $(LFLAGS)
 
@@ -104,6 +101,10 @@ thrash_twine: thrash_twine.o $(DOTOH)
 test_runcmd: test_runcmd.o test_echoargs.o $(DOTOH)
 	$(CC) -o test_echoargs test_echoargs.o -L. -lSLib $(LFLAGS)
 	$(CC) -o test_runcmd test_runcmd.o -L. -lSLib $(LFLAGS)
+
+test_tmp: test_tmp.o $(DOTOH)
+	$(CC) -o test_tmp test_tmp.o $(DOTOH) $(MINIZIP_OH) $(LFLAGS)
+
 
 docs: 
 	cd ../doc

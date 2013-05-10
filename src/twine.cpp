@@ -33,6 +33,8 @@ const size_t MAX_INPUT_SIZE = 1024000000;
 
 using namespace SLib;
 
+#define max(a, b) (a) > (b) ? (a) : (b)
+
 twine::twine() :
 	m_data (NULL),
 	m_allocated_size (0),
@@ -814,7 +816,7 @@ twine& twine::append(const char* c)
 	}
 	size_t csize = strlen(c);
 	reserve(m_data_size + csize);
-	strcat(m_data, c);
+	memcpy(m_data + m_data_size, c, csize);
 	m_data_size += csize;
 	m_data[m_data_size] = '\0';
 	return *this;
@@ -931,13 +933,23 @@ twine& twine::reserve(size_t min_size)
 	if(min_size < m_allocated_size) {
 		return *this;
 	} else {
-		char *ptr = (char *)realloc(m_data, min_size+10);
+		// Use exponential growth to minimize allocations, and character copies.
+		// For detailed analysis: http://www.gotw.ca/gotw/043.htm
+		size_t dbl = m_allocated_size * 2;
+		size_t newlen = 0;
+		if(dbl >  min_size+10 ){
+			newlen = dbl;
+		} else {
+			newlen = min_size + 1;
+		}
+
+		char *ptr = (char *)realloc(m_data, newlen);
 		if(ptr == NULL){
 			throw AnException(0, FL,
 				"twine: Error reallocating memory.");
 		}
 		m_data = ptr;
-		m_allocated_size = min_size+10;
+		m_allocated_size = newlen;
 		//for(size_t i = m_data_size; i < m_allocated_size; i++)
 			//m_data[i] = '\0';
 		return *this;
