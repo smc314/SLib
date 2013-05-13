@@ -36,8 +36,8 @@ using namespace SLib;
 #define max(a, b) (a) > (b) ? (a) : (b)
 
 twine::twine() :
-	m_data (NULL),
-	m_allocated_size (0),
+	m_data (m_small_data),
+	m_allocated_size ( TWINE_SMALL_STRING ),
 	m_data_size (0)
 {
 	/* ************************************************************************ */
@@ -45,11 +45,12 @@ twine::twine() :
 	/* the ee(FL, ...) version of the EnEx call.                                */
 	/* ************************************************************************ */
 	//EnEx ee("twine::twine()");
+	memset(m_data, 0, m_allocated_size);
 }
 
 twine::twine(const twine& t) :
-	m_data (NULL),
-	m_allocated_size (0),
+	m_data (m_small_data),
+	m_allocated_size ( TWINE_SMALL_STRING ),
 	m_data_size (0)
 {
 	//EnEx ee("twine::twine(const twine& t)");
@@ -64,11 +65,12 @@ twine::twine(const twine& t) :
 	reserve(t.m_data_size);
 	m_data_size = t.m_data_size;
 	memcpy(m_data, t.m_data, m_data_size);
+	m_data[m_data_size] = '\0';
 }
 
 twine::twine(const char* c) :
-	m_data (NULL),
-	m_allocated_size (0),
+	m_data ( m_small_data ),
+	m_allocated_size ( TWINE_SMALL_STRING ),
 	m_data_size (0)
 {
 	//EnEx ee("twine::twine(const char* c)");
@@ -82,11 +84,12 @@ twine::twine(const char* c) :
 	reserve(csize);
 	memcpy(m_data, c, csize);
 	m_data_size = csize;
+	m_data[m_data_size] = '\0';
 }
 
 twine::twine(const xmlChar* c) :
-	m_data (NULL),
-	m_allocated_size (0),
+	m_data (m_small_data),
+	m_allocated_size ( TWINE_SMALL_STRING ),
 	m_data_size (0)
 {
 	//EnEx ee("twine::twine(const xmlChar* c)");
@@ -100,22 +103,25 @@ twine::twine(const xmlChar* c) :
 	reserve(csize);
 	memcpy(m_data, (const char*)c, csize);
 	m_data_size = csize;
+	m_data[m_data_size] = '\0';
 }
 
 twine::twine(const char c) :
-	m_data (NULL),
-	m_allocated_size (0),
+	m_data (m_small_data),
+	m_allocated_size ( TWINE_SMALL_STRING ),
 	m_data_size (0)
 {
 	//EnEx ee("twine::twine(const char c)");
-	reserve(1);
+	//reserve(1);
+	memset(m_data, 0, m_allocated_size);
 	m_data[0] = c;
 	m_data_size = 1;
+	m_data[m_data_size] = '\0';
 }
 
 twine::twine(const xmlNodePtr node, const char* attrName):
-	m_data (NULL),
-	m_allocated_size (0),
+	m_data (m_small_data),
+	m_allocated_size ( TWINE_SMALL_STRING ),
 	m_data_size (0)
 {
 	//EnEx ee("twine::twine(const xmlNodePtr node, const char* c)");
@@ -127,21 +133,29 @@ twine::twine(const xmlNodePtr node, const char* attrName):
 twine::~twine() 
 {
 	//EnEx ee("twine::~twine()");
-	if(m_allocated_size > 0 || m_data != NULL){
-		if(m_data != NULL){
-			free(m_data);
+	if(m_allocated_size < TWINE_SMALL_STRING){
+		throw AnException(0, FL, "twine::m_allocated_size < TWINE_SMALL_STRING");
+	} else if(m_allocated_size == TWINE_SMALL_STRING){
+		// Nothing to do here, our string data is part of our object.
+	} else {
+		if(m_data == NULL){
+			throw AnException(0, FL, "twine::m_allocated_size > TWINE_SMALL_STRING, but m_data == NULL");
 		}
-		m_allocated_size = 0;
-		m_data = NULL;
+		free(m_data);
+		m_allocated_size = TWINE_SMALL_STRING;
+		m_data = m_small_data;
 	}
 }
 
 twine& twine::operator=(const twine& t)
 {
 	//EnEx ee("twine::operator=(const twine& t)");
+	
+	// Short circuit for self-assignment
 	if(&t == this){
 		return *this;
 	}
+
 	// short circuit for source having nothing in it.
 	if(t.m_data_size == 0){
 		if(m_data_size > 0){
@@ -150,10 +164,12 @@ twine& twine::operator=(const twine& t)
 		}
 		return *this;
 	}
+
 	reserve(t.m_data_size);
-	memset(m_data, 0, m_allocated_size);
 	m_data_size = t.m_data_size;
 	memcpy(m_data, t.m_data, m_data_size);
+	m_data[m_data_size] = '\0';
+
 	return *this;
 }
 
@@ -174,9 +190,9 @@ twine& twine::operator=(const char* c)
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
 	reserve(tsize);
-	memset(m_data, 0, m_allocated_size);
 	m_data_size = tsize;
 	memcpy(m_data, c, m_data_size);
+	m_data[m_data_size] = '\0';
 	return *this;
 }
 
@@ -191,9 +207,9 @@ twine& twine::operator<< (xmlChar* c)
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
 	reserve(tsize);
-	memset(m_data, 0, m_allocated_size);
 	m_data_size = tsize;
 	memcpy(m_data, (const char*)c, m_data_size);
+	m_data[m_data_size] = '\0';
 	xmlFree(c);
 	return *this;
 }
@@ -202,7 +218,6 @@ twine& twine::operator=(const size_t i)
 {
 	//EnEx ee("twine::operator=(const size_t i)");
 	reserve(15);
-	memset(m_data, 0, m_allocated_size);
 	sprintf(m_data, "%ld", i);
 	m_data_size = strlen(m_data);
 	return *this;
@@ -212,7 +227,6 @@ twine& twine::operator=(const intptr_t i)
 {
 	//EnEx ee("twine::operator=(const intptr_t i)");
 	reserve(15);
-	memset(m_data, 0, m_allocated_size);
 	sprintf(m_data, "%ld", i);
 	m_data_size = strlen(m_data);
 	return *this;
@@ -222,7 +236,6 @@ twine& twine::operator=(const float f)
 {
 	//EnEx ee("twine::operator=(const float f)");
 	reserve(31);
-	memset(m_data, 0, m_allocated_size);
 	sprintf(m_data, "%f", f);
 	m_data_size = strlen(m_data);
 	return *this;
@@ -477,6 +490,7 @@ twine& twine::set(const char* c, size_t n)
 	memset(m_data, 0, m_allocated_size);
 	memcpy(m_data, c, n);
 	m_data_size = n;
+	m_data[m_data_size] = '\0';
 	return *this;
 }
 	
@@ -919,20 +933,39 @@ twine& twine::ltrim(void)
 twine& twine::reserve(size_t min_size) 
 {
 	//EnEx ee("twine::reserve(size_t min_size)");
-	if(m_allocated_size == 0){
-		m_data = (char *)malloc(min_size + 10);
+	if(m_allocated_size < TWINE_SMALL_STRING){
+		// This is an error, we should never have an allocated size less than the size of
+		// our internal character buffer.
+		throw AnException(0, FL, "twine::reserve m_allocated_size < TWINE_SMALL_STRING");
+	} 
+
+	if(min_size < m_allocated_size){
+		return *this; // nothing to do, we already have enough allocated
+	}
+	
+	if(m_allocated_size == TWINE_SMALL_STRING){
+		// We've been using our internal character buffer, but now we've been asked for
+		// more space than the internal buffer can hold.
+	
+		// Allocate the size requested
+		m_data = (char*)malloc(min_size + 10);
 		if(m_data == NULL){
-			throw AnException(0, FL,
-				"twine: Error Allocating Memory");
+			throw AnException(0, FL, "twine::reserve Error Allocating Memory");
 		}
 		m_allocated_size = min_size + 10;
 		memset(m_data, 0, m_allocated_size);
-		m_data_size = 0;
+
+		if(m_data_size > 0){
+			// Copy over anything from m_small_data that was in use:
+			memcpy(m_data, m_small_data, m_data_size);
+		}
 		return *this;
-	}
-	if(min_size < m_allocated_size) {
-		return *this;
-	} else {
+
+	} else if(m_allocated_size > TWINE_SMALL_STRING){
+
+		// We've already been using a malloc'd buffer.  If they are asking for more space,
+		// use the usual realloc strategy.
+		
 		// Use exponential growth to minimize allocations, and character copies.
 		// For detailed analysis: http://www.gotw.ca/gotw/043.htm
 		size_t dbl = m_allocated_size * 2;
@@ -950,10 +983,11 @@ twine& twine::reserve(size_t min_size)
 		}
 		m_data = ptr;
 		m_allocated_size = newlen;
-		//for(size_t i = m_data_size; i < m_allocated_size; i++)
-			//m_data[i] = '\0';
 		return *this;
 	}
+
+	throw AnException(0, FL, "twine::reserve Shouldn't get to here min_size(%d) m_allocated_size(%d)",
+		(int)min_size, (int)m_allocated_size );
 }
 
 size_t twine::size(void) const 
@@ -1043,7 +1077,7 @@ void twine::strlwr(char* input)
 	}
 }
 
-vector < twine > twine::split(twine spliton)
+vector < twine > twine::split(const twine& spliton)
 {
 	//EnEx ee("twine::split(twine spliton)");
 	vector < twine > v;
@@ -1154,6 +1188,7 @@ twine& twine::decode64()
 	erase(); // clean out anything we had
 	memcpy( m_data, tmpspace, len);	
 	m_data_size = len;
+	m_data[m_data_size] = '\0';
 
 	// Return ourselves.
 	return *this;

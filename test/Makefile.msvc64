@@ -1,0 +1,30 @@
+#
+# This is the MS VC++ build version of the makefile
+# Use nmake -f Makefile.msvc to run this
+###############################################################
+
+CC=cl.exe
+LINK=link.exe
+CFLAGS=-c -Zp8 -EHsc -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS
+
+SOCKET_LIB=ws2_32.lib odbc32.lib advapi32.lib user32.lib Shlwapi.lib rpcrt4.lib
+
+LFLAGS=-machine:x64 -subsystem:console
+LLIBS=$(SSLLIBS) $(SOCKET_LIB)
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $<
+
+.c.obj:
+	$(CC) $(CFLAGS) $<
+
+DOTOH=Col.obj Row.obj OdbcTest.obj
+
+all: $(DOTOH)
+	$(LINK) $(LFLAGS) /OUT:OdbcTest64.exe $(DOTOH) $(LLIBS)
+
+clean:
+	del *.obj *.exp *.lib *.dll
+
+cleanexe:
+	del *.exe

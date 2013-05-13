@@ -46,8 +46,12 @@ using namespace std;
 #include "Base64.h"
 
 const size_t TWINE_NOT_FOUND = ~size_t(0);
+
 // space, tab, carriage return, newline
 #define TWINE_WS " \t\r\n" 
+
+// What do we consider to be a very small string:
+#define TWINE_SMALL_STRING 32
 
 namespace SLib {
 
@@ -479,7 +483,7 @@ class DLLEXPORT twine
 		* Splits the current twine into a vector of twines based
 		* on the given split string.
 		*/
-		vector < twine > split(twine spliton);
+		vector < twine > split(const twine& spliton);
 
 		/** A more sophisticated version of split, which allows you to pass in
 		  * a string containing a list of token separators that we will use to parse
@@ -552,6 +556,12 @@ class DLLEXPORT twine
 		/** size of string currently in m_data:
 		  */
 		size_t m_data_size;
+
+		/** For very small strings, we keep the data here to minimize calls to malloc.
+		  * This also ends up putting the entire twine on the stack for stack allocated
+		  * objects that hold small strings, making it very fast.
+		  */
+		char m_small_data[ TWINE_SMALL_STRING ];
 
 };
 

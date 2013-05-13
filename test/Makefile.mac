@@ -1,0 +1,32 @@
+#
+# This is the Linux build version of the makefile
+# Use make -f Makefile.mac to run this
+###############################################################
+
+UNAME := $(shell uname)
+CC=g++
+LINK=g++
+CFLAGS=-g -Wall -D_REENTRANT -fPIC -O0 -rdynamic -I/usr/include -I/usr/include/libxml2 -I/usr/include/curl -I../include
+ifeq ($(UNAME),Linux)
+	LFLAGS=-lssl -lcrypto -lpthread -lresolv -lxml2 -luuid -lz -L../lib -lSLib
+else
+	LFLAGS=-lssl -lcrypto -lpthread -lresolv -lxml2 -lz -L../lib -lSLib
+endif
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
+DOTOH=SLibTest.o
+
+all: $(DOTOH)
+	$(LINK) -o SLibTest $(DOTOH) $(LFLAGS)
+
+clean:
+	rm -f *.o SLibTest
+
+run:
+	export LD_LIBRARY_PATH=.:../lib && ./SLibTest --log-all=true
