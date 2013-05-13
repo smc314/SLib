@@ -7,34 +7,37 @@
 /* inside SLibTest.cpp in the RunOneTable method - or wherever appropriate.     */
 /* **************************************************************************** */
 
-void TestTwine002Copying_FromTwine();
-void TestTwine002Copying_FromCharStar();
-void TestTwine002Copying_FromXmlCharStar();
-void TestTwine002Copying_FromChar();
-void TestTwine002Copying_FromXmlNodePtr();
+void TestTwine003Assignment_FromTwine();
+void TestTwine003Assignment_FromTwineStar();
+void TestTwine003Assignment_FromCharStar();
+void TestTwine003Assignment_FromSizeT();
+void TestTwine003Assignment_FromIntPtrT();
+void TestTwine003Assignment_FromFloat();
 
-void TestTwine002Copying()
+void TestTwine003Assignment()
 {
 
-	TestTwine002Copying_FromTwine();
-	TestTwine002Copying_FromCharStar();
-	TestTwine002Copying_FromXmlCharStar();
-	TestTwine002Copying_FromChar();
-	TestTwine002Copying_FromXmlNodePtr();
+	TestTwine003Assignment_FromTwine();
+	TestTwine003Assignment_FromTwineStar();
+	TestTwine003Assignment_FromCharStar();
+	TestTwine003Assignment_FromSizeT();
+	TestTwine003Assignment_FromIntPtrT();
+	TestTwine003Assignment_FromFloat();
 
 }
 
-void TestTwine002Copying_FromTwine()
+void TestTwine003Assignment_FromTwine()
 {
-	BEGIN_TEST_METHOD( "TestTwine002Copying_FromTwine" )
+	BEGIN_TEST_METHOD( "TestTwine003Assignment_FromTwine" )
 
 	twine t1("SomethingShort");
 	twine t2("Something That will exceed the 32 byte small internal size buffer.");
 	twine t3;
 
-	twine c1( t1 );
-	twine c2( t2 );
-	twine c3( t3 );
+	twine c1, c2, c3;
+	c1 = t1;
+	c2 = t2;
+	c3 = t3;
 
 	// Ensure that their sizes match
 	ASSERT_EQUALS( c1.size(), t1.size(), "c1.size() != t1.size()" );
@@ -65,17 +68,60 @@ void TestTwine002Copying_FromTwine()
 	END_TEST_METHOD
 }
 
-void TestTwine002Copying_FromCharStar()
+void TestTwine003Assignment_FromTwineStar()
 {
-	BEGIN_TEST_METHOD( "TestTwine002Copying_FromCharStar" )
+	BEGIN_TEST_METHOD( "TestTwine003Assignment_FromTwineStar" )
+
+	twine* t1 = new twine("SomethingShort");
+	twine* t2 = new twine("Something That will exceed the 32 byte small internal size buffer.");
+	twine* t3 = new twine();
+
+	twine c1, c2, c3;
+	c1 = t1;
+	c2 = t2;
+	c3 = t3;
+
+	// Ensure that their sizes match
+	ASSERT_EQUALS( c1.size(), t1->size(), "c1.size() != t1.size()" );
+	ASSERT_EQUALS( c2.size(), t2->size(), "c2.size() != t2.size()" );
+	ASSERT_EQUALS( c3.size(), t3->size(), "c3.size() != t3.size()" );
+
+	// Ensure that they are using different pointers now (data is really copied)
+	ASSERT_NOTEQUALS( c1.data(), t1->data(), "c1.data() == t1.data()" );
+	ASSERT_NOTEQUALS( c2.data(), t2->data(), "c2.data() == t2.data()" );
+	ASSERT_NOTEQUALS( c3.data(), t3->data(), "c3.data() == t3.data()" );
+
+	// Ensure that the contents match
+	ASSERT_EQUALS( 0, memcmp( c1(), t1->c_str(), t1->size() ), "c1 != t1" );
+	ASSERT_EQUALS( 0, memcmp( c2(), t2->c_str(), t2->size() ), "c2 != t2" );
+	ASSERT_EQUALS( 0, memcmp( c3(), t3->c_str(), t3->size() ), "c3 != t3" );
+
+	// Ensure null termination:
+	ASSERT_EQUALS( '\0', c1.data()[ c1.size() ], "c1 not null terminated");
+	ASSERT_EQUALS( '\0', c2.data()[ c2.size() ], "c2 not null terminated");
+	ASSERT_EQUALS( '\0', c3.data()[ c3.size() ], "c3 not null terminated");
+
+	// Useful macros:
+	// ASSERT_EQUALS(a, b, "a is not equal to b, but it should be.")
+	// ASSERT_NOTEQUALS(a, b, "a is equal to b, but it shouldn't be.")
+	// ASSERT_TRUE(a, "a should be true, but it isn't.")
+	// ASSERT_FALSE(a, "a should be false, but it isn't.")
+
+	END_TEST_METHOD
+}
+
+void TestTwine003Assignment_FromCharStar()
+{
+	BEGIN_TEST_METHOD( "TestTwine003Assignment_FromCharStar" )
 
 	const char* t1 = "SomethingShort";
 	const char* t2 = "Something That will exceed the 32 byte small internal size buffer.";
 	const char* t3 = "";
 
-	twine c1( t1 );
-	twine c2( t2 );
-	twine c3( t3 );
+	twine c1, c2, c3;
+	c1 = t1;
+	c2 = t2;
+	c3 = t3;
 
 	// Ensure that their sizes match
 	ASSERT_EQUALS( c1.size(), strlen(t1), "c1.size() != strlen(t1)" );
@@ -106,64 +152,28 @@ void TestTwine002Copying_FromCharStar()
 	END_TEST_METHOD
 }
 
-void TestTwine002Copying_FromXmlCharStar()
+void TestTwine003Assignment_FromSizeT()
 {
-	BEGIN_TEST_METHOD( "TestTwine002Copying_FromXmlCharStar" )
+	BEGIN_TEST_METHOD( "TestTwine003Assignment_FromSizeT" )
 
-	const xmlChar* t1 = (const xmlChar*)"SomethingShort";
-	const xmlChar* t2 = (const xmlChar*)"Something That will exceed the 32 byte small internal size buffer.";
-	const xmlChar* t3 = (const xmlChar*)"";
+	size_t t1 = 12345;
+	size_t t2 = 3456789;
+	size_t t3 = 0;
 
-	twine c1( t1 );
-	twine c2( t2 );
-	twine c3( t3 );
+	twine c1, c2, c3;
+	c1 = t1;
+	c2 = t2;
+	c3 = t3;
 
 	// Ensure that their sizes match
-	ASSERT_EQUALS( c1.size(), strlen((const char*)t1), "c1.size() != strlen(t1)" );
-	ASSERT_EQUALS( c2.size(), strlen((const char*)t2), "c2.size() != strlen(t2)" );
-	ASSERT_EQUALS( c3.size(), strlen((const char*)t3), "c3.size() != strlen(t3)" );
-
-	// Ensure that they are using different pointers now (data is really copied)
-	ASSERT_NOTEQUALS( c1.data(), (char*)t1, "c1.data() == t1" );
-	ASSERT_NOTEQUALS( c2.data(), (char*)t2, "c2.data() == t2" );
-	ASSERT_NOTEQUALS( c3.data(), (char*)t3, "c3.data() == t3" );
-
-	// Ensure that the contents match
-	ASSERT_EQUALS( 0, memcmp( c1(), t1, c1.size() ), "c1 != t1" );
-	ASSERT_EQUALS( 0, memcmp( c2(), t2, c2.size() ), "c2 != t2" );
-	ASSERT_EQUALS( 0, memcmp( c3(), t3, c3.size() ), "c3 != t3" );
-
-	// Ensure null termination:
-	ASSERT_EQUALS( '\0', c1.data()[ c1.size() ], "c1 not null terminated");
-	ASSERT_EQUALS( '\0', c2.data()[ c2.size() ], "c2 not null terminated");
-	ASSERT_EQUALS( '\0', c3.data()[ c3.size() ], "c3 not null terminated");
-
-	// Useful macros:
-	// ASSERT_EQUALS(a, b, "a is not equal to b, but it should be.")
-	// ASSERT_NOTEQUALS(a, b, "a is equal to b, but it shouldn't be.")
-	// ASSERT_TRUE(a, "a should be true, but it isn't.")
-	// ASSERT_FALSE(a, "a should be false, but it isn't.")
-
-	END_TEST_METHOD
-}
-
-void TestTwine002Copying_FromChar()
-{
-	BEGIN_TEST_METHOD( "TestTwine002Copying_FromChar" )
-
-	twine c1( 'a' );
-	twine c2( 'b' );
-	twine c3( 'c' );
-
-	// Ensure that their sizes match
-	ASSERT_EQUALS( c1.size(), 1, "c1.size() != 1" );
-	ASSERT_EQUALS( c2.size(), 1, "c2.size() != 1" );
+	ASSERT_EQUALS( c1.size(), 5, "c1.size() != 5" );
+	ASSERT_EQUALS( c2.size(), 7, "c2.size() != 7" );
 	ASSERT_EQUALS( c3.size(), 1, "c3.size() != 1" );
 
 	// Ensure that the contents match
-	ASSERT_EQUALS( 'a', c1.data()[0], "c1 != 'a'" );
-	ASSERT_EQUALS( 'b', c2.data()[0], "c2 != 'b'" );
-	ASSERT_EQUALS( 'c', c3.data()[0], "c3 != 'c'" );
+	ASSERT_EQUALS( 0, memcmp( c1(), "12345", c1.size() ), "c1 != t1" );
+	ASSERT_EQUALS( 0, memcmp( c2(), "3456789", c2.size() ), "c2 != t2" );
+	ASSERT_EQUALS( 0, memcmp( c3(), "0", c3.size() ), "c3 != t3" );
 
 	// Ensure null termination:
 	ASSERT_EQUALS( '\0', c1.data()[ c1.size() ], "c1 not null terminated");
@@ -179,39 +189,79 @@ void TestTwine002Copying_FromChar()
 	END_TEST_METHOD
 }
 
-void TestTwine002Copying_FromXmlNodePtr()
+void TestTwine003Assignment_FromIntPtrT()
 {
-	BEGIN_TEST_METHOD( "TestTwine002Copying_FromXmlNodePtr" )
+	BEGIN_TEST_METHOD( "TestTwine003Assignment_FromIntPtrT" )
 
-	const xmlChar* t1 = (const xmlChar*)"ShortValue";
-	const xmlChar* t2 = (const xmlChar*)"LongValue That will not be less than 32 chars.";
-	const xmlChar* t3 = (const xmlChar*)"a";
+	intptr_t t1 = 12345;
+	intptr_t t2 = 3456789;
+	intptr_t t3 = 0;
 
-	xmlDocPtr doc = xmlNewDoc((const xmlChar*)"1.0");
-	doc->children = xmlNewDocNode( doc, NULL, (const xmlChar*)"SLibTwineTesting", NULL);
-	xmlNodePtr root = xmlDocGetRootElement(doc);
-	xmlSetProp(root, (const xmlChar*)"t1", t1);
-	xmlSetProp(root, (const xmlChar*)"t2", t2);
-	xmlSetProp(root, (const xmlChar*)"t3", t3);
-
-	twine c1( root, "t1" );
-	twine c2( root, "t2" );
-	twine c3( root, "t3" );
+	twine c1, c2, c3;
+	c1 = t1;
+	c2 = t2;
+	c3 = t3;
 
 	// Ensure that their sizes match
-	ASSERT_EQUALS( c1.size(), strlen((const char*)t1), "c1.size() != strlen(t1)" );
-	ASSERT_EQUALS( c2.size(), strlen((const char*)t2), "c2.size() != strlen(t2)" );
-	ASSERT_EQUALS( c3.size(), strlen((const char*)t3), "c3.size() != strlen(t3)" );
-
-	// Ensure that they are using different pointers now (data is really copied)
-	ASSERT_NOTEQUALS( c1.data(), (char*)t1, "c1.data() == t1" );
-	ASSERT_NOTEQUALS( c2.data(), (char*)t2, "c2.data() == t2" );
-	ASSERT_NOTEQUALS( c3.data(), (char*)t3, "c3.data() == t3" );
+	ASSERT_EQUALS( c1.size(), 5, "c1.size() != 5" );
+	ASSERT_EQUALS( c2.size(), 7, "c2.size() != 7" );
+	ASSERT_EQUALS( c3.size(), 1, "c3.size() != 1" );
 
 	// Ensure that the contents match
-	ASSERT_EQUALS( 0, memcmp( c1(), t1, c1.size() ), "c1 != t1" );
-	ASSERT_EQUALS( 0, memcmp( c2(), t2, c2.size() ), "c2 != t2" );
-	ASSERT_EQUALS( 0, memcmp( c3(), t3, c3.size() ), "c3 != t3" );
+	ASSERT_EQUALS( 0, memcmp( c1(), "12345", c1.size() ), "c1 != t1" );
+	ASSERT_EQUALS( 0, memcmp( c2(), "3456789", c2.size() ), "c2 != t2" );
+	ASSERT_EQUALS( 0, memcmp( c3(), "0", c3.size() ), "c3 != t3" );
+
+	// Ensure null termination:
+	ASSERT_EQUALS( '\0', c1.data()[ c1.size() ], "c1 not null terminated");
+	ASSERT_EQUALS( '\0', c2.data()[ c2.size() ], "c2 not null terminated");
+	ASSERT_EQUALS( '\0', c3.data()[ c3.size() ], "c3 not null terminated");
+
+	// Useful macros:
+	// ASSERT_EQUALS(a, b, "a is not equal to b, but it should be.")
+	// ASSERT_NOTEQUALS(a, b, "a is equal to b, but it shouldn't be.")
+	// ASSERT_TRUE(a, "a should be true, but it isn't.")
+	// ASSERT_FALSE(a, "a should be false, but it isn't.")
+
+	END_TEST_METHOD
+}
+
+void TestTwine003Assignment_FromFloat()
+{
+	BEGIN_TEST_METHOD( "TestTwine003Assignment_FromFloat" )
+
+	float t1 = 12345.678;
+	char t1c[64];
+	float t2 = 34.56789;
+	char t2c[64];
+	float t3 = 0.0;
+	char t3c[64];
+
+	// Do it ourselves so we can check the results
+	sprintf(t1c, "%f", t1);
+	sprintf(t2c, "%f", t2);
+	sprintf(t3c, "%f", t3);
+
+	twine c1, c2, c3;
+	c1 = t1;
+	c2 = t2;
+	c3 = t3;
+
+	if(m_log_steps){
+		printf("++ Float (%f) Twine (%s)\n", t1, c1() );
+		printf("++ Float (%f) Twine (%s)\n", t2, c2() );
+		printf("++ Float (%f) Twine (%s)\n", t3, c3() );
+	}
+
+	// Ensure that their sizes match
+	ASSERT_EQUALS( c1.size(), strlen(t1c), "c1.size() != strlen(t1c)" );
+	ASSERT_EQUALS( c2.size(), strlen(t2c), "c2.size() != strlen(t2c)" );
+	ASSERT_EQUALS( c3.size(), strlen(t3c), "c3.size() != strlen(t3c)" );
+
+	// Ensure that the contents match
+	ASSERT_EQUALS( 0, memcmp( c1(), t1c, c1.size() ), "c1 != t1" );
+	ASSERT_EQUALS( 0, memcmp( c2(), t2c, c2.size() ), "c2 != t2" );
+	ASSERT_EQUALS( 0, memcmp( c3(), t3c, c3.size() ), "c3 != t3" );
 
 	// Ensure null termination:
 	ASSERT_EQUALS( '\0', c1.data()[ c1.size() ], "c1 not null terminated");

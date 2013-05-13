@@ -60,6 +60,7 @@ twine::twine(const twine& t) :
 		(t.m_allocated_size < 0)||
 		(t.m_allocated_size < t.m_data_size))
 	{
+		memset(m_data, 0, m_allocated_size);
 		return;
 	}
 	reserve(t.m_data_size);
@@ -320,7 +321,7 @@ double twine::get_double() const
 	return atof(m_data);
 }
 
-const char twine::operator[](size_t i) const
+char& twine::operator[](size_t i) const
 {
 	//EnEx ee("twine::operator[](size_t i)");
 	if( (i < 0) || (i >= m_data_size)){

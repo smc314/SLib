@@ -51,6 +51,7 @@
 #include <twine.h>
 #include <Date.h>
 #include <AnException.h>
+#include <XmlHelpers.h>
 using namespace SLib;
 
 char* usage = 
@@ -686,19 +687,12 @@ void RunSLibTests()
 {
 	// Invoke all of our test methods here directly:
 	if(m_do_twine){
-		m_test_category = "SLib::twine Testing";
-		TestTwine001Allocation();
-		TestTwine002Copying();
-		TestTwine003Appending();
-		TestTwine004Split();
+		TestTwine000();
 		PrintAndReset( false );
 	}
 
 	if(m_do_date){
-		m_test_category = "SLib::Date Testing";
-		TestDate001Allocation();
-		TestDate002Copying();
-		TestDate003Updating();
+		TestDate000();
 		PrintAndReset( false );
 	}
 
@@ -717,15 +711,10 @@ void RunSLibTests()
 /* ************************************************************************************ */
 
 // Twine Tests
-#include "twine/TestTwine001Allocation.cpp"
-#include "twine/TestTwine002Copying.cpp"
-#include "twine/TestTwine003Appending.cpp"
-#include "twine/TestTwine004Split.cpp"
+#include "twine/TestTwine000.cpp"
 
 // Date Tests
-#include "date/TestDate001Allocation.cpp"
-#include "date/TestDate002Copying.cpp"
-#include "date/TestDate003Updating.cpp"
+#include "date/TestDate000.cpp"
 
 // Bug Tests
 #include "bugs/Bug0001TwineSplit.cpp"

@@ -7,21 +7,21 @@
 /* inside SLibTest.cpp in the RunOneTable method - or wherever appropriate.     */
 /* **************************************************************************** */
 
-void TestTwine004Split_NoResults();
-void TestTwine004Split_Path();
-void TestTwine004Split_Word();
+void TestTwine005Split_NoResults();
+void TestTwine005Split_Path();
+void TestTwine005Split_Word();
 
-void TestTwine004Split()
+void TestTwine005Split()
 {
-	TestTwine004Split_NoResults();
-	TestTwine004Split_Path();
-	TestTwine004Split_Word();
+	TestTwine005Split_NoResults();
+	TestTwine005Split_Path();
+	TestTwine005Split_Word();
 
 }
 
-void TestTwine004Split_NoResults()
+void TestTwine005Split_NoResults()
 {
-	BEGIN_TEST_METHOD( "TestTwine004Split_NoResults" )
+	BEGIN_TEST_METHOD( "TestTwine005Split_NoResults" )
 
 	twine t1 = "SomethingThatHasNoSplitOpportunities";
 	vector<twine> splits = t1.split( "_" );
@@ -37,10 +37,10 @@ void TestTwine004Split_NoResults()
 	END_TEST_METHOD
 }
 
-void TestTwine004Split_Path()
+void TestTwine005Split_Path()
 {
 
-	BEGIN_TEST_METHOD( "TestTwine004Split_Path" )
+	BEGIN_TEST_METHOD( "TestTwine005Split_Path" )
 
 	twine t1 = "one/two/three/four/five/six/seven";
 	vector<twine> splits = t1.split("/");
@@ -63,10 +63,10 @@ void TestTwine004Split_Path()
 	END_TEST_METHOD
 }
 
-void TestTwine004Split_Word()
+void TestTwine005Split_Word()
 {
 
-	BEGIN_TEST_METHOD( "TestTwine004Split_Word" )
+	BEGIN_TEST_METHOD( "TestTwine005Split_Word" )
 
 	twine t1 = "ALongStringLongForgottenLongBeforeLongKnewAboutLongIt";
 	vector<twine> splits = t1.split("Long");

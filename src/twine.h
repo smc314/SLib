@@ -184,7 +184,7 @@ class DLLEXPORT twine
 
 		/** Get a single char from the twine
 		  */
-		const char operator[](size_t i) const;
+		char& operator[](size_t i) const;
 
 		/** Get the chars - This is easier to type than c_str()
 		  */

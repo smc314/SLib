@@ -28,5 +28,8 @@ all: $(DOTOH)
 clean:
 	rm -f *.o SLibTest
 
-run:
+runv:
 	export LD_LIBRARY_PATH=.:../lib && ./SLibTest --log-all=true
+
+run:
+	export LD_LIBRARY_PATH=.:../lib && ./SLibTest --log-all=false --log-steps=false --log-test=false --log-err=true

@@ -7,16 +7,28 @@
 /* inside SLibTest.cpp in the RunOneTable method - or wherever appropriate.     */
 /* **************************************************************************** */
 
-void TestTwine003Appending()
+#include "TestTwine001Allocation.cpp"
+#include "TestTwine002Copying.cpp"
+#include "TestTwine003Assignment.cpp"
+#include "TestTwine004Appending.cpp"
+#include "TestTwine005Split.cpp"
+#include "TestTwine006Convert.cpp"
+#include "TestTwine007ArrayAccess.cpp"
+#include "TestTwine008Cast.cpp"
+#include "TestTwine009Compare.cpp"
+
+void TestTwine000()
 {
-	BEGIN_TEST_METHOD( "TestTwine003Appending" )
+	m_test_category = "SLib::twine Testing";
 
-	// Useful macros:
-	// ASSERT_EQUALS(a, b, "a is not equal to b, but it should be.")
-	// ASSERT_NOTEQUALS(a, b, "a is equal to b, but it shouldn't be.")
-	// ASSERT_TRUE(a, "a should be true, but it isn't.")
-	// ASSERT_FALSE(a, "a should be false, but it isn't.")
-
-	END_TEST_METHOD
+	TestTwine001Allocation();
+	TestTwine002Copying();
+	TestTwine003Assignment();
+	TestTwine004Appending();
+	TestTwine005Split();
+	TestTwine006Convert();
+	TestTwine007ArrayAccess();
+	TestTwine008Cast();
+	TestTwine009Compare();
 }
 
