@@ -226,6 +226,25 @@ class DLLEXPORT SSocket : public GSocket
 		  */
 		virtual GSocket *Listen(int timeout);
 
+		/** Turn keepalive on or off for our socket.
+		  */
+		virtual void SetKeepalive( bool tf );
+
+		/** Turn nodelay on or off for our socket.
+		  */
+		virtual void SetNoDelay( bool tf );
+
+		/** Returns the local port to which we are bound - this is more useful for client
+		  * sockets than server sockets, as you should already know the local port for a server
+		  * socket.
+		  */
+		virtual unsigned short GetLocalPort( void );
+
+		/** Checks for the amount of data immediately available to be read on the socket.
+		  * Uses ioctl+FIONREAD.
+		  */
+		virtual int GetDataToRead( int* bytesAvailable );
+
 		/**
 		  * @memo This method allows you to set the name of the
 		  *       certificate file used.  This should only be done

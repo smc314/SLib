@@ -24,6 +24,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -114,10 +115,7 @@ Socket::Socket(int port)
 	}
 #endif
 
-	int nodelay = 1;
-	if( 0 != setsockopt( the_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) ) ){
-		throw AnException(0, FL, "Error setting TCP_NODELAY on socket.");
-	}
+	SetNoDelay( true );
 
 	SOCKADDR_IN this_addr;
 
@@ -780,16 +778,10 @@ GSocket *Socket::Listen(void)
 		                  "Error during accept of connection in Listen");
 	}
 
-	int nodelay = 1;
-	if( 0 != setsockopt( new_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) ) ){
-		throw AnException(0, FL, "Error setting TCP_NODELAY on new socket returned from accept.");
-	}
-
-
 	tmp = new Socket();
-
 	tmp->the_socket = new_sock;
 	tmp->SocketType = SERVER_SOCK;
+	tmp->SetNoDelay( true );
 
 	return tmp;
 }
@@ -838,16 +830,10 @@ GSocket *Socket::Listen(int timeout)
 		                  "Error during accept of connection in Listen");
 	}
 
-	int nodelay = 1;
-	if( 0 != setsockopt( new_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) ) ){
-		throw AnException(0, FL, "Error setting TCP_NODELAY on new socket returned from accept.");
-	}
-
-
 	tmp = new Socket();
-
 	tmp->the_socket = new_sock;
 	tmp->SocketType = SERVER_SOCK;
+	tmp->SetNoDelay( true );
 
 	return tmp;
 }
@@ -880,4 +866,80 @@ int Socket::IsDataThere(int mills)
 		return -1;
 	}
 	return ret;
+}
+
+void Socket::SetKeepalive( bool tf )
+{
+	int optkeepalive = tf ? 1 : 0;
+	int rc = setsockopt( the_socket, SOL_SOCKET, SO_KEEPALIVE, (char*)&optkeepalive, sizeof(optkeepalive) );
+	if(rc != 0){
+#ifdef _WIN32
+		int err = WSAGetLastError();
+#else
+		int err = errno;
+#endif
+		throw AnException(0, FL, "Error setting SO_KEEPALIVE on socket: %d", err);
+	}
+}
+
+void Socket::SetNoDelay( bool tf )
+{
+	int optnodelay = tf ? 1 : 0;
+	int rc = setsockopt( the_socket, IPPROTO_TCP, TCP_NODELAY, (char*)&optnodelay, sizeof(optnodelay) );
+	if(rc != 0){
+#ifdef _WIN32
+		int err = WSAGetLastError();
+#else
+		int err = errno;
+#endif
+		throw AnException(0, FL, "Error setting TCP_NODELAY on socket: %d", err);
+	}
+}
+
+unsigned short Socket::GetLocalPort(void)
+{
+	SOCKADDR_IN localad;
+	int addrlen, rc, err;
+	unsigned short localPort;
+
+	addrlen = sizeof(sockaddr);
+
+#ifdef _WIN32
+	localad.sin_family = AF_INET;
+	rc = getsockname( the_socket, (struct sockaddr*)&localad, &addrlen );
+#else
+	localad = (SOCKADDR_IN)malloc(sizeof(struct sockaddr_in));
+	rc = getsockname( the_socket, (struct sockaddr*)localad, (socklen_t*)&addrlen );
+#endif
+	if(rc != 0){
+#ifdef _WIN32
+		err = WSAGetLastError();
+		throw AnException(0, FL, "Error getting local port with getsockname socket: %d", err);
+#else
+		err = errno;
+		free( localad ); // free this before throwing the exception
+		throw AnException(0, FL, "Error getting local port with getsockname socket: %d", err);
+#endif
+	}
+		
+#ifdef _WIN32
+	localPort = ntohs( localad.sin_port );
+#else
+	localPort = ntohs( localad->sin_port );
+	free( localad );
+#endif
+
+	return localPort;
+}
+
+int Socket::GetDataToRead( int* bytesAvailable )
+{
+	int rc;
+#ifdef _WIN32
+	rc = ioctlsocket( the_socket, FIONREAD, bytesAvailable );
+#else
+	rc = ioctl( the_socket, FIONREAD, bytesAvailable );
+#endif
+
+	return rc;
 }

@@ -214,6 +214,25 @@ class DLLEXPORT GSocket
 		  */
 		virtual GSocket *Listen(int timeout) = 0;
 
+		/** Turn keepalive on or off for our socket.
+		  */
+		virtual void SetKeepalive( bool tf ) = 0;
+
+		/** Turn nodelay on or off for our socket.
+		  */
+		virtual void SetNoDelay( bool tf ) = 0;
+
+		/** Returns the local port to which we are bound - this is more useful for client
+		  * sockets than server sockets, as you should already know the local port for a server
+		  * socket.
+		  */
+		virtual unsigned short GetLocalPort( void ) = 0;
+
+		/** Checks for the amount of data immediately available to be read on the socket.
+		  * Uses ioctl+FIONREAD.
+		  */
+		virtual int GetDataToRead( int* bytesAvailable ) = 0;
+
 	protected:
 
 		/**

@@ -471,6 +471,14 @@ size_t twine::check_size(void)
 	//EnEx ee("twine::check_size(void)");
 	if(m_data != NULL){
 		m_data_size = strlen(m_data);
+		if(m_data_size >= m_allocated_size){
+			ERRORL(FL, "twine::check_size - data size(%d) > allocated_size(%d).  Possible memory corruption.",
+				(int)m_data_size, (int)m_allocated_size );
+			ERRORL(FL, "twine::check_size - resetting data_size to allocated_size - 1, and null terminating.");
+			m_data_size = m_allocated_size - 1;
+			m_data[ m_data_size ] = '\0';
+			throw AnException(0, FL, "twine::check_size - data_size > allocated_size - you've just corrupted memory, or you forgot to null terminate m_data when you wrote to it!");
+		}
 	}
 	return m_data_size;
 }

@@ -16,6 +16,7 @@
 #include "TestTwine007ArrayAccess.cpp"
 #include "TestTwine008Cast.cpp"
 #include "TestTwine009Compare.cpp"
+#include "TestTwine010CheckSize.cpp"
 
 void TestTwine000()
 {
@@ -30,5 +31,6 @@ void TestTwine000()
 	TestTwine007ArrayAccess();
 	TestTwine008Cast();
 	TestTwine009Compare();
+	TestTwine010CheckSize();
 }
 

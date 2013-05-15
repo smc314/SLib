@@ -250,10 +250,10 @@ void EndHtmlGroup( void );
 		m_test_success ++; \
 		tmee.m_finish_success = true; \
 	} catch (AnException& e){ \
-		if(m_log_err) printf("!! AnException caught during unit test: %s", e.Msg() ); \
+		if(m_log_err) printf("!! AnException caught during unit test: %s\n", e.Msg() ); \
 		m_test_failure ++; \
 	} catch (std::exception& stde){ \
-		if(m_log_err) printf("!! std::exception caught during unit test: %s", stde.what() ); \
+		if(m_log_err) printf("!! std::exception caught during unit test: %s\n", stde.what() ); \
 		m_test_failure ++; \
 	} catch (...){ \
 		if(m_log_err) printf("!! Unknown exception caught during unit test\n" ); \
@@ -324,6 +324,17 @@ void EndHtmlGroup( void );
 		m_test_failure++; \
 		return; \
 	}
+
+/** Tests to verify that a given expression will trigger an exception
+  */
+#define ASSERT_EXCEPTION(a, b) \
+	try { \
+		(a); \
+		if(m_log_err) printf( "!! Exception Expected: %s\n", b); \
+		m_test_failure++; \
+		return; \
+	} catch (AnException& ) { \
+	} 
 
 #include "SLibTest.h"
 
