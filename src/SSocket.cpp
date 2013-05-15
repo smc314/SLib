@@ -1374,7 +1374,9 @@ int SSocket::GetDataToRead( int* bytesAvailable )
 {
 	int rc;
 #ifdef _WIN32
-	rc = ioctlsocket( the_socket, FIONREAD, bytesAvailable );
+	u_long tmp;
+	rc = ioctlsocket( the_socket, FIONREAD, &tmp );
+	*bytesAvailable = (int)tmp;
 #else
 	rc = ioctl( the_socket, FIONREAD, bytesAvailable );
 #endif
