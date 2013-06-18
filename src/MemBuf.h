@@ -120,6 +120,12 @@ class DLLEXPORT MemBuf
 		  */
 		const char* operator()() const;
 
+		/** Compare's this MemBuf with another.  Returns an integer less than, equal to, or greater than 
+		  * zero if our buffer is found respectively, to be less than, to match, or to be greater than the 
+		  * given MemBuf.
+		  */
+		int compare(const MemBuf& other) const;
+
 		/** Gets a writable pointer to the MemBuf memory.
 		  * This, as a non const char pointer
 		  * allows writing directly to the MemBuf memory.  This
@@ -300,6 +306,20 @@ inline MemBuf operator+(const char* lhs, const MemBuf& rhs)
 	MemBuf ret(lhs);
 	ret += rhs();
 	return ret;
+}
+
+/** Equivalence operation. This is a global function, not a member function.
+  */
+inline bool operator==(const MemBuf& lhs, const MemBuf& rhs)
+{
+	return lhs.compare(rhs) == 0;
+}
+
+/** Non-Equivalence operation. This is a global function, not a member function.
+  */
+inline bool operator!=(const MemBuf& lhs, const MemBuf& rhs)
+{
+	return lhs.compare(rhs) != 0;
 }
 
 } // End Namespace

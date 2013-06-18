@@ -227,6 +227,26 @@ const char* MemBuf::operator()() const
 	return (char*)m_data;
 }
 
+int MemBuf::compare( const MemBuf& other) const
+{
+	EnEx ee("MemBuf::compare( const MemBuf& other)");
+
+	// Are they both empty?
+	if(m_data_size == 0 && other.m_data_size == 0){
+		return 0;
+	}
+
+	// At least one is not empty, compare sizes first
+	if(m_data_size < other.m_data_size){
+		return -1;
+	} else if(m_data_size > other.m_data_size){
+		return +1;
+	} else {
+		// data sizes match, compare contents directly
+		return memcmp( m_data, other.m_data, m_data_size );
+	}
+}
+
 char* MemBuf::data(void)
 {
 	EnEx ee("MemBuf::data(void)");
