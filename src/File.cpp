@@ -295,6 +295,20 @@ vector<twine> File::listFiles(const twine& dirName)
 	while( (ent = readdir(dirp)) != NULL){
 		if(ent->d_type == DT_REG){
 			ret.push_back( twine( ent->d_name ) );
+		} else if(ent->d_type == DT_UNKNOWN){
+			// If we can't determine the type, go through the expense of using a stat call
+			// to determine the type.  it's more expensive, but the above d_type should work
+			// on most filesystems.
+			twine fullpath = dirName;
+			fullpath.append( "/" );
+			fullpath.append( ent->d_name );
+			struct stat stbuf;
+			if(stat( fullpath(), &stbuf ) == 0){
+				// stat retured success, check the mode to see if it's a directory.
+				if( S_ISREG( stbuf.st_mode ) ){
+					ret.push_back( twine( ent->d_name ) ); // it's a directory
+				}
+			}
 		}
 	}
 	closedir( dirp );
@@ -337,6 +351,20 @@ vector<twine> File::listFolders(const twine& dirName)
 	while( (ent = readdir(dirp)) != NULL){
 		if(ent->d_type == DT_DIR){
 			ret.push_back( twine( ent->d_name ) );
+		} else if(ent->d_type == DT_UNKNOWN){
+			// If we can't determine the type, go through the expense of using a stat call
+			// to determine the type.  it's more expensive, but the above d_type should work
+			// on most filesystems.
+			twine fullpath = dirName;
+			fullpath.append( "/" );
+			fullpath.append( ent->d_name );
+			struct stat stbuf;
+			if(stat( fullpath(), &stbuf ) == 0){
+				// stat retured success, check the mode to see if it's a directory.
+				if( S_ISDIR( stbuf.st_mode ) ){
+					ret.push_back( twine( ent->d_name ) ); // it's a directory
+				}
+			}
 		}
 	}
 	closedir( dirp );
