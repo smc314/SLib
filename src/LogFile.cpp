@@ -668,6 +668,7 @@ void LogFile::readLogHeaders()
 		try {
 			fclose(m_log);
 		} catch (...) {
+			throw;
 		}
 
 		m_log = NULL;

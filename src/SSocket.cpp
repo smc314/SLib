@@ -1301,6 +1301,7 @@ int SSocket::IsDataThere(int mills)
 		ret = select(n, &rfds, NULL, NULL, &tv);
 	} catch (...) {
 		printf("Caught exception trying to check data on socket\n");
+		throw;
 		return -1;
 	}
 	return ret;
