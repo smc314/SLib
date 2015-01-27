@@ -303,6 +303,7 @@ Socket::Socket(int port, bool useUDP, char *localipaddr)
 		if(proper_localip_inaddr==INADDR_NONE)
 		{
 			FreeSock();
+			free(this_addr);
 			throw AnException(INADDR_NONE, FL, "Server inet_addr Failed!  Parameter localipaddr = %s",localipaddr);
 		}
 		this_addr->sin_addr.s_addr=proper_localip_inaddr;
@@ -525,6 +526,7 @@ Socket::Socket(char *machine, int port, bool useUDP, char *localipaddr)
 		if(proper_localip_inaddr==INADDR_NONE)
 		{
 			FreeSock();
+			free(this_addr);
 			throw AnException(INADDR_NONE, FL, "Client inet_addr Failed!  Parameter localipaddr = %s",localipaddr);
 		}
 		this_addr->sin_addr.s_addr=proper_localip_inaddr;

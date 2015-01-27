@@ -293,6 +293,33 @@ class DLLEXPORT XmlHelpers {
 			xmlSetProp(node, (const xmlChar*)attrName, tmp);
 		}
 			
+		static Date getDateAttr(xmlNodePtr node, const char* attrName){
+			EnEx ee(FL, "XmlHelpers::getDateAttr(xmlNodePtr node)");
+			if(node == NULL){
+				throw AnException(0, FL, "NULL node passed into getDateAttr");
+			}
+			if(attrName == NULL){
+				throw AnException(0, FL, "NULL attribute name passed into getDateAttr");
+			}
+
+			Date ret;
+			ret.SetValue( xmlGetProp( node, (const xmlChar*)attrName ) );
+			return ret;
+		}
+
+		static void setDateAttr(xmlNodePtr node, const char* attrName, const Date& date){
+			if(node == NULL){
+				throw AnException(0, FL, "NULL node passed into setDateAttr");
+			}
+			if(attrName == NULL){
+				throw AnException(0, FL, "NULL attribute name passed into setDateAttr");
+			}
+			Date* td = (Date*)&date;
+			xmlChar* tmp = (xmlChar*)td->GetValue();
+
+			xmlSetProp(node, (const xmlChar*)attrName, tmp);
+		}
+			
 
 		static bool getBoolAttr(xmlNodePtr node, const char* attrName){
 			if(node == NULL){

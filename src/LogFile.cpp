@@ -672,7 +672,7 @@ void LogFile::readLogHeaders()
 		}
 
 		m_log = NULL;
-		throw e;
+		throw; // Re-throw the original exception
 	}
 
 }

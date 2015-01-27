@@ -57,24 +57,22 @@ void Log::TimeStamp(twine& t)
 	t.reserve(64);
 	t.erase();
 	char *tmp_pict = t.data();
+	char local_tmp[64];
 
 #ifdef _WIN32
-	char local_tmp[32];
 	struct timeb tmp_tv;
 	ftime(&tmp_tv);
 
 	memset(local_tmp, 0, 32);
-	strftime(local_tmp, 32, "%Y/%m/%d %H:%M:%S",
-		localtime(&(tmp_tv.time)));
+	strftime(local_tmp, 32, "%Y/%m/%d %H:%M:%S", localtime(&(tmp_tv.time)));
 	memset(tmp_pict, 0, 64);
 	sprintf(tmp_pict, "%s.%.3d", local_tmp, (int)tmp_tv.millitm);
 #else
 	struct timeval tmp_tv;
 	gettimeofday(&tmp_tv, NULL);
-	memset(tmp_pict, 0, 64);
-	strftime(tmp_pict, 64, "%Y/%m/%d %H:%M:%S",
-		localtime(&(tmp_tv.tv_sec)));
-	sprintf(tmp_pict, "%s.%.6d", tmp_pict, (int)tmp_tv.tv_usec);
+	memset(local_tmp, 0, 64);
+	strftime(local_tmp, 64, "%Y/%m/%d %H:%M:%S", localtime(&(tmp_tv.tv_sec)));
+	sprintf(tmp_pict, "%s.%.6d", local_tmp, (int)tmp_tv.tv_usec);
 #endif
 
 	t.check_size();
