@@ -1235,7 +1235,7 @@ void SSocket::InitOurSSL(void)
 		}
 
 		if (SocketType == CLIENT_SOCK) {
-			m_meth = (SSL_METHOD*)SSLv2_client_method();
+			m_meth = (SSL_METHOD*)SSLv23_client_method();
 		} else {
 			m_meth = (SSL_METHOD*)SSLv23_server_method();
 		}
