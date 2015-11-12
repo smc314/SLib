@@ -7,7 +7,12 @@ AR=ar
 DOC=doc++
 UNAME := $(shell uname)
 
-OPENSSLDIR=/usr
+ifeq ($(UNAME),Linux)
+	OPENSSLDIR=/usr
+else
+	OPENSSLDIR=/usr/local/opt/openssl
+endif
+
 SOCKET_LIB=
 
 CFLAGS=-g -Wall -D_REENTRANT -fPIC -O2 -rdynamic -I$(OPENSSLDIR)/include \
