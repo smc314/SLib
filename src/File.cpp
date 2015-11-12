@@ -72,11 +72,10 @@ void File::closeFile()
 void File::getStat()
 {
 	EnEx ee("File::getStat()");
-	int ret;
 #ifdef _WIN32
-	ret = _fstat(_fileno(m_fp), &m_stat);
+	_fstat(_fileno(m_fp), &m_stat);
 #else
-	ret = fstat(fileno(m_fp), &m_stat);
+	fstat(fileno(m_fp), &m_stat);
 #endif
 }
 

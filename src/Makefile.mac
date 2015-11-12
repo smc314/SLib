@@ -25,6 +25,8 @@ endif
 	$(CC) $(CFLAGS) -c $< -o $@
 %.o:	%.c
 	gcc $(CFLAGS) -c $< -o $@
+zip.o:	zip.c
+	gcc $(CFLAGS) -DNOCRYPT -c $< -o $@
 
 # smtp.o is not here because we need to find out how to compile it
 # on a mac before including it in this list.

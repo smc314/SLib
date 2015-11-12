@@ -17,6 +17,9 @@ LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
 %.o:	%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
+zip.o:	zip.c
+	$(CC) $(CFLAGS) -DNOCRYPT -c $< -o $@
+
 DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Tools.o twine.o Date.o \
 	smtp.o Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o \
 	XmlHelpers.o BlockingQueue.o File.o LogFile.o HttpClient.o \

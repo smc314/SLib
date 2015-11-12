@@ -120,7 +120,7 @@ void smtp::Send(EMail& message)
 			twine host;
 			int ptr1;
 			ptr1 = send_list[start].first.find("@");
-			if(ptr1 == TWINE_NOT_FOUND){
+			if(ptr1 == (int)TWINE_NOT_FOUND){
 				ERRORL(FL, "EMail address (%s) has no @",
 					send_list[start].first());
 				send_list[start].second = 1;
@@ -135,7 +135,7 @@ void smtp::Send(EMail& message)
 			for(i = start+1; i < (int)send_list.size(); i++){
 				twine tmphost;
 				ptr1 = send_list[i].first.find("@");
-				if(ptr1 == TWINE_NOT_FOUND){
+				if(ptr1 == (int)TWINE_NOT_FOUND){
 					ERRORL(FL, 
 						"EMail address (%s) has no @",
 						send_list[i].first());

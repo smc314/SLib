@@ -594,7 +594,7 @@ twine& twine::format(const char* f, va_list ap)
 			// double twine capacity
 			reserve(m_allocated_size * 2);  
 			success = false;
-		} else if (nsize > (m_allocated_size - 1)){ // newer C lib
+		} else if (nsize > (int)(m_allocated_size - 1)){ // newer C lib
 			// give it requested size
 			reserve(nsize + 20);                 
 			success = false;

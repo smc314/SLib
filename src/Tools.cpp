@@ -318,7 +318,7 @@ vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twin
 	int aStdinPipe[2];
 	int aStdoutPipe[2];
 	pid_t nChild, w;
-	char nChar;
+
 	int nResult;
 
 	if(pipe(aStdinPipe) < 0){
