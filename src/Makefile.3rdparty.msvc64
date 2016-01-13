@@ -10,7 +10,7 @@
 MINGW_BINDIR=c:/Program Files/Git/mingw64/bin
 GIT_USRBIN=c:/Program Files/Git/usr/bin
 PATH=$(PATH);$(MINGW_BINDIR);$(GIT_USRBIN)
-CURL="$(MINGW_BINDIR)/curl.exe" -O
+CURL="$(MINGW_BINDIR)/curl.exe" -O -L
 UNZIP="$(GIT_USRBIN)/unzip.exe"
 UNTAR="$(GIT_USRBIN)/tar.exe" xvfz
 
@@ -24,7 +24,7 @@ V_CURL=7.46.0
 V_PNG=1.6.20
 
 
-all: dirs zlib openssl iconv libxml2 curl png
+all: dirs zlib openssl iconv libxml2 curl png libharu
 
 dirs:
 	rm -rf bin include lib
@@ -67,6 +67,13 @@ png:
 	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libpng-$(V_PNG)-vc14-x64.zip
 	$(UNZIP) libpng-$(V_PNG)-vc14-x64.zip
 
+libharu:
+	rm -rf libharu*
+	$(CURL) https://github.com/libharu/libharu/archive/RELEASE_2_3_0.zip
+	$(UNZIP) RELEASE_2_3_0.zip
+	copy SLib\src\Makefile.libharu.win64dll libharu-RELEASE_2_3_0\script
+	cd libharu-RELEASE_2_3_0
+	nmake -f script\Makefile.libharu.win64dll ZLIB_PREFIX=.. PNG_PREFIX=.. all install
 
 
 
