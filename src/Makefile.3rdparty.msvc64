@@ -17,6 +17,7 @@ UNTAR="$(GIT_USRBIN)/tar.exe" xvfz
 # Version information
 V_ZLIB=1.2.8
 V_OPENSSL=1.0.2e
+V_SSH2=1.6.0
 V_ICONV=1.14
 V_LIBXML2=2.9.3
 V_LIBXSLT=1.1.28
@@ -24,7 +25,7 @@ V_CURL=7.46.0
 V_PNG=1.6.20
 
 
-all: dirs zlib openssl iconv libxml2 curl png libharu
+all: dirs zlib openssl ssh2 iconv libxml2 curl png libharu
 
 dirs:
 	rm -rf bin include lib
@@ -38,10 +39,16 @@ zlib:
 	$(UNZIP) zlib-$(V_ZLIB)-vc14-x64.zip
 	
 openssl: 
-	del /Q /S openssl-$(V_OPENSL)-vc14-x64.zip
+	del /Q /S openssl-$(V_OPENSSL)-vc14-x64.zip
 	del /Q /S openssl.cnf
 	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/openssl-$(V_OPENSSL)-vc14-x64.zip
 	$(UNZIP) openssl-$(V_OPENSSL)-vc14-x64.zip
+
+ssh2: 
+	del /Q /S libssh2-$(V_SSH2)-vc14-x64.zip
+	del /Q /S openssl.cnf
+	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libssh2-$(V_SSH2)-vc14-x64.zip
+	$(UNZIP) libssh2-$(V_SSH2)-vc14-x64.zip
 
 iconv: 
 	del /Q /S libiconv-$(V_ICONV)-vc14-x64.zip
