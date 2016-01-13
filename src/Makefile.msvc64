@@ -13,11 +13,11 @@ RM=del /Q
 SOCKET_LIB=ws2_32.lib
 
 
-CFLAGS=-c -Zp8 -EHsc -GS -O2 -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D "_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include"
+CFLAGS=-c -Zp8 -EHsc -GS -O2 -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D "_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include" -I "$(3PL)\include\libxml2" -DCURL_STATICLIB
 
-SSLLIBS=$(3PL)\x64\lib\libeay32.lib $(3PL)\x64\lib\ssleay32.lib \
-	$(3PL)\x64\lib\libxml2.lib $(3PL)\x64\lib\libcurl_imp.lib \
-	$(3PL)\x64\lib\zdll.lib
+SSLLIBS=$(3PL)\lib\libeay32.lib $(3PL)\lib\ssleay32.lib \
+	$(3PL)\lib\libxml2.lib $(3PL)\lib\libcurl_a.lib \
+	$(3PL)\lib\zlib_a.lib
 
 # Note -SafeSEH not required/available on x64 targets
 LFLAGS=-machine:x64 -subsystem:console -NXCompat -DynamicBase
@@ -109,14 +109,13 @@ clean:
 install:
 	$(CP) ..\include\*.h $(3PL)\include
 	$(CP) ..\include\*.cpp $(3PL)\include
-	-mkdir $(3PL)\x64
-	-mkdir $(3PL)\x64\lib
-	-mkdir $(3PL)\x64\bin
-	$(CP) ..\lib\libSLib.lib $(3PL)\x64\lib
-	$(CP) ..\lib\libSLib.dll $(3PL)\x64\bin
-	$(CP) LogDump.exe $(3PL)\x64\bin
-	$(CP) SLogDump.exe $(3PL)\x64\bin
-	$(CP) SqlShell.exe $(3PL)\x64\bin
+	-mkdir $(3PL)\lib
+	-mkdir $(3PL)\bin
+	$(CP) ..\lib\libSLib.lib $(3PL)\lib
+	$(CP) ..\lib\libSLib.dll $(3PL)\bin
+	$(CP) LogDump.exe $(3PL)\bin
+	$(CP) SLogDump.exe $(3PL)\bin
+	$(CP) SqlShell.exe $(3PL)\bin
 
 docs:
 	docxx --html --dir ..\..\appint\doc\slib *.h

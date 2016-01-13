@@ -1,0 +1,66 @@
+#
+# Makefile used to download and extract all of the 3rd party components that are
+# used by SLib on a windows 64 platform.  Run this outside the slib folder.
+#
+# Pre-reqs expected: 
+#    * Install Visual Studio 2015 community edition (or higher) and
+#      include the GIT utilities with the installation.
+#
+
+MINGW_BINDIR=c:/Program Files/Git/mingw64/bin
+GIT_USRBIN=c:/Program Files/Git/usr/bin
+PATH=$(PATH);$(MINGW_BINDIR);$(GIT_USRBIN)
+CURL="$(MINGW_BINDIR)/curl.exe" -O
+UNZIP="$(GIT_USRBIN)/unzip.exe"
+UNTAR="$(GIT_USRBIN)/tar.exe" xvfz
+
+# Version information
+V_ZLIB=1.2.8
+V_OPENSSL=1.0.2e
+V_ICONV=1.14
+V_LIBXML2=2.9.3
+V_LIBXSLT=1.1.28
+V_CURL=7.46.0
+
+
+all: dirs zlib openssl iconv libxml2 curl
+
+dirs:
+	rm -rf bin include lib
+	mkdir bin
+	mkdir include
+	mkdir lib
+
+zlib:
+	del /Q /S zlib-$(V_ZLIB)-vc14-x64.zip
+	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/zlib-$(V_ZLIB)-vc14-x64.zip
+	$(UNZIP) zlib-$(V_ZLIB)-vc14-x64.zip
+	
+openssl: 
+	del /Q /S openssl-$(V_OPENSL)-vc14-x64.zip
+	del /Q /S openssl.cnf
+	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/openssl-$(V_OPENSSL)-vc14-x64.zip
+	$(UNZIP) openssl-$(V_OPENSSL)-vc14-x64.zip
+
+iconv: 
+	del /Q /S libiconv-$(V_ICONV)-vc14-x64.zip
+	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libiconv-$(V_ICONV)-vc14-x64.zip
+	$(UNZIP) libiconv-$(V_ICONV)-vc14-x64.zip
+
+libxml2:
+	del /Q /S libxml2-$(V_LIBXML2)-vc14-x64.zip
+	del /Q /S libxslt-$(V_LIBXSLT)-vc14-x64.zip
+	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libxml2-$(V_LIBXML2)-vc14-x64.zip
+	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libxslt-$(V_LIBXSLT)-vc14-x64.zip
+	$(UNZIP) libxml2-$(V_LIBXML2)-vc14-x64.zip
+	$(UNZIP) libxslt-$(V_LIBXSLT)-vc14-x64.zip
+
+
+curl:
+	del /Q /S libcurl-$(V_CURL)-vc14-x64.zip
+	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libcurl-$(V_CURL)-vc14-x64.zip
+	$(UNZIP) libcurl-$(V_CURL)-vc14-x64.zip
+
+
+
+
