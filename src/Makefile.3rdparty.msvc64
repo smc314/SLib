@@ -21,9 +21,10 @@ V_ICONV=1.14
 V_LIBXML2=2.9.3
 V_LIBXSLT=1.1.28
 V_CURL=7.46.0
+V_PNG=1.6.20
 
 
-all: dirs zlib openssl iconv libxml2 curl
+all: dirs zlib openssl iconv libxml2 curl png
 
 dirs:
 	rm -rf bin include lib
@@ -60,6 +61,11 @@ curl:
 	del /Q /S libcurl-$(V_CURL)-vc14-x64.zip
 	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libcurl-$(V_CURL)-vc14-x64.zip
 	$(UNZIP) libcurl-$(V_CURL)-vc14-x64.zip
+
+png:
+	del /Q /S libpng-$(V_PNG)-vc14-x64.zip
+	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libpng-$(V_PNG)-vc14-x64.zip
+	$(UNZIP) libpng-$(V_PNG)-vc14-x64.zip
 
 
 
