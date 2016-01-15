@@ -1,0 +1,135 @@
+#
+# Makefile used to download and build all of the 3rd party components that are
+# used by SLib on a windows 64 platform.
+#
+# Pre-reqs expected: 
+#    * Install Visual Studio 2015 community edition (or higher) and
+#      include the GIT utilities with the installation.
+#
+#    * Install Perl from ActiveState perl - required by Openssl configure/compile
+#
+#    * Install NASM from www.nasm.us - required by Openssl configure/compile
+
+CURRENTPATH=c:\\Users\\smc\\dev\\3rdParty
+MINGW_BINDIR=c:/Program Files/Git/mingw64/bin
+GIT_USRBIN=c:/Program Files/Git/usr/bin
+PATH=$(PATH);$(MINGW_BINDIR);$(GIT_USRBIN)
+CURL="$(MINGW_BINDIR)/curl.exe" -O -L
+UNZIP="$(GIT_USRBIN)/unzip.exe"
+UNTAR="$(GIT_USRBIN)/tar.exe" xvfz
+
+all: dirs zlib openssl iconv libxml2 curl png libharu
+
+dirs:
+	rm -rf bin include lib
+	mkdir bin
+	mkdir include
+	mkdir lib
+
+zlib:
+	del /Q /S zlib-1.2.8 zlib128.zip
+	rm -rf  zlib-1.2.8
+	$(CURL) http://zlib.net/zlib128.zip
+	$(UNZIP) zlib128.zip
+	cd zlib-1.2.8
+	nmake -f win32/Makefile.msc AS=ml64 LOC="-DASMV -DASMINF -I." OBJA="inffasx64.obj gvmat64.obj inffas8664.obj"
+	copy zdll.lib ..\lib
+	copy zlib.lib ..\lib
+	copy zlib1.dll ..\bin
+	copy zlib.h ..\include
+	copy zconf.h ..\include
+	cd ..
+	
+openssl:
+	del /Q /S openssl-1.0.2e.tar.gz
+	rm -rf openssl-1.0.2e
+	$(CURL) https://www.openssl.org/source/openssl-1.0.2e.tar.gz
+	-$(UNTAR) openssl-1.0.2e.tar.gz
+	cd openssl-1.0.2e
+	perl Configure VC-WIN64A shared --prefix=$(CURRENTPATH)
+	ms\do_win64a
+	nmake -f ms\ntdll.mak
+	nmake -f ms\ntdll.mak test
+	nmake -f ms\ntdll.mak install
+	cd ..
+
+iconv:
+	rm -rf /Q /S iconv-for-windows
+	git clone https://github.com/holy-shit/iconv-for-windows.git
+	copy iconv-for-windows\include\iconv.h include
+	copy iconv-for-windows\lib64\libiconv.dll bin
+	copy iconv-for-windows\lib64\libiconv.lib lib
+	copy iconv-for-windows\lib64\libiconv.lib lib\iconv.lib
+
+libxml2:
+	del /Q /S libxml2-2.9.3.tar.gz libxslt-1.1.28.tar.gz
+	rm -rf libxml2-2.9.3 libxslt-1.1.28
+	rm -rf include\libxml2 include\libxml include\libexslt include\libxslt
+	$(CURL) ftp://xmlsoft.org/libxml2/libxml2-2.9.3.tar.gz
+	$(CURL) ftp://xmlsoft.org/libxml2/libxslt-1.1.28.tar.gz
+	$(UNTAR) libxml2-2.9.3.tar.gz
+	$(UNTAR) libxslt-1.1.28.tar.gz
+	cd libxml2-2.9.3\win32
+	cscript configure.js compiler=msvc zlib=yes iconv=yes prefix=$(CURRENTPATH) include=$(CURRENTPATH) lib=$(CURRENTPATH)
+	nmake -f Makefile.msvc
+	nmake -f Makefile.msvc install
+	cd ..\..
+	cd include
+	move libxml2\libxml .
+	cd ..
+	cd libxslt-1.1.28\win32
+	cscript configure.js compiler=msvc zlib=yes iconv=yes prefix=$(CURRENTPATH) include=$(CURRENTPATH) lib=$(CURRENTPATH)
+	cd ..\libxslt
+	move win32config.h win32config.h.bak
+	cat win32config.h.bak | sed -e"s/#define snprintf _snprintf//" > win32config.h
+	cd ..\win32
+	move Makefile Makefile.bak
+	cat Makefile.bak | sed -e"s/\/OPT:NOWIN98//" > Makefile
+	nmake
+	nmake install
+	cd ..\..
+	move lib\libexslt.dll bin
+	move lib\libxslt.dll bin
+
+curl:
+	del /Q /S curl-7.46.0.tar.gz
+	rm -rf curl-7.46.0
+	$(CURL) http://curl.haxx.se/download/curl-7.46.0.tar.gz
+	$(UNTAR) curl-7.46.0.tar.gz
+	cd curl-7.46.0\winbuild
+	nmake /f Makefile.vc mode=dll VC=14 WITH_DEVEL=..\.. WITH_SSL=dll WITH_ZLIB=dll MACHINE=x64
+	cd ..\builds\libcurl-vc14-x64-release-dll-ssl-dll-zlib-dll-ipv6-sspi
+	copy bin\*.* ..\..\..\bin
+	mkdir ..\..\..\include\curl
+	copy include\curl\*.* ..\..\..\include\curl
+	copy lib\*.* ..\..\..\lib
+	cd ..\..\..
+
+#$(CURL) http://download.sourceforge.net/libpng/libpng-1.6.20.tar.gz
+png:
+	del /Q /S libpng-1.6.20.tar.gz
+	rm -rf libpng-1.6.20
+	$(CURL) ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.20.tar.gz
+	$(UNTAR) libpng-1.6.20.tar.gz
+	cd libpng-1.6.20
+	copy ..\SLib\src\Makefile.libpng.msvc64 scripts
+	nmake -f scripts\Makefile.libpng.msvc64 CPPFLAGS=-I..\include
+	cd ..
+	-mkdir include\libpng16
+	copy libpng-1.6.20\png.h include\libpng16
+	copy libpng-1.6.20\pngconf.h include\libpng16
+	copy libpng-1.6.20\pnglibconf.h include\libpng16
+	copy libpng-1.6.20\libpng.lib lib
+
+
+libharu:
+	rm -rf libharu*
+	$(CURL) https://github.com/libharu/libharu/archive/RELEASE_2_3_0.zip
+	$(UNZIP) RELEASE_2_3_0.zip
+	copy SLib\src\Makefile.libharu.win64dll libharu-RELEASE_2_3_0\script
+	cd libharu-RELEASE_2_3_0
+	nmake -f script\Makefile.libharu.win64dll ZLIB_PREFIX=.. PNG_PREFIX=.. all install
+
+
+
+

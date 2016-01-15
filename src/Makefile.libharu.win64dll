@@ -30,7 +30,7 @@ LIBTARGET=libhpdf.dll
 CFLAGS=/MD -nologo -O2 -Iinclude -Iwin32\include   -I"$(PNG_PREFIX)"\include\libpng16 -I"$(ZLIB_PREFIX)"\include -DHPDF_DLL_MAKE -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__
 CFLAGS_DEMO=/MD -nologo -O2 -Iinclude -Iwin32\include -D__WIN32__ -DHPDF_DLL
 CFLAGS_EXE=-Fe
-LDFLAGS=-machine:x64 /LIBPATH:$(PNG_PREFIX)\lib /LIBPATH:$(ZLIB_PREFIX)\lib /LIBPATH:win32\msvc libpng.lib zlib_a.lib
+LDFLAGS=-machine:x64 /LIBPATH:$(PNG_PREFIX)\lib /LIBPATH:$(ZLIB_PREFIX)\lib /LIBPATH:win32\msvc libpng.lib zdll.lib
 LDFLAGS_DEMO1=
 LDFLAGS_DEMO2=/link /LIBPATH:. /LIBPATH:win32\msvc libhpdf.lib
 DEFNAME=win32/msvc/libhpdf.def

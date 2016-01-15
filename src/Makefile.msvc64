@@ -13,14 +13,17 @@ RM=del /Q
 SOCKET_LIB=ws2_32.lib
 
 
-CFLAGS=-c -Zp8 -EHsc -GS -O2 -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D "_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include" -I "$(3PL)\include\libxml2" -DCURL_STATICLIB
+CFLAGS=-c -EHsc -O2 -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -DLINT_ARGS -MD -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D "_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include" -I "$(3PL)\include\libxml2"
+
+EXECFLAGS=/MD -O2 -I "$(3PL)\include" -I "$(3PL)\include\libxml2"
 
 SSLLIBS=$(3PL)\lib\libeay32.lib $(3PL)\lib\ssleay32.lib \
-	$(3PL)\lib\libxml2.lib $(3PL)\lib\libcurl_a.lib \
-	$(3PL)\lib\zlib_a.lib
+	$(3PL)\lib\libxml2.lib $(3PL)\lib\libcurl.lib \
+	$(3PL)\lib\zlib.lib
 
 # Note -SafeSEH not required/available on x64 targets
-LFLAGS=-machine:x64 -subsystem:console -NXCompat -DynamicBase
+LFLAGS=-machine:x64
+EXELFLAGS=/link $(LFLAGS) 
 LLIBS=$(SSLLIBS) $(SOCKET_LIB) advapi32.lib
 
 .cpp.obj:
@@ -41,9 +44,9 @@ DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
 
 all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) SLogDump.$(OHEXT) SqlShell.$(OHEXT) incs
 	$(LINK) $(LFLAGS) $(DOTOH) $(MINIZIP_OH) /OUT:libSLib.dll /DLL $(LLIBS)
-	$(CC) LogDump.$(OHEXT) libSLib.lib $(LFLAGS)
-	$(CC) SLogDump.$(OHEXT) libSLib.lib $(LFLAGS)
-	$(CC) SqlShell.$(OHEXT) libSLib.lib $(LFLAGS)
+	$(CC) $(EXECFLAGS) LogDump.$(OHEXT) $(EXELFLAGS) libSLib.lib
+	$(CC) $(EXECFLAGS) SLogDump.$(OHEXT) $(EXELFLAGS) libSLib.lib
+	$(CC) $(EXECFLAGS) SqlShell.$(OHEXT) $(EXELFLAGS) sqlite3.$(OHEXT)
 	$(CP) libSLib.dll ..\lib
 	$(CP) libSLib.lib ..\lib
 
