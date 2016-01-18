@@ -18,7 +18,7 @@ CURL="$(MINGW_BINDIR)/curl.exe" -O -L
 UNZIP="$(GIT_USRBIN)/unzip.exe"
 UNTAR="$(GIT_USRBIN)/tar.exe" xvfz
 
-all: dirs zlib openssl iconv libxml2 curl png libharu
+all: dirs zlib openssl iconv libxml2 curl png libharu qx
 
 dirs:
 	rm -rf bin include lib
@@ -130,6 +130,10 @@ libharu:
 	cd libharu-RELEASE_2_3_0
 	nmake -f script\Makefile.libharu.win64dll ZLIB_PREFIX=.. PNG_PREFIX=.. all install
 
+qx:
+	rm -rf qooxdoo-5.0.1-sdk*
+	$(CURL) http://downloads.sourceforge.net/qooxdoo/qooxdoo-5.0.1-sdk.zip
+	$(UNZIP) qooxdoo-5.0.1-sdk.zip
 
 
 
