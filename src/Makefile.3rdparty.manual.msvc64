@@ -105,11 +105,11 @@ curl:
 	copy lib\*.* ..\..\..\lib
 	cd ..\..\..
 
-#$(CURL) http://download.sourceforge.net/libpng/libpng-1.6.20.tar.gz
+#$(CURL) ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.20.tar.gz
 png:
 	del /Q /S libpng-1.6.20.tar.gz
 	rm -rf libpng-1.6.20
-	$(CURL) ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.20.tar.gz
+	$(CURL) http://download.sourceforge.net/libpng/libpng-1.6.20.tar.gz
 	$(UNTAR) libpng-1.6.20.tar.gz
 	cd libpng-1.6.20
 	copy ..\SLib\src\Makefile.libpng.msvc64 scripts
