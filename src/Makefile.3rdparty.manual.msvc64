@@ -127,6 +127,7 @@ libharu:
 	$(CURL) https://github.com/libharu/libharu/archive/RELEASE_2_3_0.zip
 	$(UNZIP) RELEASE_2_3_0.zip
 	copy SLib\src\Makefile.libharu.win64dll libharu-RELEASE_2_3_0\script
+	copy SLib\src\hpdf_config.win64.h libharu-RELEASE_2_3_0\include\hpdf_config.h
 	cd libharu-RELEASE_2_3_0
 	nmake -f script\Makefile.libharu.win64dll ZLIB_PREFIX=.. PNG_PREFIX=.. all install
 

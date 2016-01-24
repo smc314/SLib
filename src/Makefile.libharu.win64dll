@@ -152,6 +152,25 @@ installfiles:
 	copy include\hpdf.h $(ZLIB_PREFIX)\include
 	copy include\hpdf_consts.h $(ZLIB_PREFIX)\include
 	copy include\hpdf_types.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_config.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_version.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_doc.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_catalog.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_objects.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_encoder.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_streams.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_list.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_error.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_mmgr.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_encrypt.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_image.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_pages.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_gstate.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_font.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_fontdef.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_ext_gstate.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_outline.h $(ZLIB_PREFIX)\include
+	copy include\hpdf_pdfa.h $(ZLIB_PREFIX)\include
 	copy libhpdf.lib $(ZLIB_PREFIX)\lib
 	copy libhpdf.dll $(ZLIB_PREFIX)\bin
 
