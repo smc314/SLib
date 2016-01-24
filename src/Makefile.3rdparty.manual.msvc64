@@ -105,11 +105,11 @@ curl:
 	copy lib\*.* ..\..\..\lib
 	cd ..\..\..
 
-#$(CURL) http://download.sourceforge.net/libpng/libpng-1.6.20.tar.gz
+#$(CURL) ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.20.tar.gz
 png:
 	del /Q /S libpng-1.6.20.tar.gz
 	rm -rf libpng-1.6.20
-	$(CURL) ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.20.tar.gz
+	$(CURL) http://download.sourceforge.net/libpng/libpng-1.6.20.tar.gz
 	$(UNTAR) libpng-1.6.20.tar.gz
 	cd libpng-1.6.20
 	copy ..\SLib\src\Makefile.libpng.msvc64 scripts
@@ -127,6 +127,7 @@ libharu:
 	$(CURL) https://github.com/libharu/libharu/archive/RELEASE_2_3_0.zip
 	$(UNZIP) RELEASE_2_3_0.zip
 	copy SLib\src\Makefile.libharu.win64dll libharu-RELEASE_2_3_0\script
+	copy SLib\src\hpdf_config.win64.h libharu-RELEASE_2_3_0\include\hpdf_config.h
 	cd libharu-RELEASE_2_3_0
 	nmake -f script\Makefile.libharu.win64dll ZLIB_PREFIX=.. PNG_PREFIX=.. all install
 
