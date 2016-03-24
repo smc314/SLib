@@ -39,7 +39,7 @@ Date::Date()
 
 Date::Date(const Date& d)
 {
-	m_TimeVal = d.m_TimeVal;
+	//m_TimeVal = d.m_TimeVal;
 	m_TimeStruct = (struct tm *)malloc(sizeof(struct tm));
 	memcpy(m_TimeStruct, d.m_TimeStruct, sizeof(struct tm));
 	m_picture = (char *)malloc(64);
@@ -57,7 +57,7 @@ Date& Date::operator=(const Date& d)
 	if(&d == this){
 		return *this;
 	}
-	m_TimeVal = d.m_TimeVal;
+	//m_TimeVal = d.m_TimeVal;
 	memcpy(m_TimeStruct, d.m_TimeStruct, sizeof(struct tm));
 	return *this;
 }
@@ -106,7 +106,7 @@ void Date::SetValue(const char *date)
 	m_TimeStruct->tm_mon -= 1; // months in struct are 0 based.
 	
 	// Ensure our TimeVal is also in sync.
-	m_TimeVal = mktime(m_TimeStruct);
+	//m_TimeVal = mktime(m_TimeStruct);
 		
 }
 
@@ -261,7 +261,7 @@ void Date::SetValue(const char* date, const char* format)
 	m_TimeStruct->tm_mon -= 1; // months in struct are 0 based.
 
 	// Ensure our TimeVal is also in sync.
-	m_TimeVal = mktime(m_TimeStruct);
+	//m_TimeVal = mktime(m_TimeStruct);
 		
 }
 
@@ -289,13 +289,18 @@ void Date::SetValue(const time_t t)
 
 Date::operator time_t() const
 {
-	return m_TimeVal;
+	struct tm tmp_tm;
+
+	// use a temporary because mktime modifies it's argument.
+	memcpy(&tmp_tm, m_TimeStruct, sizeof(struct tm));
+	time_t tmp = mktime(&tmp_tm);	
+	return tmp;
 }
 
 void Date::SetValue(const struct tm* t)
 {
 	memcpy(m_TimeStruct, t, sizeof(struct tm));
-	m_TimeVal = mktime(m_TimeStruct);
+	//m_TimeVal = mktime(m_TimeStruct);
 }
 
 Date::operator const struct tm*() const
@@ -664,7 +669,7 @@ void Date::Normalize(void)
 	}
 	
 	// Ensure our TimeVal is also in sync.
-	m_TimeVal = mktime(m_TimeStruct);
+	//m_TimeVal = mktime(m_TimeStruct);
 		
 }
 
