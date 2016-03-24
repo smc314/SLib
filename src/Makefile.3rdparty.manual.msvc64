@@ -41,11 +41,11 @@ zlib:
 	cd ..
 	
 openssl:
-	del /Q /S openssl-1.0.2e.tar.gz
-	rm -rf openssl-1.0.2e
-	$(CURL) https://www.openssl.org/source/openssl-1.0.2e.tar.gz
-	-$(UNTAR) openssl-1.0.2e.tar.gz
-	cd openssl-1.0.2e
+	del /Q /S openssl-1.0.2g.tar.gz
+	rm -rf openssl-1.0.2g
+	$(CURL) https://www.openssl.org/source/openssl-1.0.2g.tar.gz
+	-$(UNTAR) openssl-1.0.2g.tar.gz
+	cd openssl-1.0.2g
 	perl Configure VC-WIN64A shared --prefix=$(CURRENTPATH)
 	ms\do_win64a
 	nmake -f ms\ntdll.mak
