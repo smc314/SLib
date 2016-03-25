@@ -12,8 +12,10 @@
 
 CURRENTPATH=c:\\Users\\smc\\dev\\3rdParty
 MINGW_BINDIR=c:/Program Files/Git/mingw64/bin
+GIT_BIN=c:/Program Files/Git/bin
 GIT_USRBIN=c:/Program Files/Git/usr/bin
 PATH=$(PATH);$(MINGW_BINDIR);$(GIT_USRBIN)
+GIT="$(GIT_BIN)/git.exe"
 CURL="$(MINGW_BINDIR)/curl.exe" -O -L
 UNZIP="$(GIT_USRBIN)/unzip.exe"
 UNTAR="$(GIT_USRBIN)/tar.exe" xvfz
@@ -135,6 +137,9 @@ qx:
 	rm -rf qooxdoo-5.0.1-sdk*
 	$(CURL) http://downloads.sourceforge.net/qooxdoo/qooxdoo-5.0.1-sdk.zip
 	$(UNZIP) qooxdoo-5.0.1-sdk.zip
+	cd qooxdoo-5.0.1-sdk.zip\application
+	$(GIT) clone https://github.com/sqville/sqv.git
+
 
 
 
