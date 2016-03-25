@@ -137,7 +137,7 @@ qx:
 	rm -rf qooxdoo-5.0.1-sdk*
 	$(CURL) http://downloads.sourceforge.net/qooxdoo/qooxdoo-5.0.1-sdk.zip
 	$(UNZIP) qooxdoo-5.0.1-sdk.zip
-	cd qooxdoo-5.0.1-sdk.zip\application
+	cd qooxdoo-5.0.1-sdk\application
 	$(GIT) clone https://github.com/sqville/sqv.git
 
 
