@@ -86,6 +86,9 @@ class DLLEXPORT HttpClient
 		  */
 		MemBuf ResponseBuffer;
 
+	protected:
+		CURL* m_curl_handle;
+
 	private:
 
 		/// Copy constructor is private to prevent use
@@ -94,7 +97,6 @@ class DLLEXPORT HttpClient
 		/// Assignment operator is private to prevent use
 		HttpClient& operator=(const HttpClient& c) { return *this; }
 
-		CURL* m_curl_handle;
 };
 
 } // End Namespace SLib
