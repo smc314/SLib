@@ -168,6 +168,10 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 		curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYPEER, false);
 		curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYHOST, false);
 	}
+
+	// Call for any extra curl options from child classes
+	PostOptions();
+
 	{ // for timing scope
 		EnEx ee3(FL, "HttpClient::Post - curl_easy_perform");
 		curl_easy_perform( m_curl_handle );
@@ -175,7 +179,20 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 	curl_easy_reset( m_curl_handle );
 	curl_slist_free_all(slist);
 
+	// Call for any extra free-up of data or configs
+	PostFree();
+
 	return ResponseBuffer.data();
+}
+
+void HttpClient::PostOptions()
+{
+	// Our implementation does nothing with this method.  Child classes can override this as necessary.
+}
+
+void HttpClient::PostFree()
+{
+	// Our implementation does nothing with this method.  Child classes can override this as necessary.
 }
 
 xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)
