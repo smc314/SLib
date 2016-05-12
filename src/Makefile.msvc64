@@ -37,7 +37,7 @@ MINIZIP_OH=ioapi.$(OHEXT) iowin32.$(OHEXT) mztools.$(OHEXT) unzip.$(OHEXT) zip.$
 
 DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
 	Thread.$(OHEXT) Mutex.$(OHEXT) Tools.$(OHEXT) twine.$(OHEXT) Date.$(OHEXT) \
-	smtp.$(OHEXT) Interval.$(OHEXT) EMail.$(OHEXT) Timer.$(OHEXT) \
+	smtp.$(OHEXT) SmtpClient.$(OHEXT) Interval.$(OHEXT) EMail.$(OHEXT) Timer.$(OHEXT) \
 	Parms.$(OHEXT) LogMsg.$(OHEXT) Hash.$(OHEXT) EnEx.$(OHEXT) XmlHelpers.$(OHEXT) \
 	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT) HttpClient.$(OHEXT) ZipFile.$(OHEXT) \
 	MemBuf.$(OHEXT) sqlite3.$(OHEXT) LogFile2.$(OHEXT)
@@ -96,6 +96,9 @@ test_runcmd: test_runcmd.$(OHEXT) test_echoargs.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_echoargs.exe test_echoargs.$(OHEXT) libSLib.lib $(LLIBS)
 	$(LINK) $(LFLAGS) /OUT:test_runcmd.exe test_runcmd.$(OHEXT) libSLib.lib $(LLIBS)
 
+test_SmtpClient: test_SmtpClient.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_SmtpClient.exe test_SmtpClient.$(OHEXT) libSLib.lib $(LLIBS)
+
 incs:
 	$(CP) *.h ..\include
 	$(CP) Pool.cpp ..\include
@@ -106,7 +109,7 @@ clean:
 	$(RM) ..\lib\libSLib.lib
 	$(RM) ..\include\*.h
 	$(RM) ..\include\Pool.cpp
-	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h ZipFile.h MemBuf.h sqlite3.h sqlite3ext.h LogFile2.h
+	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h SmtpClient.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h ZipFile.h MemBuf.h sqlite3.h sqlite3ext.h LogFile2.h
 
 
 install:

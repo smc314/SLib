@@ -52,7 +52,7 @@ class DLLEXPORT EMail
 		  * The rest of the e-mail attributes can be filled in
 		  * afterwards.
 		  */
-		EMail(twine subject);
+		EMail(const twine& subject);
 
 		/// Copy Constructor
 		EMail(const EMail& e);
@@ -64,7 +64,7 @@ class DLLEXPORT EMail
 		virtual ~EMail();
 
 		/// Set the Subject of the e-mail
-		void Subject(twine& subj);
+		void Subject(const twine& subj);
 
 		/// Get the Subject of the e-mail
 		twine& Subject(void);
@@ -75,31 +75,31 @@ class DLLEXPORT EMail
 		  * characters.  This is a requirement of the e-mail systems
 		  * we will be communicating with.
 		  */
-		void Body(twine& msg);
+		void Body(const twine& msg);
 
 		/// Get the body text of the e-mail
 		twine& Body(void);
 
 		/// Set the from e-mail address
-		void From(twine& addr);
+		void From(const twine& addr);
 
 		/// Get the from e-mail address
 		twine& From(void);
 
 		/// Set the reply-to e-mail address
-		void ReplyTo(twine& addr);
+		void ReplyTo(const twine& addr);
 	
 		/// Get the reply-to e-mail address
 		twine& ReplyTo(void);
 
 		/// Add an e-mail address to the TO list.
-		void AddTO(twine& addr);
+		void AddTO(const twine& addr);
 
 		/// Get the full list of TO addresses
 		vector < twine >& TOList(void);		
 
 		/// Add an e-mail address to the CC list.
-		void AddCC(twine& addr);
+		void AddCC(const twine& addr);
 
 		/// Get the full list of CC addresses
 		vector < twine >& CCList(void);

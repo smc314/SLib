@@ -22,7 +22,7 @@
 
 using namespace SLib;
 
-EMail::EMail(twine subject)
+EMail::EMail(const twine& subject)
 {
 	m_subject = subject;
 }
@@ -55,7 +55,7 @@ EMail::~EMail()
 	// nothing yet.
 }
 
-void EMail::Subject(twine& subj)
+void EMail::Subject(const twine& subj)
 {
 	m_subject = subj;
 }
@@ -65,7 +65,7 @@ twine& EMail::Subject(void)
 	return m_subject;
 }
 
-void EMail::Body(twine& msg)
+void EMail::Body(const twine& msg)
 {
 	size_t ptr1;
 	m_body = msg;
@@ -88,7 +88,7 @@ twine& EMail::Body(void)
 	return m_body;
 }
 
-void EMail::From(twine& addr)
+void EMail::From(const twine& addr)
 {
 	m_from = addr;
 }
@@ -98,7 +98,7 @@ twine& EMail::From(void)
 	return m_from;
 }
 
-void EMail::ReplyTo(twine& addr)
+void EMail::ReplyTo(const twine& addr)
 {
 	m_reply_to = addr;
 }
@@ -108,7 +108,7 @@ twine& EMail::ReplyTo(void)
 	return m_reply_to;
 }
 
-void EMail::AddTO(twine& addr)
+void EMail::AddTO(const twine& addr)
 {
 	m_to_list.push_back(addr);
 }
@@ -118,7 +118,7 @@ vector < twine >& EMail::TOList(void)
 	return m_to_list;
 }
 
-void EMail::AddCC(twine& addr)
+void EMail::AddCC(const twine& addr)
 {
 	m_cc_list.push_back(addr);
 }

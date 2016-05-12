@@ -36,7 +36,7 @@ zip.o:	zip.c
 # smtp.o is not here because we need to find out how to compile it
 # on a mac before including it in this list.
 DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Mutex.o Tools.o twine.o Date.o \
-	Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o XmlHelpers.o BlockingQueue.o File.o \
+	SmtpClient.o Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o XmlHelpers.o BlockingQueue.o File.o \
 	LogFile.o HttpClient.o ZipFile.o MemBuf.o sqlite3.o LogFile2.o
 
 MINIZIP_OH=ioapi.o mztools.o unzip.o zip.o
@@ -111,6 +111,9 @@ test_runcmd: test_runcmd.o test_echoargs.o $(DOTOH)
 
 test_tmp: test_tmp.o $(DOTOH)
 	$(CC) -o test_tmp test_tmp.o $(DOTOH) $(MINIZIP_OH) $(LFLAGS)
+
+test_SmtpClient: test_SmtpClient.o $(DOTOH)
+	$(CC) -o test_SmtpClient test_SmtpClient.o $(DOTOH) $(MINIZIP_OH) $(LFLAGS)
 
 
 docs: 
