@@ -34,52 +34,72 @@ int main (void)
 	Date bd;
 	Date cd;
 
-	printf("ad is (%s)\n", ad.GetValue());
-	printf("ad is also (%s)\n", ad.GetValue("%Y-%m-%d-%H-%M-%S"));
+	printf("ad is (%s)\n", ad.GetValue()());
+	printf("ad is also (%s)\n", ad.GetValue("%Y-%m-%d-%H-%M-%S")());
 
 	bd.SetValue("07/13/2001 01:02:03.456", "%m/%d/%Y %H:%M:%S");
-	printf("bd is (%s)\n", bd.GetValue());
-	printf("bd is also (%s)\n", bd.GetValue("%m/%d/%Y %H:%M:%S"));
+	printf("bd is (%s)\n", bd.GetValue()());
+	printf("bd is also (%s)\n", bd.GetValue("%m/%d/%Y %H:%M:%S")());
+	printf("bd is also (%s)\n", bd.GetValue("%Y%m%d%H%M%S")());
+	printf("bd is also (%s)\n", bd.EDate()());
+	printf("bd is also (%s)\n", bd.EDate()());
+	printf("bd is also (%s)\n", bd.EDate()());
+	printf("bd is also (%s)\n", bd.EDate()());
+
+	twine tmp, tmp2;
+	tmp2 = bd.EDate();
+	tmp.format("Date: %s\r\n", tmp2() );
+	printf("%s\n", tmp());
+
+	printf("Before direct format\n");
+	tmp.format("Date: %s\r\n", bd.GetValue("%Y%m%d%H%M%S")() );
+	printf("After direct format\n");
+	printf("%s", tmp() );
+
+	printf("Before EDate format\n");
+	tmp.format("Date: %s\r\n", bd.EDate()() );
+	printf("After EDate format\n");
+	printf("%s", tmp() );
 
 	ad.Floor();
 	bd = ad;
 	bd.Ceil();
 
-	printf("ad is (%s) bd is (%s)\n", ad.GetValue(), bd.GetValue());
+	printf("ad is (%s) bd is (%s)\n", ad.GetValue()(), bd.GetValue()());
 
 	cd.SetValue("7/4/2001", "%m/%d/%Y");
-	printf("cd is (%s)\n", cd.GetValue());
+	printf("cd is (%s)\n", cd.GetValue()());
 
 	cd.SetValue("7/4/89", "%m/%d/%Y");
-	printf("cd is (%s)\n", cd.GetValue());
+	printf("cd is (%s)\n", cd.GetValue()());
 
 	cd.SetValue("7/4/01", "%m/%d/%Y");
-	printf("cd is (%s)\n", cd.GetValue());
+	printf("cd is (%s)\n", cd.GetValue()());
 
 	cd.SetValue("20010714080910.123", "%Y%m%d%H%M%S");
-	printf("cd is (%s)\n", cd.GetValue());
+	printf("cd is (%s)\n", cd.GetValue()());
 
 	cd.SetValue("2001/09/01 00:08:05");
-	printf("Initial cd is (%s)\n", cd.GetValue());
+	printf("Initial cd is (%s)\n", cd.GetValue()());
 	cd.AddSec(-65);
-	printf("cd is (%s)\n", cd.GetValue());
+	printf("cd is (%s)\n", cd.GetValue()());
 
 	ad.SetValue("2001/08/09 12:00:00");
 	bd.SetValue("2001/08/09 12:30:00");
 
 	if(bd - ad > SLib::Interval(10, MINUTES)){
 		printf("(%s) - (%s) has a difference greater than 10 minutes\n",
-			bd.GetValue(), ad.GetValue());
+			bd.GetValue()(), ad.GetValue()());
 	}
 
 	if(bd - ad > SLib::Interval(20, MINUTES)){
 		printf("(%s) - (%s) has a difference greater than 20 minutes\n",
-			bd.GetValue(), ad.GetValue());
+			bd.GetValue()(), ad.GetValue()());
 	}
 
 	if(bd - ad > SLib::Interval(1, DAY)){
 		printf("(%s) - (%s) has a difference greater than 1 day\n",
-			bd.GetValue(), ad.GetValue());
+			bd.GetValue()(), ad.GetValue()());
 	}
 
 	test_conversions();
@@ -89,7 +109,11 @@ int main (void)
 
 void test_conversions(void)
 {
+	printf("test_conversions - start");
+
 	Date d;
+
+	printf("test_conversions - date <--> time_t");
 
 	// Date <--> time_t
 	time_t t;
@@ -100,6 +124,7 @@ void test_conversions(void)
 	d.SetCurrent();
 	t = d;
 
+	printf("test_conversions - date <--> struct tm*");
 	// Date <--> struct tm*
 	struct tm* stm;
 
@@ -110,12 +135,15 @@ void test_conversions(void)
 	d.SetCurrent();
 	const struct tm* cstm = d;
 
+	printf("test_conversions - date <--> xmlChar*");
 	// Date <--> xmlChar*
-	xmlChar* xmlc = (xmlChar*)"2002/10/30 10:33:00";
+	xmlChar* xmlc = (xmlChar*)xmlMalloc(24);	
+	memcpy(xmlc, "2002/10/30 10:33:00", 19);
 	d.SetValue(xmlc);
 
 	const xmlChar* cxmlc = d;
 
+	printf("test_conversions - date <--> char*");
 	// Date <--> char*
 	char* c = "2002/10/30 10:33:00";
 	d.SetValue(c);
@@ -123,6 +151,7 @@ void test_conversions(void)
 	const char* cc = d;
 
 #ifdef _WIN32
+/*
 	// Date <--> CTime
 	CTime ct;
 	d.SetValue(ct);
@@ -140,7 +169,8 @@ void test_conversions(void)
 	d.SetValue(D);
 
 	D = d;
-
+*/
 #endif _WIN32
 
+	printf("test_conversions - done");
 }

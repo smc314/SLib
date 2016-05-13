@@ -314,7 +314,7 @@ class DLLEXPORT Date
 		    </pre>
 		  * Hours are 24 based.
 		  */
-		virtual char *GetValue(void);
+		virtual twine GetValue(void);
 
 		/**
 		  * Use this to retrive the current value of this date
@@ -331,9 +331,9 @@ class DLLEXPORT Date
 		  * Anything else in the format is considered a character
 		  * literal and is copied to the output date string directly.
 		  */
-		virtual char *GetValue(const char* format);
-		virtual char *GetValue(const twine& format);
-		virtual char *GetValue(const twine* format);
+		virtual twine GetValue(const char* format);
+		virtual twine GetValue(const twine& format);
+		virtual twine GetValue(const twine* format);
 
 		/**
 		  * Use this function to set the hour, minute, and second
@@ -457,7 +457,7 @@ class DLLEXPORT Date
 		    "Wed Jun 30 21:49:08 1993"		    
 		    </pre>
 		  */
-		virtual char* EDate(void);
+		virtual twine EDate(void);
 
 		/// equivalence operator
 		bool operator==(const Date& d) const;

@@ -75,7 +75,7 @@ test_logfile: test_logfile.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_logfile.exe test_logfile.$(OHEXT) libSLib.lib $(LLIBS)
 
 test_date: test_date.$(OHEXT)
-	$(LINK) /OUT:test_date.exe test_date.$(OHEXT) libSLib.lib $(LFLAGS)
+	$(LINK) /OUT:test_date.exe test_date.$(OHEXT) libSLib.lib $(3PL)\lib\libxml2.lib $(LFLAGS)
 
 test_sleep: test_sleep.$(OHEXT)
 	$(LINK) /OUT:test_sleep.exe test_sleep.$(OHEXT) libSLib.lib $(LFLAGS)

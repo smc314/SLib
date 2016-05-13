@@ -34,17 +34,17 @@ size_t SmtpClient_ReadMemoryCallback(void* contents, size_t size, size_t nmemb, 
 {
 	SmtpClient* client = (SmtpClient*)userp;
 
-	printf("SmtpClient_ReadMemoryCallback(contents, %ld, %ld, userp) SendIndex = %ld\n", size, nmemb, client->SendIndex);
+	//printf("SmtpClient_ReadMemoryCallback(contents, %ld, %ld, userp) SendIndex = %ld\n", size, nmemb, client->SendIndex);
 
 	// If they don't want us to ready any memory, bail out quickly.
 	if( (size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
-		printf("SmtpClient_ReadMemoryCallback - size/nmemb is zero\n");
+		//printf("SmtpClient_ReadMemoryCallback - size/nmemb is zero\n");
 		return 0;
 	}
 
 	// If we've sent all of our memory already, bail out quickly
 	if(client->SendIndex >= client->SendLines.size()){
-		printf("SmtpClient_ReadMemoryCallback - nothing more to send.\n");
+		//printf("SmtpClient_ReadMemoryCallback - nothing more to send.\n");
 		return 0; // nothing more to send
 	}
 
@@ -167,11 +167,11 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 	curl_easy_setopt( m_curl_handle, CURLOPT_UPLOAD, 1L );
 
 	// For progress information
-	//curl_easy_setopt( m_curl_handle, CURLOPT_NOPROGRESS, 0L);
-	//curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSFUNCTION, SmtpClient_ProgressCallback );
-	//curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSDATA, this );
+	curl_easy_setopt( m_curl_handle, CURLOPT_NOPROGRESS, 0L);
+	curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSFUNCTION, SmtpClient_ProgressCallback );
+	curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSDATA, this );
 
-	curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1L );
+	curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 0L );
 
 	// Add in proxy information if given
 	if(!m_proxy.empty()){
@@ -185,7 +185,7 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 	twine errmsg; 
 	if(res != CURLE_OK){
 		errmsg.format("Sending SMTP Message failed: %s", curl_easy_strerror(res) );
-		printf("%s", errmsg() );
+		//printf("%s", errmsg() );
 	}
 
 	// Always clean up and free lists
@@ -222,6 +222,7 @@ void SmtpClient::FormatMessage(EMail& message )
 {
 	EnEx ee(FL, "SmtpClient::FormatMessage(EMail& message)" );
 
+	//printf("here0\n");
 	SendLines.clear();
 	SendIndex = 0;
 
@@ -230,13 +231,18 @@ void SmtpClient::FormatMessage(EMail& message )
 	if(message.ReplyTo().size() == 0){
 		message.ReplyTo(message.From());
 	}
-
-	twine boundary;  boundary.format("SLibSmtpClient=%s", message.CreateDate().GetValue("%Y%m%d%H%M%S") );
+	//printf("here1\n");
+	twine boundary;  boundary.format("SLibSmtpClient=%s", message.CreateDate().GetValue("%Y%m%d%H%M%S")() );
+	//printf("here1a\n");
 
 	tmp.format("From: %s\r\n", message.From()() ); SendLines.push_back( tmp );
+	//printf("here1b\n");
 	tmp.format("Subject: %s\r\n", message.Subject()() ); SendLines.push_back( tmp );
-	tmp.format("Date: %s\r\n", message.CreateDate().EDate() ); SendLines.push_back( tmp );
+	//printf("here1c\n");
+	tmp.format("Date: %s\r\n", message.CreateDate().EDate()() ); SendLines.push_back( tmp );
+	//printf("here1d\n");
 	tmp.format("Reply-To: %s\r\n", message.ReplyTo()() ); SendLines.push_back( tmp );
+	//printf("here2\n");
 	//tmp.format("Content-Type: multipart/alternative; boundary=\"%s\"\r\n", boundary() );
 	tmp = "To:";
 	for(size_t i = 0; i < message.TOList().size()-1; i++){
@@ -245,15 +251,17 @@ void SmtpClient::FormatMessage(EMail& message )
 	tmp += " " + message.TOList()[ message.TOList().size() - 1] + "\r\n";
 	SendLines.push_back( tmp );
 
+	//printf("here3");
 	if(message.CCList().size() > 0){
 		tmp = "Cc:";
-		for(size_t i = 0; i < message.TOList().size()-1; i++){
-			tmp += " " + message.TOList()[i] + ",";
+		for(size_t i = 0; i < message.CCList().size()-1; i++){
+			tmp += " " + message.CCList()[i] + ",";
 		}
-		tmp += " " + message.TOList()[ message.TOList().size() - 1] + "\r\n";
+		tmp += " " + message.CCList()[ message.CCList().size() - 1] + "\r\n";
 		SendLines.push_back( tmp );
 	}
 
+	//printf("here4");
 	SendLines.push_back( "\r\n" ); // Empty line to divide headers from body
 	
 	//SendLines.push_back( "--" + boundary + "\r\n" );
@@ -263,6 +271,7 @@ void SmtpClient::FormatMessage(EMail& message )
 	for(size_t i = 0; i < bodyLines.size(); i++){
 		SendLines.push_back( bodyLines[i] + "\r\n" );
 	}
+	//printf("here5");
 
 	//SendLines.push_back( "--" + boundary + "\r\n" );
 

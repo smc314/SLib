@@ -570,39 +570,49 @@ twine& twine::format(const char* f, va_list ap)
 	if(f == NULL){
 		throw AnException(0, FL, "Null format string.");
 	}
-	
+	//printf("twine here1\n");	
 	reserve(256); // make sure we have a minimum amount of space
 
+	//printf("twine here2\n");	
 	while(!success){
 		// Use a copy of the args list so that we can cycle through
 		// them as many times as we need to:
+		//printf("twine here3\n");	
 		va_list apCopy;
+		//printf("twine here4\n");	
 #ifdef _WIN32
 		memcpy(&apCopy, &ap, sizeof(va_list) );
 #else
 		va_copy(apCopy, ap);
 #endif
 
+		//printf("twine here5\n");	
 		memset(m_data, 0, m_allocated_size);
+		//printf("twine here6\n");	
 #ifdef _WIN32
 		nsize = _vsnprintf(m_data, m_allocated_size - 1, f, apCopy);
 #else
 		nsize = vsnprintf(m_data, m_allocated_size - 1, f, apCopy);
 #endif
 
+		//printf("twine here7\n");	
 		if(nsize < 0) { // older C libraries
+			//printf("twine here8\n");	
 			// double twine capacity
 			reserve(m_allocated_size * 2);  
 			success = false;
 		} else if (nsize > (int)(m_allocated_size - 1)){ // newer C lib
+			//printf("twine here9\n");	
 			// give it requested size
 			reserve(nsize + 20);                 
 			success = false;
 		} else {
+			//printf("twine here10\n");	
 			success = true;
 			m_data_size = nsize;
 		}
 	}
+	//printf("twine here11\n");	
 	return *this;
 }
 

@@ -315,9 +315,8 @@ class DLLEXPORT XmlHelpers {
 				throw AnException(0, FL, "NULL attribute name passed into setDateAttr");
 			}
 			Date* td = (Date*)&date;
-			xmlChar* tmp = (xmlChar*)td->GetValue();
 
-			xmlSetProp(node, (const xmlChar*)attrName, tmp);
+			xmlSetProp(node, (const xmlChar*)attrName, td->GetValue());
 		}
 			
 

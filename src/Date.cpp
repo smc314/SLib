@@ -310,7 +310,7 @@ Date::operator const struct tm*() const
 
 Date::operator const char*()
 {
-	return GetValue();
+	return GetValue()();
 }
 
 void Date::SetValue(xmlChar* c)
@@ -369,7 +369,7 @@ Date::operator DATE() const
 #endif // _WIN32
 
 
-char *Date::GetValue(void)
+twine Date::GetValue(void)
 {
 	memset(m_picture, 0, 64);
 
@@ -377,10 +377,11 @@ char *Date::GetValue(void)
 
 	m_len = 19;
 	
-	return m_picture;
+	twine ret; ret.set(m_picture, m_len);
+	return ret;
 }
 	
-char *Date::GetValue(const char* format)
+twine Date::GetValue(const char* format)
 {
 	memset(m_picture, 0, 64);
 
@@ -388,15 +389,16 @@ char *Date::GetValue(const char* format)
 
 	m_len = strlen(m_picture);
 	
-	return m_picture;
+	twine ret; ret.set(m_picture, m_len);
+	return ret;
 }
 
-char* Date::GetValue(const twine& format)
+twine Date::GetValue(const twine& format)
 {
 	return GetValue(format());
 }
 
-char* Date::GetValue(const twine* format)
+twine Date::GetValue(const twine* format)
 {
 	return GetValue(format->c_str());
 }
@@ -683,7 +685,7 @@ time_t Date::Epoch(void)
 	return m_TimeVal;
 }
 
-char* Date::EDate(void)
+twine Date::EDate(void)
 {
 	memset(m_picture, 0, 64);
 
@@ -691,7 +693,8 @@ char* Date::EDate(void)
 
 	m_len = strlen(m_picture);
 	
-	return m_picture;
+	twine ret; ret.set(m_picture, m_len);
+	return ret;
 }
 	
 
