@@ -848,6 +848,9 @@ twine& twine::append(const char* c)
 		return *this; // nothing to append
 	}
 	size_t csize = strlen(c);
+	if(csize > MAX_INPUT_SIZE){
+		throw AnException(0,FL,"twine: Input Too Large");
+	}
 	reserve(m_data_size + csize);
 	memcpy(m_data + m_data_size, c, csize);
 	m_data_size += csize;
@@ -860,6 +863,9 @@ twine& twine::append(const char* c, size_t count)
 	//EnEx ee("twine::append(const char* c, size_t count)");
 	if(c == NULL){
 		return *this; // nothing to append
+	}
+	if(count > MAX_INPUT_SIZE){
+		throw AnException(0,FL,"twine: Input Too Large");
 	}
 	reserve(m_data_size + count);
 	memcpy(m_data + m_data_size, c, count);
@@ -877,6 +883,9 @@ twine& twine::insert(size_t p, const char* c)
 	}
 
 	size_t csize = strlen(c);
+	if(csize > MAX_INPUT_SIZE){
+		throw AnException(0,FL,"twine: Input Too Large");
+	}
 	reserve(m_data_size + csize);
 	for(size_t i = m_data_size - 1; i >= p; i--){
 		m_data[i+csize] = m_data[i];
@@ -1079,6 +1088,9 @@ void twine::strupr(char* input)
 		throw AnException(0, FL, "twine::strupr - input is NULL");
 	}
 	size_t len = strlen(input);
+	if(len > MAX_INPUT_SIZE){
+		throw AnException(0,FL,"twine: Input Too Large");
+	}
 	for(size_t i = 0; i < len; i++){
 		input[i] = toupper(input[i]);
 	}
@@ -1091,6 +1103,9 @@ void twine::strlwr(char* input)
 		throw AnException(0, FL, "twine::strlwr - input is NULL");
 	}
 	size_t len = strlen(input);
+	if(len > MAX_INPUT_SIZE){
+		throw AnException(0,FL,"twine: Input Too Large");
+	}
 	for(size_t i = 0; i < len; i++){
 		input[i] = tolower(input[i]);
 	}
@@ -1180,6 +1195,9 @@ twine& twine::getAttribute(xmlNodePtr node, const char* attrName)
 twine& twine::encode64()
 {
 	//EnEx ee("twine::encode64()");
+	if(size() == 0){
+		return *this; // We're an empty string
+	}
 
 	// Run the conversion
 	size_t len;
@@ -1197,6 +1215,9 @@ twine& twine::encode64()
 twine& twine::decode64()
 {
 	//EnEx ee("twine::decode64()");
+	if(size() == 0){
+		return *this; // We're an empty string
+	}
 
 	// Run the conversion
 	size_t len;

@@ -151,14 +151,13 @@ map<const char*, EnExProfile*>* EnterExit::FindOurHitCounter(void)
 			return HitCounterList()[i].second;
 		}
 	}
+
 	// If we get here, then our tid was not in the list.  Add it in.
+	SLib::Lock the_lock(HitCounterListAddMutex());
 	pair<THREAD_ID_TYPE, map<const char*, EnExProfile*>* > the_pair;
 	the_pair.first = tid;
 	the_pair.second = new map<const char*, EnExProfile*>();
-	{ // for scope
-		SLib::Lock the_lock(HitCounterListAddMutex());
-		HitCounterList().push_back(the_pair);
-	} // mutex released here
+	HitCounterList().push_back(the_pair);
 	return the_pair.second;
 }
 
@@ -172,13 +171,11 @@ vector<const char*>* EnterExit::FindOurStackTrace(void)
 	}
 
 	// If we get here, then our tid was not in the list.  Add it in.
+	SLib::Lock the_lock(HitCounterListAddMutex());
 	pair<THREAD_ID_TYPE, vector<const char*>* > the_pair;
 	the_pair.first = tid;
 	the_pair.second = new vector<const char*>();
-	{ // for scope
-		SLib::Lock the_lock(HitCounterListAddMutex());
-		StackTraceList().push_back(the_pair);
-	} // mutex released here
+	StackTraceList().push_back(the_pair);
 	return the_pair.second;
 }
 

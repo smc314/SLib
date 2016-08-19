@@ -97,6 +97,16 @@ class DLLEXPORT HttpClient
 		 */
 		virtual void PostFree();
 
+		/** This is an internal method that is called by Get just before the curl_easy_perform is
+		 * called.  This allows you to set any other options you need for curl to do it's work.
+		 */
+		virtual void GetOptions();
+
+		/** If you need to free up any data that was allocated in GetOptions, do it here.  This will be
+		 * called after the curl_easy_perform, and after we have reset the curl handle.
+		 */
+		virtual void GetFree();
+
 		CURL* m_curl_handle;
 
 	private:

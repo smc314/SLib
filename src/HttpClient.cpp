@@ -121,8 +121,13 @@ char* HttpClient::Get(const twine& url )
 	curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYPEER, false);
 	curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYHOST, false);
 
+	// Call for any extra curl options from child classes
+	GetOptions();
+
 	curl_easy_perform( m_curl_handle );
 	curl_easy_reset( m_curl_handle );
+
+	GetFree();
 
 	return ResponseBuffer.data();
 }
@@ -191,6 +196,16 @@ void HttpClient::PostOptions()
 }
 
 void HttpClient::PostFree()
+{
+	// Our implementation does nothing with this method.  Child classes can override this as necessary.
+}
+
+void HttpClient::GetOptions()
+{
+	// Our implementation does nothing with this method.  Child classes can override this as necessary.
+}
+
+void HttpClient::GetFree()
 {
 	// Our implementation does nothing with this method.  Child classes can override this as necessary.
 }
