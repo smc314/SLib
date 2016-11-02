@@ -65,6 +65,7 @@ class DLLEXPORT XmlHelpers {
 			}
 			// Loop through the child nodes and return the first one with a name that matches
 			for(xmlNodePtr node = parent->xmlChildrenNode; node != NULL; node = node->next){
+				if(node->type != XML_ELEMENT_NODE) continue;
 				if(strcmp((const char*)node->name, childNodeName) == 0){
 					return node;
 				}
@@ -91,6 +92,7 @@ class DLLEXPORT XmlHelpers {
 			
 			// Loop through the child nodes and return the first one with a name that matches
 			for(xmlNodePtr node = parent->xmlChildrenNode; node != NULL; node = node->next){
+				if(node->type != XML_ELEMENT_NODE) continue;
 				if(strcmp((const char*)node->name, childNodeName) == 0){
 					// Check the attribute:
 					twine an(node, attrName);
@@ -118,6 +120,7 @@ class DLLEXPORT XmlHelpers {
 			vector<xmlNodePtr> ret;
 			// Loop through the child nodes and return the first one with a name that matches
 			for(xmlNodePtr node = parent->xmlChildrenNode; node != NULL; node = node->next){
+				if(node->type != XML_ELEMENT_NODE) continue;
 				if(strcmp((const char*)node->name, childNodeName) == 0){
 					ret.push_back(node);
 				}
