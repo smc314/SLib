@@ -28,12 +28,28 @@
 
 #include "twine.h"
 #include "Date.h"
+#include "MemBuf.h"
 using namespace SLib;
 
 #include <vector>
 using namespace std;
 
 namespace SLib {
+
+/**
+  * This class represents an attachment for an e-mail message.  It holds
+  * all of the information necessary to get the attachment correctly formated
+  * and delivered to all of it's destinations.
+  *
+  * @copyright 2002 Steven M. Cherry
+  */
+class DLLEXPORT EMailAttachment
+{
+	public:
+		twine fileName;
+		twine mimeType;
+		MemBuf* data;
+};
 
 /**
   * This class represents an individual e-mail message.  It holds
@@ -104,6 +120,12 @@ class DLLEXPORT EMail
 		/// Get the full list of CC addresses
 		vector < twine >& CCList(void);
 
+		/// Add an e-mail attachment - Note, we'll delete this data when we destruct
+		void AddAttachment(const twine& fileName, const twine& mimeType, MemBuf* buf);
+
+		/// Get the full list of Attachments
+		vector < EMailAttachment >& AttachmentList(void);
+
 		/// Get the date this e-mail was created
 		Date& CreateDate(void);
 
@@ -116,6 +138,7 @@ class DLLEXPORT EMail
 		vector < twine > m_to_list;
 		vector < twine > m_cc_list;
 		Date m_create_date;
+		vector < EMailAttachment > m_attachment_list;
 
 };
 

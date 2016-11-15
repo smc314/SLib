@@ -19,6 +19,7 @@
 
 
 #include "EMail.h"
+#include "AnException.h"
 
 using namespace SLib;
 
@@ -52,7 +53,13 @@ EMail& EMail::operator=(const EMail& e)
 
 EMail::~EMail()
 {
-	// nothing yet.
+	// Ensure all attachment data is destroyed
+	for(size_t i = 0; i < m_attachment_list.size(); i++){
+		if(m_attachment_list[i].data != NULL){
+			delete m_attachment_list[i].data;
+			m_attachment_list[i].data = NULL;
+		}
+	}
 }
 
 void EMail::Subject(const twine& subj)
@@ -126,6 +133,29 @@ void EMail::AddCC(const twine& addr)
 vector < twine >& EMail::CCList(void)
 {
 	return m_cc_list;
+}
+
+void EMail::AddAttachment(const twine& fileName, const twine& mimeType, MemBuf* buf)
+{
+	if(fileName.empty()){
+		throw AnException(0, FL, "Missing attachment fileName");
+	}
+	if(mimeType.empty()){
+		throw AnException(0, FL, "Missing attachment mimeType");
+	}
+	if(buf == NULL || buf->size() == 0){
+		throw AnException(0, FL, "Missing attachment data");
+	}
+	EMailAttachment a;
+	a.fileName = fileName;
+	a.mimeType = mimeType;
+	a.data = buf;
+	m_attachment_list.push_back(a);
+}
+
+vector < EMailAttachment >& EMail::AttachmentList(void)
+{
+	return m_attachment_list;
 }
 
 Date& EMail::CreateDate(void)

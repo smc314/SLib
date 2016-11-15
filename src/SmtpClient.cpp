@@ -231,19 +231,14 @@ void SmtpClient::FormatMessage(EMail& message )
 	if(message.ReplyTo().size() == 0){
 		message.ReplyTo(message.From());
 	}
-	//printf("here1\n");
 	twine boundary;  boundary.format("SLibSmtpClient=%s", message.CreateDate().GetValue("%Y%m%d%H%M%S")() );
-	//printf("here1a\n");
 
 	tmp.format("From: %s\r\n", message.From()() ); SendLines.push_back( tmp );
-	//printf("here1b\n");
 	tmp.format("Subject: %s\r\n", message.Subject()() ); SendLines.push_back( tmp );
-	//printf("here1c\n");
 	tmp.format("Date: %s\r\n", message.CreateDate().EDate()() ); SendLines.push_back( tmp );
-	//printf("here1d\n");
 	tmp.format("Reply-To: %s\r\n", message.ReplyTo()() ); SendLines.push_back( tmp );
-	//printf("here2\n");
-	//tmp.format("Content-Type: multipart/alternative; boundary=\"%s\"\r\n", boundary() );
+	tmp.format("MIME-Version: 1.0\r\n" ); SendLines.push_back(tmp);
+	tmp.format("Content-Type: multipart/mixed; boundary=\"%s\"\r\n", boundary() ); SendLines.push_back(tmp);
 	tmp = "To:";
 	for(size_t i = 0; i < message.TOList().size()-1; i++){
 		tmp += " " + message.TOList()[i] + ",";
@@ -251,7 +246,6 @@ void SmtpClient::FormatMessage(EMail& message )
 	tmp += " " + message.TOList()[ message.TOList().size() - 1] + "\r\n";
 	SendLines.push_back( tmp );
 
-	//printf("here3");
 	if(message.CCList().size() > 0){
 		tmp = "Cc:";
 		for(size_t i = 0; i < message.CCList().size()-1; i++){
@@ -261,19 +255,45 @@ void SmtpClient::FormatMessage(EMail& message )
 		SendLines.push_back( tmp );
 	}
 
-	//printf("here4");
 	SendLines.push_back( "\r\n" ); // Empty line to divide headers from body
 	
-	//SendLines.push_back( "--" + boundary + "\r\n" );
-	//SendLines.push_back( "Content-Transfer-Encoding: quoted-printable\r\n");
-	//SendLines.push_back( "Content-Type: text/plain; charset=utf-8\r\n");
+	SendLines.push_back( "--" + boundary + "\r\n" );
+	SendLines.push_back( "Content-Type: text/plain; charset=utf-8\r\n");
+	SendLines.push_back( "\r\n" ); // Empty line to divide headers from body
+
 	vector<twine> bodyLines = message.Body().split("\n");
 	for(size_t i = 0; i < bodyLines.size(); i++){
 		SendLines.push_back( bodyLines[i] + "\r\n" );
 	}
-	//printf("here5");
 
-	//SendLines.push_back( "--" + boundary + "\r\n" );
+	vector< EMailAttachment >& attachments = message.AttachmentList();
+	for(size_t i = 0; i < attachments.size(); i++){
+		SendLines.push_back( "\r\n--" + boundary + "\r\n" );
+		tmp.format( "Content-Type: %s; charset=utf-8\r\n", attachments[i].mimeType() );
+		SendLines.push_back( tmp );
+		tmp.format( "Content-Disposition: attachment; filename=\"%s\"\r\n", attachments[i].fileName());
+		SendLines.push_back( tmp );
+		SendLines.push_back( "Content-Transfer-Encoding: base64\r\n");
+		SendLines.push_back( "\r\n" ); // Empty line to divide headers from body
 
-	// Include any attachment data here.
+		// base64 encode the attachment
+		attachments[i].data->encode64();
+
+		twine b64; b64.set( attachments[i].data->data(), attachments[i].data->size() );
+		vector<twine> attachLines = b64.split("\n");
+		for(size_t j = 0; j < attachLines.size(); j++){
+			SendLines.push_back( attachLines[j] + "\r\n" );
+		}
+		SendLines.push_back( "\r\n" ); // Terminate the data
+	}
+
+	SendLines.push_back( "\r\n" ); // Empty line to signal end of section
+	SendLines.push_back( "--" + boundary + "--\r\n" ); // Last boundary has -- before and after boundary text
+
+	/*
+	for(size_t i = 0; i < SendLines.size(); i++){
+		printf("%s", SendLines[i]() );
+	}
+	*/
+
 }
