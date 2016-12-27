@@ -363,12 +363,21 @@ int twine::compare(const twine& t) const
 int twine::compare(const char* c) const
 {
 	//EnEx ee("twine::compare(const char* c)");
-	if((m_data_size == 0) && (c == NULL)){
-		return 0; // equal if both null
+	if((m_data_size == 0)){
+		if(c == NULL){
+			return 0; // equal if both null
+		} else if( c[0] == '\0' ) {
+			return 0; // c is null terminated at first position - counts as empty/null
+		} else {
+			return -1; // c has something in it, but we don't
+		}
+	} else {
+		if(c == NULL || c[0] == '\0'){
+			return -1; // We have data, but c doesn't
+		} 
 	}
-	if(m_data_size == 0 || c == NULL){
-		return -1;
-	}
+
+	// We have data, and c has data - do a string compare
 	return strcmp(m_data, c);
 }
 
