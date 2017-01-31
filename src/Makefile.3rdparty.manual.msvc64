@@ -29,11 +29,12 @@ dirs:
 	mkdir lib
 
 zlib:
-	del /Q /S zlib-1.2.8 zlib128.zip
-	rm -rf  zlib-1.2.8
-	$(CURL) http://zlib.net/zlib128.zip
-	$(UNZIP) zlib128.zip
-	cd zlib-1.2.8
+	del /Q /S zlib-1.2.8 zlib128.zip 
+	del /Q /S zlib-1.2.11 zlib1211.zip 
+	rm -rf  zlib-1.2.11
+	$(CURL) http://zlib.net/zlib1211.zip
+	$(UNZIP) zlib1211.zip
+	cd zlib-1.2.11
 	nmake -f win32/Makefile.msc AS=ml64 LOC="-DASMV -DASMINF -I." OBJA="inffasx64.obj gvmat64.obj inffas8664.obj"
 	copy zdll.lib ..\lib
 	copy zlib.lib ..\lib
