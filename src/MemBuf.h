@@ -204,6 +204,10 @@ class DLLEXPORT MemBuf
 		  */
 		size_t size(void) const;
 
+		/** Sets the length of the MemBuf.
+		  */
+		void size(size_t newSize);
+
 		/** Returns the length of the MemBuf.
 		  */
 		size_t length(void) const;
@@ -259,6 +263,10 @@ class DLLEXPORT MemBuf
 		  */
 		MemBuf& Decrypt(xmlDocPtr doc, RSA* keypair, bool usePrivate = true);
 
+		/** Sometimes, notably in ODBC applications, it's useful to have an externally public
+		  * length indicator that goes along with this object.  Use this for those purposes.
+		  */
+		int userIntVal;
 
 	private:
 

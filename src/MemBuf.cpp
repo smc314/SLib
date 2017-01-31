@@ -42,7 +42,8 @@ MemBuf::MemBuf() :
 
 MemBuf::MemBuf(const MemBuf& t) :
 	m_data (NULL),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal (0)
 {
 	EnEx ee("MemBuf::MemBuf(const MemBuf& t)");
 
@@ -58,7 +59,8 @@ MemBuf::MemBuf(const MemBuf& t) :
 
 MemBuf::MemBuf(const char* c) :
 	m_data (NULL),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal (0)
 {
 	EnEx ee("MemBuf::MemBuf(const char* c)");
 	if(c == NULL){
@@ -72,7 +74,8 @@ MemBuf::MemBuf(const char* c) :
 
 MemBuf::MemBuf(const xmlChar* c) :
 	m_data (NULL),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal (0)
 {
 	EnEx ee("MemBuf::MemBuf(const xmlChar* c)");
 	if(c == NULL){
@@ -86,7 +89,8 @@ MemBuf::MemBuf(const xmlChar* c) :
 
 MemBuf::MemBuf(const size_t s) :
 	m_data (NULL),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal (0)
 {
 	EnEx ee("MemBuf::MemBuf(const size_t s)");
 	reserve(s);
@@ -95,7 +99,8 @@ MemBuf::MemBuf(const size_t s) :
 
 MemBuf::MemBuf(const twine& c):
 	m_data (NULL),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal (0)
 {
 	EnEx ee("MemBuf::MemBuf(const twine& c)");
 
@@ -114,6 +119,7 @@ MemBuf::~MemBuf()
 		}
 		m_data_size = 0;
 		m_data = NULL;
+		userIntVal = 0;
 	}
 }
 
@@ -135,6 +141,7 @@ MemBuf& MemBuf::operator=(const MemBuf& t)
 	reserve(t.m_data_size);
 	m_data_size = t.m_data_size;
 	memcpy(m_data, t.m_data, m_data_size);
+	userIntVal = t.userIntVal;
 	return *this;
 }
 
@@ -457,6 +464,16 @@ size_t MemBuf::size(void) const
 { 
 	EnEx ee("MemBuf::size(void)");
 	return m_data_size; 
+}
+
+void MemBuf::size(size_t newSize)
+{ 
+	EnEx ee("MemBuf::size(size_t newSize)");
+	// Make sure we have enough space - if they are asking for a bigger size, this
+	// will allocate the required data.
+	reserve(newSize);
+	erase(newSize); // Clean out anything after the newSize
+	m_data_size = newSize; // record the new size.
 }
 
 size_t MemBuf::length(void) const 
