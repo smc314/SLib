@@ -31,7 +31,8 @@ using namespace SLib;
 
 MemBuf::MemBuf() :
 	m_data (NULL),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal (0)
 {
 	/* ************************************************************************ */
 	/* MemBuf's are used during log processing.  For this reason, do not include */
@@ -471,9 +472,15 @@ void MemBuf::size(size_t newSize)
 	EnEx ee("MemBuf::size(size_t newSize)");
 	// Make sure we have enough space - if they are asking for a bigger size, this
 	// will allocate the required data.
-	reserve(newSize);
-	erase(newSize); // Clean out anything after the newSize
-	m_data_size = newSize; // record the new size.
+	if(newSize == m_data_size){
+		return; // bail out early - sizes already match
+	}
+	if(newSize > m_data_size){
+		reserve(newSize);
+	} else {
+		erase(newSize); // Clean out anything after the newSize
+		m_data_size = newSize; // record the new size.
+	}
 }
 
 size_t MemBuf::length(void) const 
