@@ -68,6 +68,9 @@ class DLLEXPORT ZipFile
 		/// The methods to unzip a file are all static.  This extracts all files from the given zip file.
 		static void Extract(const twine& zipName, const twine& targetDir);
 
+		/// Set our root folder.
+		void SetRootFolder( const twine& root );
+
 	private:
 
 		/// Copy constructor is private to prevent use
@@ -79,6 +82,8 @@ class DLLEXPORT ZipFile
 		/// Our zip file
 		zipFile m_zf;
 
+		/// The root directory we work from.
+		twine m_root;
 };
 
 } // End Namespace SLib

@@ -278,9 +278,16 @@ void ZipFile::Close()
 	m_zf = NULL;
 }
 
+void ZipFile::SetRootFolder( const twine& root )
+{
+	EnEx ee(FL, "ZipFile::SetRootFolder(const twine& infile)");
+
+	m_root = root;
+}
+
 void ZipFile::AddFile(const twine& infile)
 {
-	EnEx ee(FL, "ZipFile::AddFile(const twine& infile, const twine& zipName)");
+	EnEx ee(FL, "ZipFile::AddFile(const twine& infile)");
 
     int opt_compress_level=9;
     int err=0;
@@ -337,22 +344,33 @@ void ZipFile::AddFile(const twine& infile)
 		throw AnException(0, FL, "Error creating %s in zipfile", infile());
 	} 
 
-	fin = FOPEN_FUNC(infile(),"rb");
+	twine fullFileName;
+	if(m_root.empty()){
+		fullFileName = infile;
+	} else {
+		if(m_root.endsWith("/") || m_root.endsWith("\\")){
+			fullFileName = m_root + infile;
+		} else {
+			fullFileName = m_root + "/" + infile;
+		}
+	}
+
+	fin = FOPEN_FUNC(fullFileName(),"rb");
 	if (fin==NULL) {
-		throw AnException(0, FL, "Error in opening %s for reading", infile());
+		throw AnException(0, FL, "Error in opening %s for reading", fullFileName());
 	}
 
 	// Write the file contents to the zip file.
 	while ( (size_read = (int)fread(buf, 1, size_buf, fin)) != 0) {
 		if( zipWriteInFileInZip (m_zf,buf,size_read) < 0 ){
-			throw AnException(0, FL, "Error in writing %s to the zipfile", infile());
+			throw AnException(0, FL, "Error in writing %s to the zipfile", fullFileName());
 		}
 	}
 
 	fclose(fin);
 
 	if( zipCloseFileInZip(m_zf) != ZIP_OK){
-		throw AnException(0, FL, "Error closing %s in the zipfile.", infile() );
+		throw AnException(0, FL, "Error closing %s in the zipfile.", fullFileName() );
 	}
 
     free(buf);
@@ -362,14 +380,25 @@ void ZipFile::AddFolder(const twine& infolder)
 {
 	EnEx ee(FL, "ZipFile::AddFolder(const twine& infolder)");
 
+	twine fullName;
+	if(m_root.empty()){
+		fullName = infolder;
+	} else {
+		if(m_root.endsWith("/") || m_root.endsWith("\\")){
+			fullName = m_root + infolder;
+		} else {
+			fullName = m_root + "/" + infolder;
+		}
+	}
+
 	// Add all of the files in the target folder:
-	vector<twine> files = File::listFiles( infolder );
+	vector<twine> files = File::listFiles( fullName );
 	for(size_t i = 0; i < files.size(); i ++ ){
 		AddFile( infolder + "/" + files[i] );
 	}
 
 	// Recurse through all sub-folders and do the same:
-	vector<twine> folders = File::listFolders( infolder );
+	vector<twine> folders = File::listFolders( fullName );
 	for(size_t i = 0; i < folders.size(); i ++){
 		if(folders[i] != "." && folders[i] != ".."){
 			AddFolder( infolder + "/" + folders[i] );
