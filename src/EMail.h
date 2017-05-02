@@ -120,6 +120,12 @@ class DLLEXPORT EMail
 		/// Get the full list of CC addresses
 		vector < twine >& CCList(void);
 
+		/// Add an e-mail header to the header list.
+		void AddHeader(const twine& name, const twine& value);
+
+		/// Get the full list of headers
+		vector < pair< twine, twine> >& HeaderList(void);
+
 		/// Add an e-mail attachment - Note, we'll delete this data when we destruct
 		void AddAttachment(const twine& fileName, const twine& mimeType, MemBuf* buf);
 
@@ -137,6 +143,7 @@ class DLLEXPORT EMail
 		twine m_reply_to;
 		vector < twine > m_to_list;
 		vector < twine > m_cc_list;
+		vector < pair< twine, twine> > m_headers;
 		Date m_create_date;
 		vector < EMailAttachment > m_attachment_list;
 

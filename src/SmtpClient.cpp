@@ -237,6 +237,13 @@ void SmtpClient::FormatMessage(EMail& message )
 	tmp.format("Subject: %s\r\n", message.Subject()() ); SendLines.push_back( tmp );
 	tmp.format("Date: %s\r\n", message.CreateDate().EDate()() ); SendLines.push_back( tmp );
 	tmp.format("Reply-To: %s\r\n", message.ReplyTo()() ); SendLines.push_back( tmp );
+
+	// Add in any custom headers the user has specified
+	for(size_t i = 0; i < message.HeaderList().size(); i++){
+		tmp.format("%s: %s\r\n", message.HeaderList()[i].first(), message.HeaderList()[i].second() );
+		SendLines.push_back( tmp );
+	}
+
 	tmp.format("MIME-Version: 1.0\r\n" ); SendLines.push_back(tmp);
 	tmp.format("Content-Type: multipart/mixed; boundary=\"%s\"\r\n", boundary() ); SendLines.push_back(tmp);
 	tmp = "To:";

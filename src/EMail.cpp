@@ -135,6 +135,17 @@ vector < twine >& EMail::CCList(void)
 	return m_cc_list;
 }
 
+void EMail::AddHeader(const twine& name, const twine& value)
+{
+	pair<twine, twine> p( name, value);
+	m_headers.push_back( p );
+}
+
+vector < pair<twine, twine> >& EMail::HeaderList(void)
+{
+	return m_headers;
+}
+
 void EMail::AddAttachment(const twine& fileName, const twine& mimeType, MemBuf* buf)
 {
 	if(fileName.empty()){
