@@ -283,10 +283,13 @@ void SmtpClient::FormatMessage(EMail& message )
 		SendLines.push_back( "Content-Transfer-Encoding: base64\r\n");
 		SendLines.push_back( "\r\n" ); // Empty line to divide headers from body
 
-		// base64 encode the attachment
-		attachments[i].data->encode64();
+		// Make a copy of the data for base64 encoding:
+		MemBuf dataCopy( *attachments[i].data );
 
-		twine b64; b64.set( attachments[i].data->data(), attachments[i].data->size() );
+		// base64 encode the attachment copy
+		dataCopy.encode64();
+
+		twine b64; b64.set( dataCopy.data(), dataCopy.size() );
 		vector<twine> attachLines = b64.split("\n");
 		for(size_t j = 0; j < attachLines.size(); j++){
 			SendLines.push_back( attachLines[j] + "\r\n" );
