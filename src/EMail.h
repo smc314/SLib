@@ -29,6 +29,7 @@
 #include "twine.h"
 #include "Date.h"
 #include "MemBuf.h"
+#include "suvector.h"
 using namespace SLib;
 
 #include <vector>
@@ -141,8 +142,8 @@ class DLLEXPORT EMail
 		twine m_body;
 		twine m_from;
 		twine m_reply_to;
-		vector < twine > m_to_list;
-		vector < twine > m_cc_list;
+		suvector < twine > m_to_list;
+		suvector < twine > m_cc_list;
 		vector < pair< twine, twine> > m_headers;
 		Date m_create_date;
 		vector < EMailAttachment > m_attachment_list;
