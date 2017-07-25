@@ -243,8 +243,9 @@ vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twin
 	// Prepare command line arguments and start the proc
 	twine cmdLine = cmd;
 	for(size_t i = 0; i < args.size(); i++){
-		cmdLine.append( " " );
+		cmdLine.append( " \"" );
 		cmdLine.append( args[ i ] );
+		cmdLine.append( "\"" );
 	}
 	rc = CreateProcess( cmd(), cmdLine.data(), &sa, &sa, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL,
 		&stStartupInfo, &stProcessInfo );
