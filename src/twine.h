@@ -539,6 +539,25 @@ class DLLEXPORT twine
 		 */
 		twine& getAttribute(xmlNodePtr node, const char* attrName);
 
+		/** Sometimes, notably in ODBC applications, it's useful to have an externally public
+		  * length indicator that goes along with this object.  Use this for those purposes.
+		  */
+		int userIntVal;
+
+		/** Use this to convert our contents to utf8.  This is primarily used in
+		 * reading Unicode data from a database.  Assumptions:
+		 * 1) You've reserved enough space in the twine for your UCS2 data.
+		 * 2) You've written to the data() pointer all of your UCS2 data.
+		 * 3) You've written the length of your data to userIntVal.
+		 *
+		 * After setting all of that up, call this method and we'll convert our contents (if possible)
+		 * to utf8 based on the content lenght in userIntVal.
+		 *
+		 * When used with SQL Server, the fromEncoding is typically UTF-16LE.  If you pass an empty 
+		 * string into this, we'll default to UTF-16LE
+		 */
+		twine& to_utf8(const twine& fromEncoding);
+
 	private:
 
 		/** Checks the index against the bounds of the array:

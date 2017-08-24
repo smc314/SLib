@@ -19,7 +19,7 @@ EXECFLAGS=/MD -O2 -I "$(3PL)\include" -I "$(3PL)\include\libxml2"
 
 SSLLIBS=$(3PL)\lib\libeay32.lib $(3PL)\lib\ssleay32.lib \
 	$(3PL)\lib\libxml2.lib $(3PL)\lib\libcurl.lib \
-	$(3PL)\lib\zlib.lib
+	$(3PL)\lib\zlib.lib $(3PL)\lib\libiconv.lib
 
 # Note -SafeSEH not required/available on x64 targets
 LFLAGS=-machine:x64

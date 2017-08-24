@@ -38,7 +38,8 @@ using namespace SLib;
 twine::twine() :
 	m_data (m_small_data),
 	m_allocated_size ( TWINE_SMALL_STRING ),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal (0)
 {
 	/* ************************************************************************ */
 	/* twine's are used during log processing.  For this reason, do not include */
@@ -51,7 +52,8 @@ twine::twine() :
 twine::twine(const twine& t) :
 	m_data (m_small_data),
 	m_allocated_size ( TWINE_SMALL_STRING ),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal (0)
 {
 	//EnEx ee("twine::twine(const twine& t)");
 	// short circuit for source having nothing in it.
@@ -65,6 +67,7 @@ twine::twine(const twine& t) :
 	}
 	reserve(t.m_data_size);
 	m_data_size = t.m_data_size;
+	userIntVal = t.userIntVal;
 	memcpy(m_data, t.m_data, m_data_size);
 	m_data[m_data_size] = '\0';
 }
@@ -72,7 +75,8 @@ twine::twine(const twine& t) :
 twine::twine(const char* c) :
 	m_data ( m_small_data ),
 	m_allocated_size ( TWINE_SMALL_STRING ),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal(0)
 {
 	//EnEx ee("twine::twine(const char* c)");
 	if(c == NULL){
@@ -91,7 +95,8 @@ twine::twine(const char* c) :
 twine::twine(const xmlChar* c) :
 	m_data (m_small_data),
 	m_allocated_size ( TWINE_SMALL_STRING ),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal(0)
 {
 	//EnEx ee("twine::twine(const xmlChar* c)");
 	if(c == NULL){
@@ -110,7 +115,8 @@ twine::twine(const xmlChar* c) :
 twine::twine(const char c) :
 	m_data (m_small_data),
 	m_allocated_size ( TWINE_SMALL_STRING ),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal(0)
 {
 	//EnEx ee("twine::twine(const char c)");
 	//reserve(1);
@@ -123,7 +129,8 @@ twine::twine(const char c) :
 twine::twine(const xmlNodePtr node, const char* attrName):
 	m_data (m_small_data),
 	m_allocated_size ( TWINE_SMALL_STRING ),
-	m_data_size (0)
+	m_data_size (0),
+	userIntVal(0)
 {
 	//EnEx ee("twine::twine(const xmlNodePtr node, const char* c)");
 
@@ -134,6 +141,8 @@ twine::twine(const xmlNodePtr node, const char* attrName):
 twine::~twine() 
 {
 	//EnEx ee("twine::~twine()");
+	userIntVal = 0;
+
 	if(m_allocated_size < TWINE_SMALL_STRING){
 		throw AnException(0, FL, "twine::m_allocated_size < TWINE_SMALL_STRING");
 	} else if(m_allocated_size == TWINE_SMALL_STRING){
@@ -168,6 +177,7 @@ twine& twine::operator=(const twine& t)
 
 	reserve(t.m_data_size);
 	m_data_size = t.m_data_size;
+	userIntVal = t.userIntVal;
 	memcpy(m_data, t.m_data, m_data_size);
 	m_data[m_data_size] = '\0';
 
@@ -219,7 +229,7 @@ twine& twine::operator=(const size_t i)
 {
 	//EnEx ee("twine::operator=(const size_t i)");
 	reserve(15);
-	sprintf(m_data, "%ld", i);
+	sprintf(m_data, "%zd", i);
 	m_data_size = strlen(m_data);
 	return *this;
 }
@@ -228,7 +238,7 @@ twine& twine::operator=(const intptr_t i)
 {
 	//EnEx ee("twine::operator=(const intptr_t i)");
 	reserve(15);
-	sprintf(m_data, "%ld", i);
+	sprintf(m_data, "%Id", i);
 	m_data_size = strlen(m_data);
 	return *this;
 }
@@ -278,7 +288,7 @@ twine& twine::operator+=(const size_t i)
 	//EnEx ee("twine::operator+=(const size_t i)");
 	char tmp[16];
 	memset(tmp, 0, 16);
-	sprintf(tmp, "%ld", i);
+	sprintf(tmp, "%zd", i);
 	append(tmp);
 	return *this;
 }
@@ -288,7 +298,7 @@ twine& twine::operator+=(const intptr_t i)
 	//EnEx ee("twine::operator+=(const intptr_t i)");
 	char tmp[16];
 	memset(tmp, 0, 16);
-	sprintf(tmp, "%ld", i);
+	sprintf(tmp, "%Id", i);
 	append(tmp);
 	return *this;
 }
@@ -1243,3 +1253,76 @@ twine& twine::decode64()
 	return *this;
 }
 
+twine& twine::to_utf8(const twine& fromEncoding)
+{
+	twine useEncoding("UTF-16LE");
+	if(!fromEncoding.empty()){
+		useEncoding = fromEncoding;
+	}
+
+	if(userIntVal <= 0){
+		// nothing to do.
+		erase();
+		m_data_size = 0;
+		return *this;
+	}
+
+	/*
+	printf("Twine context at start of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+		m_allocated_size, m_data_size, userIntVal
+	);
+	printf("%s\n", Tools::hexDump(m_data, "to_utf8 - before", 16, userIntVal + 16, true, false)() );
+	*/
+
+	// Setup a temporary twine to use to hold the output
+	twine target; target.reserve( m_allocated_size );
+	char* inputData = m_data;
+	char* targetData = target.data(); // iconv moves this pointer, so make a copy for it to use
+	size_t targetSize = target.capacity();
+	size_t inRemains = (size_t)userIntVal;
+
+	// Run the conversion
+	iconv_t context = iconv_open("UTF-8", useEncoding()); // To, From
+	size_t cvtlen = iconv( context, // Conversion context
+		(const char**)&inputData,   // Pointer to source to read
+		(size_t*)&inRemains,        // How much to read
+		(char**)&targetData,        // Pointer to where to write the data
+		(size_t*)&targetSize        // How big is target going in and comming out
+	);
+
+	if(cvtlen == (size_t)-1){
+		printf("error in to_utf8: %s, %d\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+			 strerror(errno), errno,
+			m_allocated_size, m_data_size, userIntVal
+		);
+		printf("%s\n", Tools::hexDump(m_data, "to_utf8 - details", 16, userIntVal + 16, true, false)() );
+		iconv_close( context );
+		return *this;
+	}
+
+	/*
+	printf("Twine context at in to_utf8 after iconv:\ncvtlen(%zd) inRemains(%zd) targetSize(%zd)\n",
+		cvtlen, inRemains, targetSize
+	);
+	printf("%s\n", Tools::hexDump(target.data(), "to_utf8 - during", 16, targetSize+16, true, false)() );
+	*/
+
+	// Erase our data and replace it with that from the temporary twine	
+	erase();
+	// iconv moves the targetData pointer - use it to determine where it stopped
+	size_t newLen = targetData - target.data(); 
+	memcpy(m_data, target.data(), newLen);
+	m_data_size = newLen;
+
+	// Free up the iconv conversion context
+	iconv_close( context );
+
+	/*
+	printf("Twine context at end of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+		m_allocated_size, m_data_size, userIntVal
+	);
+	printf("%s\n", Tools::hexDump(m_data, "to_utf8 - after", 16, m_data_size + 16, true, false)() );
+	*/
+
+	return *this;
+}
