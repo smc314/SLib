@@ -557,6 +557,7 @@ class DLLEXPORT twine
 		 * string into this, we'll default to UTF-16LE
 		 */
 		twine& to_utf8(const twine& fromEncoding);
+		twine& to_utf16le(const twine& fromEncoding);
 
 	private:
 
