@@ -29,8 +29,9 @@ template <class T>
 class VectorDelete {
 	public:
 		void operator()(vector<T*>* v) const {
+			if(v == NULL) return; // Quick bail out
 			for(auto item : *v){
-				if(item != NULL){
+				if(item != NULL){ // Don't delete if already null
 					delete item;
 				}
 			}
