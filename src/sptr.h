@@ -21,6 +21,24 @@
 #include "dptr.h"
 
 /**
+  * A Convenience template for deleting a vector of pointers.  All of the
+  * pointers in the vector will be deleted, and then the vector itself
+  * will be deleted.
+  */
+template <class T>
+class VectorDelete {
+	public:
+		void operator()(vector<T*>* v) const {
+			for(auto item : *v){
+				if(item != NULL){
+					delete item;
+				}
+			}
+			delete v;
+		}
+};
+
+/**
   * @memo This template defines our smart pointer object.  This is used
   *       to safely handle pointers to memory and objects with a built-in
   *       knowledge of destruction practices.
