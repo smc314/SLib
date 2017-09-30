@@ -28,23 +28,14 @@ using namespace SLib;
 map<const char*, EnExProfile*>* global_hit_counter = NULL;
 SLib::Mutex* global_hit_counter_mutex = NULL;
 
-/** This is the list of entry exit stats that we keep for every thread
-    that runs in the system.  It's indexed by the thread id and maintained
-    by each individual thread.
-*/
-vector< pair< 
-	THREAD_ID_TYPE, 
-	map<const char*, EnExProfile*>* 
-> >* hit_counter_list = NULL;
+/** Each thread gets its own hit counter where it can store thread-local information
+  * about methods that have beeen used and timing for those methods.
+  */
+thread_local map<const char*, EnExProfile*> thread_hit_counter;
 
 /** This is the stack trace for each thread.
  */
-vector< pair<
-	THREAD_ID_TYPE,
-	vector<const char*>*
-> >* stack_trace_list = NULL;
-
-SLib::Mutex* hit_counter_list_add_mutex = NULL;
+thread_local vector<const char*> thread_stack_trace;
 
 map<const char*, EnExProfile*>& GlobalHitCounter()
 {
@@ -60,30 +51,6 @@ SLib::Mutex* GlobalHitCounterMutex()
 		global_hit_counter_mutex = new Mutex();
 	}
 	return global_hit_counter_mutex;
-}
-
-vector< pair< THREAD_ID_TYPE, map< const char*, EnExProfile*>* > >& HitCounterList()
-{
-	if(hit_counter_list == NULL){
-		hit_counter_list = new vector< pair< THREAD_ID_TYPE, map< const char*, EnExProfile*>* > >();
-	}
-	return *hit_counter_list;
-}
-
-SLib::Mutex* HitCounterListAddMutex()
-{
-	if(hit_counter_list_add_mutex == NULL){
-		hit_counter_list_add_mutex = new SLib::Mutex();
-	}
-	return hit_counter_list_add_mutex;
-}
-
-vector< pair < THREAD_ID_TYPE, vector<const char*>* > >& StackTraceList()
-{
-	if(stack_trace_list == NULL){
-		stack_trace_list = new vector< pair< THREAD_ID_TYPE, vector<const char*>* > >();
-	}
-	return *stack_trace_list;
 }
 
 EnterExit::EnterExit(const char* methodName) : 
@@ -124,66 +91,27 @@ EnterExit::EnterExit(const char* file, int line, const char* methodName, bool sa
 
 void EnterExit::Init(void)
 {
-	m_hitCounter = FindOurHitCounter();
-	m_stackTrace = FindOurStackTrace();
-
-	map<const char*, EnExProfile*>::iterator it = m_hitCounter->find(m_methodName);
-	if(it != m_hitCounter->end()){
+	map<const char*, EnExProfile*>::iterator it = thread_hit_counter.find(m_methodName);
+	if(it != thread_hit_counter.end()){
 		// keep track of this for exit timing.
 		m_methodProfile = it->second; 
 		m_methodProfile->HitsInc();
 	} else {
 		// keep track of this for exit timing.
 		m_methodProfile = new EnExProfile(m_methodName);
-		(*m_hitCounter)[ m_methodName ] = m_methodProfile;
+		thread_hit_counter[ m_methodName ] = m_methodProfile;
 	}
 
 	if(m_line) TRACE(m_file, m_line, "%s: Entering Method", m_methodName);
-	m_stackTrace->push_back(m_methodName);
+	thread_stack_trace.push_back(m_methodName);
 	m_methodEntryStamp = Timer::GetCycleCount();
-}
-
-map<const char*, EnExProfile*>* EnterExit::FindOurHitCounter(void)
-{
-	THREAD_ID_TYPE tid = Thread::CurrentThreadId();
-	for(size_t i = 0, l = HitCounterList().size(); i < l; i++){
-		if(HitCounterList()[i].first == tid){
-			return HitCounterList()[i].second;
-		}
-	}
-
-	// If we get here, then our tid was not in the list.  Add it in.
-	SLib::Lock the_lock(HitCounterListAddMutex());
-	pair<THREAD_ID_TYPE, map<const char*, EnExProfile*>* > the_pair;
-	the_pair.first = tid;
-	the_pair.second = new map<const char*, EnExProfile*>();
-	HitCounterList().push_back(the_pair);
-	return the_pair.second;
-}
-
-vector<const char*>* EnterExit::FindOurStackTrace(void)
-{
-	THREAD_ID_TYPE tid = Thread::CurrentThreadId();
-	for(size_t i = 0, l = StackTraceList().size(); i < l; i++){
-		if(StackTraceList()[i].first == tid){
-			return StackTraceList()[i].second;
-		}
-	}
-
-	// If we get here, then our tid was not in the list.  Add it in.
-	SLib::Lock the_lock(HitCounterListAddMutex());
-	pair<THREAD_ID_TYPE, vector<const char*>* > the_pair;
-	the_pair.first = tid;
-	the_pair.second = new vector<const char*>();
-	StackTraceList().push_back(the_pair);
-	return the_pair.second;
 }
 
 EnterExit::~EnterExit()
 {
 	m_methodExitStamp = Timer::GetCycleCount();
 	if(m_line) TRACE(m_file, m_line, "%s: Exiting Method", m_methodName);
-	m_stackTrace->pop_back();
+	thread_stack_trace.pop_back();
 
 	m_methodProfile->RecordEntryExit(m_methodEntryStamp, m_methodExitStamp);
 
@@ -218,9 +146,8 @@ twine EnterExit::GetStackTrace(void)
 	twine tmp, msg;
 	tmp.format("Stack trace for thread: %d\n", (uint32_t)(intptr_t)Thread::CurrentThreadId() );
 	msg += tmp;
-	vector<const char*>* stack_trace = FindOurStackTrace();
-	for(int i = 0; i < (int)stack_trace->size(); i++){
-		tmp.format("\t%s\n", stack_trace->at( i ) );
+	for(auto trace : thread_stack_trace){
+		tmp.format("\t%s\n", trace );
 		msg += tmp;
 	}
 	return msg;
@@ -234,7 +161,7 @@ void EnterExit::SaveToGlobal(void)
 	map<const char*, EnExProfile*>::iterator glob_it;
 
 	// Walk all of our hit counters:
-	for(our_it = m_hitCounter->begin(); our_it != m_hitCounter->end(); our_it++){
+	for(our_it = thread_hit_counter.begin(); our_it != thread_hit_counter.end(); our_it++){
 
 		// Now find this entry in the global hit counter map:
 
@@ -265,8 +192,6 @@ void EnterExit::SaveToGlobal(void)
 
 void EnterExit::PrintHitMap(void)
 {
-	map<const char*, EnExProfile*>* hit_counters = FindOurHitCounter();
-	map<const char*, EnExProfile*>::iterator it;
 	printf("%40s\t%12s\t%16s\t%16s\t%16s\t%16s\n",
 		"Method Name",
 		"Total Hits",
@@ -281,15 +206,15 @@ void EnterExit::PrintHitMap(void)
 		"==========",
 		"==========",
 		"============");
-	for(it = hit_counters->begin(); it != hit_counters->end(); it++){
+	for(auto it : thread_hit_counter){
 		printf("%40s\t%12ld\t%16.2f\t%16.2f\t%16.2f\t%16.2f\n",
-			it->first, it->second->Hits(),
-			it->second->AvgTime(),
-			it->second->MinTime(),
-			it->second->MaxTime(),
-			it->second->TotalTime()
+			it.first, it.second->Hits(),
+			it.second->AvgTime(),
+			it.second->MinTime(),
+			it.second->MaxTime(),
+			it.second->TotalTime()
 		);
-		if(it->second->StopProfile()){
+		if(it.second->StopProfile()){
 			printf("\tProfiling stopped after a thousand hits with an average less than 0.0001\n");
 		}
 	}

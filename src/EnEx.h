@@ -131,14 +131,6 @@ class DLLEXPORT EnterExit {
 		 */
 		void Init(void);
 
-		/** Looks up our thread-specific hit counter from the global list.
-		 */
-		static map<const char*, EnExProfile*>* FindOurHitCounter(void);
-
-		/** Looks up our thread-specific stack trace from the global list.
-		 */
-		static vector<const char*>* FindOurStackTrace(void);
-
 		const char* m_file;
 		int m_line;
 		const char* m_methodName;
@@ -146,8 +138,6 @@ class DLLEXPORT EnterExit {
 		uint64_t m_methodExitStamp;
 		bool m_saveToGlobal;
 		EnExProfile* m_methodProfile;
-		map<const char*, EnExProfile*>* m_hitCounter;
-		vector<const char*>* m_stackTrace;
 };
 
 /** This is a mirror of the EnterExit class, but it does nothing.  We use a define to swap between these
