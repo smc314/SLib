@@ -231,7 +231,6 @@ const char MemBuf::operator[](size_t i) const
 
 const char* MemBuf::operator()() const
 {
-	EnEx ee("MemBuf::operator()()");
 	return (char*)m_data;
 }
 
@@ -463,7 +462,6 @@ MemBuf& MemBuf::reserve(size_t min_size)
 
 size_t MemBuf::size(void) const 
 { 
-	EnEx ee("MemBuf::size(void)");
 	return m_data_size; 
 }
 

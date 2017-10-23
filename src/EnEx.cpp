@@ -313,7 +313,7 @@ EnExProfile::EnExProfile(const char* methodName)
 	m_methodName = methodName;
 	m_hits = 1;	
 	m_totalTime = 0;
-	m_minTime = 0;
+	m_minTime = 100000000;
 	m_maxTime = 0;
 	m_stopProfile = false;
 }
