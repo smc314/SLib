@@ -390,6 +390,10 @@ class DLLEXPORT twine
 		 */
 		twine& replace(const char c, const char n);
 
+		/** Replaces all instances of a search string with an alternate string
+		  */
+		twine& replaceAll(const twine& target, const twine& replacement);
+
 		/** Appends a const char* to the end of the twine
 		  */
 		twine& append(const char* c);

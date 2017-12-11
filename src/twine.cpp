@@ -860,6 +860,16 @@ twine& twine::replace(const char c, const char n)
 	return *this;
 }
 
+twine& twine::replaceAll(const twine& target, const twine& replacement)
+{
+	size_t idx = find(target);
+	while(idx != TWINE_NOT_FOUND){
+		replace(idx, target.size(), replacement);
+		idx = find(target, idx + replacement.size());
+	}
+	return *this;
+}
+
 twine& twine::append(const char* c)
 {
 	//EnEx ee("twine::append(const char* c)");
