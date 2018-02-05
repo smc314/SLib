@@ -1294,7 +1294,7 @@ twine& twine::to_utf8(const twine& fromEncoding)
 	// Run the conversion
 	iconv_t context = iconv_open("UTF-8", useEncoding()); // To, From
 	size_t cvtlen = iconv( context, // Conversion context
-		(const char**)&inputData,   // Pointer to source to read
+		(char**)&inputData,   // Pointer to source to read
 		(size_t*)&inRemains,        // How much to read
 		(char**)&targetData,        // Pointer to where to write the data
 		(size_t*)&targetSize        // How big is target going in and comming out
@@ -1365,7 +1365,7 @@ twine& twine::to_utf16le(const twine& fromEncoding)
 	// Run the conversion
 	iconv_t context = iconv_open("UTF-16LE", useEncoding()); // To, From
 	size_t cvtlen = iconv( context, // Conversion context
-		(const char**)&inputData,   // Pointer to source to read
+		(char**)&inputData,   // Pointer to source to read
 		(size_t*)&inRemains,        // How much to read
 		(char**)&targetData,        // Pointer to where to write the data
 		(size_t*)&targetSize        // How big is target going in and comming out
