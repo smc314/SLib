@@ -15,17 +15,19 @@ endif
 
 SOCKET_LIB=
 
-CFLAGS=-g -Wall -D_REENTRANT -fPIC -O2 -I$(OPENSSLDIR)/include \
+_CFLAGS=-g -Wall -D_REENTRANT -fPIC -O2 -I$(OPENSSLDIR)/include \
 	-I/usr/include/libxml2 -I/usr/include/curl
 
-CPPFLAGS=-std=c++14 $(CFLAGS)
+_CPPFLAGS=-std=c++14 $(_CFLAGS)
 
 ifeq ($(UNAME),Linux)
-	CFLAGS=$(CFLAGS) -rdynamic
-	CPPFLAGS=$(CPPFLAGS) -rdynamic
+	CFLAGS=$(_CFLAGS) -rdynamic
+	CPPFLAGS=$(_CPPFLAGS) -rdynamic
 	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
 		-lresolv -lxml2 -lz -lcurl -lrt
 else
+	CFLAGS=$(_CFLAGS)
+	CPPFLAGS=$(_CPPFLAGS)
 	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
 		-lresolv -lxml2 -lz -lcurl -liconv
 endif
