@@ -135,7 +135,7 @@ Socket::Socket(int port)
 	this_addr->sin_port = htons(port);
 	this_addr->sin_addr.s_addr = htonl(INADDR_ANY);
 
-	if (bind(the_socket, (const struct sockaddr *)this_addr, sizeof(sockaddr)) < 0) 
+	if (::bind(the_socket, (const struct sockaddr *)this_addr, sizeof(sockaddr)) < 0) 
 	{
 		err = errno;
 		free(this_addr);
@@ -312,7 +312,7 @@ Socket::Socket(int port, bool useUDP, char *localipaddr)
 	else this_addr->sin_addr.s_addr = INADDR_ANY;
 
 
-	if (bind(the_socket, (const struct sockaddr *)this_addr,
+	if (::bind(the_socket, (const struct sockaddr *)this_addr,
 	         sizeof(sockaddr)) < 0) 
 	{
 		err = errno;
@@ -535,7 +535,7 @@ Socket::Socket(char *machine, int port, bool useUDP, char *localipaddr)
 	else this_addr->sin_addr.s_addr = INADDR_ANY;
 
 
-	if (bind(the_socket, (const struct sockaddr *)this_addr,
+	if (::bind(the_socket, (const struct sockaddr *)this_addr,
 	         sizeof(sockaddr)) < 0) 
 	{
 		err = errno;

@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <iconv.h>
+#include <errno.h>
 
 #include "twine.h"
 

@@ -301,7 +301,7 @@ SSocket::SSocket(int port)
 	the_addr->sin_port = htons(port);
 	the_addr->sin_addr.s_addr = INADDR_ANY;
 
-	if (bind(the_socket, (const struct sockaddr *)the_addr,
+	if (::bind(the_socket, (const struct sockaddr *)the_addr,
 	         sizeof(sockaddr)) < 0) 
 	{
 		err = errno;
@@ -481,7 +481,7 @@ SSocket::SSocket(int port, char *localipaddr)
 	else the_addr->sin_addr.s_addr = INADDR_ANY;
 
 
-	if (bind(the_socket, (const struct sockaddr *)the_addr,
+	if (::bind(the_socket, (const struct sockaddr *)the_addr,
 	         sizeof(sockaddr)) < 0) 
 	{
 		err = errno;
@@ -769,7 +769,7 @@ SSocket::SSocket(char *machine, int port, char *localipaddr)
 	else this_addr->sin_addr.s_addr = INADDR_ANY;
 
 
-	if (bind(the_socket, (const struct sockaddr *)this_addr,
+	if (::bind(the_socket, (const struct sockaddr *)this_addr,
 	         sizeof(sockaddr)) < 0) 
 	{
 		err = errno;
