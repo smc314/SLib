@@ -35,7 +35,9 @@ const size_t MAX_INPUT_SIZE = 1024000000;
 
 using namespace SLib;
 
+#ifndef max
 #define max(a, b) (a) > (b) ? (a) : (b)
+#endif
 
 twine::twine() :
 	m_data (m_small_data),
@@ -1296,7 +1298,11 @@ twine& twine::to_utf8(const twine& fromEncoding)
 	// Run the conversion
 	iconv_t context = iconv_open("UTF-8", useEncoding()); // To, From
 	size_t cvtlen = iconv( context, // Conversion context
+#ifdef _WIN32
+		(const char**)&inputData,   // Pointer to source to read
+#else
 		(char**)&inputData,   // Pointer to source to read
+#endif
 		(size_t*)&inRemains,        // How much to read
 		(char**)&targetData,        // Pointer to where to write the data
 		(size_t*)&targetSize        // How big is target going in and comming out
@@ -1367,7 +1373,11 @@ twine& twine::to_utf16le(const twine& fromEncoding)
 	// Run the conversion
 	iconv_t context = iconv_open("UTF-16LE", useEncoding()); // To, From
 	size_t cvtlen = iconv( context, // Conversion context
+#ifdef _WIN32
+		(const char**)&inputData,   // Pointer to source to read
+#else
 		(char**)&inputData,   // Pointer to source to read
+#endif
 		(size_t*)&inRemains,        // How much to read
 		(char**)&targetData,        // Pointer to where to write the data
 		(size_t*)&targetSize        // How big is target going in and comming out
