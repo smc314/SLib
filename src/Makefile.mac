@@ -135,9 +135,11 @@ clean:
 	rm -f ../include/Pool.cpp
 
 install:
-	-mkdir -p ../../x64/lib
-	-mkdir -p ../../x64/bin
-	cp libSLib.so ../../x64/lib/
-	cp LogDump ../../x64/bin/
-	cp SLogDump ../../x64/bin/
-	cp SqlShell ../../x64/bin/
+	-mkdir -p ../../lib
+	-mkdir -p ../../bin
+	-mkdir -p ../../include
+	cp ../include/*.h ../include/*.cpp ../../include/
+	cp libSLib.so ../../lib/
+	cp LogDump ../../bin/
+	cp SLogDump ../../bin/
+	cp SqlShell ../../bin/

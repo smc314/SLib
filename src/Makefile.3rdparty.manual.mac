@@ -1,0 +1,49 @@
+#
+# Makefile used to download and build all of the 3rd party components that are
+# used by SLib on a windows 64 platform.
+#
+# Pre-reqs expected: 
+#    * Install Visual Studio 2015 community edition (or higher) and
+#      include the GIT utilities with the installation.
+#
+#    * Install Perl from ActiveState perl - required by Openssl configure/compile
+#
+#    * Install NASM from www.nasm.us - required by Openssl configure/compile
+
+CURRENTPATH := $(shell pwd)
+
+all: dirs png libharu qx
+
+dirs:
+	rm -rf bin include lib
+	mkdir bin
+	mkdir include
+	mkdir lib
+
+#$(CURL) ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/libpng-1.6.20.tar.gz
+png:
+	rm -f libpng-1.6.20.tar.gz
+	rm -rf libpng-1.6.20
+	wget http://download.sourceforge.net/libpng/libpng-1.6.20.tar.gz
+	tar xvfz libpng-1.6.20.tar.gz
+	cd libpng-1.6.20 && ./configure --prefix=$(CURRENTPATH)
+	cd libpng-1.6.20 && make
+	cd libpng-1.6.20 && make install
+
+
+libharu:
+	rm -rf libharu*
+	wget https://github.com/libharu/libharu/archive/RELEASE_2_3_0.zip
+	unzip RELEASE_2_3_0.zip
+	cp  SLib/src/Makefile.libharu.mac libharu-RELEASE_2_3_0/script
+	cp SLib/src/hpdf_config.win64.h libharu-RELEASE_2_3_0/include/hpdf_config.h
+	cd libharu-RELEASE_2_3_0 && make -f script/Makefile.libharu.mac all install
+
+qx:
+	rm -rf qooxdoo-5.0.1-sdk*
+	wget http://www.helixsdk.org/qooxdoo-5.0.1-sdk.zip
+	unzip qooxdoo-5.0.1-sdk.zip
+
+
+
+
