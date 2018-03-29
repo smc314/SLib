@@ -560,7 +560,7 @@ class DLLEXPORT twine
 		 * When used with SQL Server, the fromEncoding is typically UTF-16LE.  If you pass an empty 
 		 * string into this, we'll default to UTF-16LE
 		 */
-		twine& to_utf8(const twine& fromEncoding);
+		twine& to_utf8(const twine& fromEncoding, bool withChatter = false);
 		twine& to_utf16le(const twine& fromEncoding);
 
 	private:

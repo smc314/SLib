@@ -1267,7 +1267,7 @@ twine& twine::decode64()
 	return *this;
 }
 
-twine& twine::to_utf8(const twine& fromEncoding)
+twine& twine::to_utf8(const twine& fromEncoding, bool withChatter)
 {
 	twine useEncoding("UTF-16LE");
 	if(!fromEncoding.empty()){
@@ -1281,12 +1281,12 @@ twine& twine::to_utf8(const twine& fromEncoding)
 		return *this;
 	}
 
-	/*
-	printf("Twine context at start of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
-		m_allocated_size, m_data_size, userIntVal
-	);
-	printf("%s\n", Tools::hexDump(m_data, "to_utf8 - before", 16, userIntVal + 16, true, false)() );
-	*/
+	if(withChatter){
+		printf("Twine context at start of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+			m_allocated_size, m_data_size, userIntVal
+		);
+		printf("%s\n", Tools::hexDump(m_data, "to_utf8 - before", 16, userIntVal + 16, true, false)() );
+	}
 
 	// Setup a temporary twine to use to hold the output
 	twine target; target.reserve( m_allocated_size );
@@ -1318,12 +1318,12 @@ twine& twine::to_utf8(const twine& fromEncoding)
 		return *this;
 	}
 
-	/*
-	printf("Twine context at in to_utf8 after iconv:\ncvtlen(%zd) inRemains(%zd) targetSize(%zd)\n",
-		cvtlen, inRemains, targetSize
-	);
-	printf("%s\n", Tools::hexDump(target.data(), "to_utf8 - during", 16, targetSize+16, true, false)() );
-	*/
+	if(withChatter){
+		printf("Twine context at in to_utf8 after iconv:\ncvtlen(%zd) inRemains(%zd) targetSize(%zd)\n",
+			cvtlen, inRemains, targetSize
+		);
+		printf("%s\n", Tools::hexDump(target.data(), "to_utf8 - during", 16, targetSize+16, true, false)() );
+	}
 
 	// Erase our data and replace it with that from the temporary twine	
 	erase();
@@ -1335,12 +1335,12 @@ twine& twine::to_utf8(const twine& fromEncoding)
 	// Free up the iconv conversion context
 	iconv_close( context );
 
-	/*
-	printf("Twine context at end of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
-		m_allocated_size, m_data_size, userIntVal
-	);
-	printf("%s\n", Tools::hexDump(m_data, "to_utf8 - after", 16, m_data_size + 16, true, false)() );
-	*/
+	if(withChatter){
+		printf("Twine context at end of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+			m_allocated_size, m_data_size, userIntVal
+		);
+		printf("%s\n", Tools::hexDump(m_data, "to_utf8 - after", 16, m_data_size + 16, true, false)() );
+	}
 
 	return *this;
 }
