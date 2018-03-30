@@ -77,6 +77,15 @@ class DLLEXPORT Date
 		/// Assignment operator.
 		Date& operator=(const Date& d);
 
+		/// Checks to see if we are a Min date value - equal to 1900-01-01 00:00:00
+		bool IsMinValue(void) const;
+
+		/// Returns a Min value Date - equal to 1900-01-01 00:00:00
+		static Date MinValue(void);
+
+		/// Sets the current Date to a Min value Date - equal to 1900-01-01 00:00:00
+		Date& SetMinValue(void);
+
 		/**
 		  * Use this to update the date and time stamp in this
 		  * object to right now.
@@ -458,6 +467,12 @@ class DLLEXPORT Date
 		    </pre>
 		  */
 		virtual twine EDate(void);
+
+		/// Used for debugging
+		void DumpTimeStruct(void) const;
+
+		/// not equivalence operator
+		bool operator!=(const Date& d) const;
 
 		/// equivalence operator
 		bool operator==(const Date& d) const;

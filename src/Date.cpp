@@ -62,6 +62,44 @@ Date& Date::operator=(const Date& d)
 	return *this;
 }
 
+bool Date::IsMinValue(void) const
+{
+	if( Year() == 1900 &&
+		Month() == 1 &&
+		Day() == 1 &&
+		Hour() == 0 &&
+		Min() == 0 &&
+		Sec() == 0
+	){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+Date Date::MinValue(void)
+{
+	Date ret;
+	ret.Sec( 0 );
+	ret.Min( 0 );
+	ret.Hour( 0 );
+	ret.Day( 1 );
+	ret.Month( 1 );
+	ret.Year( 1900 );
+	return ret;
+}
+
+Date& Date::SetMinValue(void)
+{
+	Sec( 0 );
+	Min( 0 );
+	Hour( 0 );
+	Day( 1 );
+	Month( 1 );
+	Year( 1900 );
+	return *this;
+}
+
 void Date::SetCurrent(void)
 {
 	m_TimeVal = time(NULL);
@@ -696,7 +734,36 @@ twine Date::EDate(void)
 	twine ret; ret.set(m_picture, m_len);
 	return ret;
 }
+
+void Date::DumpTimeStruct(void) const
+{
+	printf("Y(%d) M(%d) D(%d) H(%d) M(%d) S(%d)\n",
+		(int)m_TimeStruct->tm_year,
+		(int)m_TimeStruct->tm_mon,
+		(int)m_TimeStruct->tm_mday,
+		(int)m_TimeStruct->tm_hour,
+		(int)m_TimeStruct->tm_min,
+		(int)m_TimeStruct->tm_sec
+	);
+}
 	
+
+bool Date::operator!=(const Date& d) const
+{
+	if(m_TimeStruct->tm_year != d.m_TimeStruct->tm_year)
+		return true;
+	if(m_TimeStruct->tm_mon != d.m_TimeStruct->tm_mon)
+		return true;
+	if(m_TimeStruct->tm_mday != d.m_TimeStruct->tm_mday)
+		return true;
+	if(m_TimeStruct->tm_hour != d.m_TimeStruct->tm_hour)
+		return true;
+	if(m_TimeStruct->tm_min != d.m_TimeStruct->tm_min)
+		return true;
+	if(m_TimeStruct->tm_sec != d.m_TimeStruct->tm_sec)
+		return true;
+	return false;
+}
 
 bool Date::operator==(const Date& d) const
 {
