@@ -407,7 +407,7 @@ Date::operator DATE() const
 #endif // _WIN32
 
 
-twine Date::GetValue(void)
+twine Date::GetValue(void) const
 {
 	memset(m_picture, 0, 64);
 
@@ -419,7 +419,7 @@ twine Date::GetValue(void)
 	return ret;
 }
 	
-twine Date::GetValue(const char* format)
+twine Date::GetValue(const char* format) const
 {
 	memset(m_picture, 0, 64);
 
@@ -431,12 +431,12 @@ twine Date::GetValue(const char* format)
 	return ret;
 }
 
-twine Date::GetValue(const twine& format)
+twine Date::GetValue(const twine& format) const
 {
 	return GetValue(format());
 }
 
-twine Date::GetValue(const twine* format)
+twine Date::GetValue(const twine* format) const
 {
 	return GetValue(format->c_str());
 }
@@ -490,6 +490,18 @@ void Date::Day(int d)
 int Date::DayW(void) const
 {
 	return m_TimeStruct->tm_wday;
+}
+
+Date& Date::PrepDayW(void)
+{
+	// To get the day of the week correct, we have to do a bit more manipulation
+	struct tm tmp_tm;
+	memcpy( &tmp_tm, m_TimeStruct, sizeof(struct tm));
+	tmp_tm.tm_isdst = 0; // Make sure this is turned off to get the day of week correct
+	time_t tmp_t = mktime(&tmp_tm); // mktime changes its argument, that's why we use a temporary
+	SetValue( tmp_t );
+
+	return *this;
 }
 
 int Date::Hour(void) const
@@ -713,7 +725,7 @@ void Date::Normalize(void)
 		
 }
 
-time_t Date::Epoch(void)
+time_t Date::Epoch(void) const
 {
 	struct tm tmp_tm;
 
@@ -723,7 +735,7 @@ time_t Date::Epoch(void)
 	return m_TimeVal;
 }
 
-twine Date::EDate(void)
+twine Date::EDate(void) const
 {
 	memset(m_picture, 0, 64);
 
@@ -842,7 +854,7 @@ bool Date::operator>=(const Date& d) const
 	return m_TimeStruct->tm_sec >= d.m_TimeStruct->tm_sec;
 }
 
-SLib::Interval Date::operator-(Date& d)
+SLib::Interval Date::operator-(const Date& d) const
 {
 	SLib::Interval i;
 

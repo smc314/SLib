@@ -296,7 +296,7 @@ class DLLEXPORT XmlHelpers {
 			xmlSetProp(node, (const xmlChar*)attrName, tmp);
 		}
 			
-		static Date getDateAttr(xmlNodePtr node, const char* attrName){
+		static Date getDateAttr(xmlNodePtr node, const char* attrName, const twine& dateFormat = ""){
 			EnEx ee(FL, "XmlHelpers::getDateAttr(xmlNodePtr node)");
 			if(node == NULL){
 				throw AnException(0, FL, "NULL node passed into getDateAttr");
@@ -306,11 +306,20 @@ class DLLEXPORT XmlHelpers {
 			}
 
 			Date ret;
-			ret.SetValue( xmlGetProp( node, (const xmlChar*)attrName ) );
+			twine tmp( node, attrName );
+			if(tmp.empty() || tmp == "null" || tmp == "Null" || tmp == "NULL"){
+				ret.SetMinValue();
+			} else {
+				if(dateFormat.empty()){
+					ret.SetValue( tmp ); // if the format doesn't match, exceptions will be thrown here
+				} else {
+					ret.SetValue( tmp, dateFormat ); // if the format doesn't match exceptions will be thrown
+				}
+			}
 			return ret;
 		}
 
-		static void setDateAttr(xmlNodePtr node, const char* attrName, const Date& date){
+		static void setDateAttr(xmlNodePtr node, const char* attrName, const Date& date, const twine& dateFormat = ""){
 			if(node == NULL){
 				throw AnException(0, FL, "NULL node passed into setDateAttr");
 			}
@@ -319,7 +328,13 @@ class DLLEXPORT XmlHelpers {
 			}
 			Date* td = (Date*)&date;
 
-			xmlSetProp(node, (const xmlChar*)attrName, td->GetValue());
+			if(date.IsMinValue()){
+				return; // nothing to do
+			} else if(dateFormat.empty()){
+				xmlSetProp(node, (const xmlChar*)attrName, td->GetValue());
+			} else {
+				xmlSetProp(node, (const xmlChar*)attrName, td->GetValue(dateFormat));
+			}
 		}
 			
 

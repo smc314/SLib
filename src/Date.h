@@ -323,7 +323,7 @@ class DLLEXPORT Date
 		    </pre>
 		  * Hours are 24 based.
 		  */
-		virtual twine GetValue(void);
+		virtual twine GetValue(void) const;
 
 		/**
 		  * Use this to retrive the current value of this date
@@ -340,9 +340,9 @@ class DLLEXPORT Date
 		  * Anything else in the format is considered a character
 		  * literal and is copied to the output date string directly.
 		  */
-		virtual twine GetValue(const char* format);
-		virtual twine GetValue(const twine& format);
-		virtual twine GetValue(const twine* format);
+		virtual twine GetValue(const char* format) const;
+		virtual twine GetValue(const twine& format) const;
+		virtual twine GetValue(const twine* format) const;
 
 		/**
 		  * Use this function to set the hour, minute, and second
@@ -378,6 +378,9 @@ class DLLEXPORT Date
 
 		/// Returns the 0-based day of week
 		virtual int DayW(void) const;
+
+		/// Use this to prepare the date to return the day of week correctly.
+		virtual Date& PrepDayW(void);
 
 		/**
 		  * Use this to query the hour value by number.
@@ -457,7 +460,7 @@ class DLLEXPORT Date
 		  * Returns the number of seconds since the epoch that this
 		  * date represents.  This is equivalent to mktime(3).
 		  */
-		virtual time_t Epoch(void);
+		virtual time_t Epoch(void) const;
 
 		/**
 		  * Returns the date formatted correctly for inclusion in
@@ -466,7 +469,7 @@ class DLLEXPORT Date
 		    "Wed Jun 30 21:49:08 1993"		    
 		    </pre>
 		  */
-		virtual twine EDate(void);
+		virtual twine EDate(void) const;
 
 		/// Used for debugging
 		void DumpTimeStruct(void) const;
@@ -490,7 +493,7 @@ class DLLEXPORT Date
 		bool operator>=(const Date& d) const;
 
 		/// Subtraction of dates produces an interval
-		SLib::Interval operator-(Date& d);
+		SLib::Interval operator-(const Date& d) const;
 
 		/// Addition of an interval produces a new date
 		Date operator+(SLib::Interval& i) const;
@@ -508,7 +511,7 @@ class DLLEXPORT Date
 		  * This is a public member variable that allows the
 		  * DB interfaces to see the length of the date string.
 		  */
-		size_t m_len;
+		mutable size_t m_len;
 
 	protected:
 
@@ -519,9 +522,9 @@ class DLLEXPORT Date
 		  */
 		virtual void Normalize(void);
 
-		time_t m_TimeVal;
-		struct tm *m_TimeStruct;
-		char *m_picture;
+		mutable time_t m_TimeVal;
+		struct tm *m_TimeStruct; // This is the core item that cannot be mutable
+		mutable char *m_picture;
 
 };
 
