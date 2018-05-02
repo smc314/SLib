@@ -63,7 +63,8 @@ char* Base64::encode(const char* data, size_t input_length, size_t* output_lengt
 	BIO_get_mem_ptr(b64, &bptr);
 
 	*output_length = bptr->length;
-	char* output_data = (char*)malloc(*output_length);
+	char* output_data = (char*)malloc(*output_length + 2);
+	memset(output_data, 0, *output_length + 2);
 	memcpy(output_data, bptr->data, bptr->length);
 
 	BIO_free_all(b64);

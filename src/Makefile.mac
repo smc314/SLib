@@ -57,6 +57,10 @@ all: $(DOTOH) $(MINIZIP_OH) LogDump.o SLogDump.o SqlShell.o incs
 incs:
 	cp *.h Pool.cpp ../include
 
+check:
+	cd test && make -f Makefile.mac
+	test/SLibTest
+
 tests: test_64 test_date test_dptr test_enex test_log test_logfile test_membuf test_queue test_split test_string test_suvect test_timer test_twine test_xml test_zip thrash_timer thrash_twine
 
 test_64: test_64.o $(DOTOH)
