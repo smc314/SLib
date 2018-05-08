@@ -35,7 +35,7 @@ TEST_CASE( "Date - GetValue 1", "[date]" )
 	REQUIRE( ad.GetValue("%Y-%m-%d-%H-%M-%S") == "2001-07-13-01-02-03" );
 	REQUIRE( ad.GetValue("%m/%d/%Y %H:%M:%S") == "07/13/2001 01:02:03" );
 	REQUIRE( ad.GetValue("%Y%m%d%H%M%S") == "20010713010203" );
-	REQUIRE( ad.EDate() == "Tue, 13 Jul 2001 01:02:03 -0500" );
+	REQUIRE( ad.EDate() == "Fri, 13 Jul 2001 01:02:03 -0500" );
 
 	SECTION( "Flooring the date works" ){
 		ad.Floor();
@@ -54,6 +54,19 @@ TEST_CASE( "Date - GetValue 1", "[date]" )
 	}
 }
 
+TEST_CASE( "Date - time_t conversions", "[date]" )
+{
+	Date ad;
+	time_t t;
+
+	t = time(NULL);
+	ad.SetCurrent();
+	REQUIRE( t == ad );
+
+	ad.SetValue( t );
+	REQUIRE( t == ad );
+}
+
 TEST_CASE( "Date - Compare1", "[date]" )
 {
 	Date ad; 
@@ -64,7 +77,11 @@ TEST_CASE( "Date - Compare1", "[date]" )
 
 	REQUIRE( bd - ad > SLib::Interval(10, MINUTES) );
 	REQUIRE( bd - ad > SLib::Interval(20, MINUTES) );
-	REQUIRE( bd - ad > SLib::Interval(1, DAY) );
+	REQUIRE_FALSE( bd - ad > SLib::Interval(1, DAY) );
+	REQUIRE_FALSE( ad == bd );
+
+	bd.AddMin( -30 );
+	REQUIRE( ad == bd );
 
 }
 

@@ -142,7 +142,9 @@ void Date::SetValue(const char *date)
 	m_TimeStruct->tm_year -= 1900;
 
 	m_TimeStruct->tm_mon -= 1; // months in struct are 0 based.
-	
+
+	PrepDayW();
+
 	// Ensure our TimeVal is also in sync.
 	//m_TimeVal = mktime(m_TimeStruct);
 		
@@ -297,6 +299,8 @@ void Date::SetValue(const char* date, const char* format)
 	}
 	m_TimeStruct->tm_year -= 1900;
 	m_TimeStruct->tm_mon -= 1; // months in struct are 0 based.
+
+	PrepDayW();
 
 	// Ensure our TimeVal is also in sync.
 	//m_TimeVal = mktime(m_TimeStruct);
@@ -499,7 +503,9 @@ Date& Date::PrepDayW(void)
 	memcpy( &tmp_tm, m_TimeStruct, sizeof(struct tm));
 	tmp_tm.tm_isdst = 0; // Make sure this is turned off to get the day of week correct
 	time_t tmp_t = mktime(&tmp_tm); // mktime changes its argument, that's why we use a temporary
-	SetValue( tmp_t );
+
+	// Now, copy over the day of the week into our setup
+	m_TimeStruct->tm_wday = tmp_tm.tm_wday;
 
 	return *this;
 }
@@ -720,6 +726,8 @@ void Date::Normalize(void)
 		}
 	}
 	
+	PrepDayW();
+
 	// Ensure our TimeVal is also in sync.
 	//m_TimeVal = mktime(m_TimeStruct);
 		
