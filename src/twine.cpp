@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <iconv.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include "twine.h"
 
@@ -242,7 +243,7 @@ twine& twine::operator=(const intptr_t i)
 {
 	//EnEx ee("twine::operator=(const intptr_t i)");
 	reserve(15);
-	sprintf(m_data, "%Id", i);
+	sprintf(m_data, "%" PRIdPTR, i);
 	m_data_size = strlen(m_data);
 	return *this;
 }
@@ -302,7 +303,7 @@ twine& twine::operator+=(const intptr_t i)
 	//EnEx ee("twine::operator+=(const intptr_t i)");
 	char tmp[16];
 	memset(tmp, 0, 16);
-	sprintf(tmp, "%Id", i);
+	sprintf(tmp, "%" PRIdPTR, i);
 	append(tmp);
 	return *this;
 }
@@ -1282,7 +1283,7 @@ twine& twine::to_utf8(const twine& fromEncoding, bool withChatter)
 	}
 
 	if(withChatter){
-		printf("Twine context at start of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+		printf("Twine context at start of to_utf8:\nm_allocated_size(%" PRIdPTR ") m_data_size(%" PRIdPTR ") userIntVal(%d)\n",
 			m_allocated_size, m_data_size, userIntVal
 		);
 		printf("%s\n", Tools::hexDump(m_data, "to_utf8 - before", 16, userIntVal + 16, true, false)() );
@@ -1309,7 +1310,7 @@ twine& twine::to_utf8(const twine& fromEncoding, bool withChatter)
 	);
 
 	if(cvtlen == (size_t)-1){
-		printf("error in to_utf8: %s, %d\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+		printf("error in to_utf8: %s, %d\nm_allocated_size(%" PRIdPTR ") m_data_size(%" PRIdPTR ") userIntVal(%d)\n",
 			 strerror(errno), errno,
 			m_allocated_size, m_data_size, userIntVal
 		);
@@ -1336,7 +1337,7 @@ twine& twine::to_utf8(const twine& fromEncoding, bool withChatter)
 	iconv_close( context );
 
 	if(withChatter){
-		printf("Twine context at end of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+		printf("Twine context at end of to_utf8:\nm_allocated_size(%" PRIdPTR ") m_data_size(%" PRIdPTR ") userIntVal(%d)\n",
 			m_allocated_size, m_data_size, userIntVal
 		);
 		printf("%s\n", Tools::hexDump(m_data, "to_utf8 - after", 16, m_data_size + 16, true, false)() );
@@ -1357,7 +1358,7 @@ twine& twine::to_utf16le(const twine& fromEncoding)
 	}
 
 	/*
-	printf("Twine context at start of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+	printf("Twine context at start of to_utf8:\nm_allocated_size(%" PRIdPTR ") m_data_size(%" PRIdPTR ") userIntVal(%d)\n",
 		m_allocated_size, m_data_size, userIntVal
 	);
 	printf("%s\n", Tools::hexDump(m_data, "to_utf8 - before", 16, userIntVal + 16, true, false)() );
@@ -1384,7 +1385,7 @@ twine& twine::to_utf16le(const twine& fromEncoding)
 	);
 
 	if(cvtlen == (size_t)-1){
-		printf("error in to_utf16le: %s, %d\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+		printf("error in to_utf16le: %s, %d\nm_allocated_size(%" PRIdPTR ") m_data_size(%" PRIdPTR ") userIntVal(%d)\n",
 			 strerror(errno), errno,
 			m_allocated_size, m_data_size, userIntVal
 		);
@@ -1412,7 +1413,7 @@ twine& twine::to_utf16le(const twine& fromEncoding)
 	iconv_close( context );
 
 	/*
-	printf("Twine context at end of to_utf8:\nm_allocated_size(%Id) m_data_size(%Id) userIntVal(%d)\n",
+	printf("Twine context at end of to_utf8:\nm_allocated_size(%" PRIdPTR ") m_data_size(%" PRIdPTR ") userIntVal(%d)\n",
 		m_allocated_size, m_data_size, userIntVal
 	);
 	printf("%s\n", Tools::hexDump(m_data, "to_utf8 - after", 16, m_data_size + 16, true, false)() );

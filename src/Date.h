@@ -454,7 +454,7 @@ class DLLEXPORT Date
 		/**
 		  * Use this to add an interval value to this date.
 		  */
-		virtual void Add(Interval& i);
+		virtual void Add(const Interval& i);
 
 		/** 
 		  * Returns the number of seconds since the epoch that this
@@ -496,16 +496,16 @@ class DLLEXPORT Date
 		SLib::Interval operator-(const Date& d) const;
 
 		/// Addition of an interval produces a new date
-		Date operator+(SLib::Interval& i) const;
+		Date operator+(const SLib::Interval& i) const;
 
 		/// Addition of an interval adjusts this date
-		Date& operator+=(SLib::Interval& i);
+		Date& operator+=(const SLib::Interval& i);
 
 		/// Subtraction of an interval produces a new date
-		Date operator-(SLib::Interval& i) const;
+		Date operator-(const SLib::Interval& i) const;
 
 		/// Subtraction of an interval adjusts this date
-		Date& operator-=(SLib::Interval& i);
+		Date& operator-=(const SLib::Interval& i);
 
 		/**
 		  * This is a public member variable that allows the
