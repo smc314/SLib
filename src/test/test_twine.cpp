@@ -314,7 +314,7 @@ TEST_CASE("Twine - assign from xmlChar", "[twine][xml]")
         }
     } 
 
-    SECTION("Copy Long Twine") {
+    SECTION("Assign Long xmlChar") {
         xmlChar* xml = (xmlChar*)("I am a longer string that will not fit in optimized storage.");
 
         SECTION( "Calling constructor by name" ){
