@@ -82,10 +82,11 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
             // thrown when number of non-zero chars in string
             // is greater than MAX_INPUT_SIZE
             char* monster = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*monster));
-            for(int i = 0; i < MAX_INPUT_SIZE; ++i)
-            {
-                monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
-            }
+         // for(int i = 0; i < MAX_INPUT_SIZE; ++i)
+         // {
+         //     monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
+         // }
+            memset(monster, 'A', MAX_INPUT_SIZE);
             monster[MAX_INPUT_SIZE] = 0;
 
             SECTION( "Direct assignment of a long string" ){
@@ -120,10 +121,11 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
             // This is an invalid size, because the nonzero portion of the string is of length greater
             // than MAX_INPUT_SIZE
             char* monster = (char*)malloc((MAX_INPUT_SIZE + 2) * sizeof(*monster));
-            for(int i = 0; i <= MAX_INPUT_SIZE; ++i)
-            {
-                monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
-            }
+         // for(int i = 0; i <= MAX_INPUT_SIZE; ++i)
+         // {
+         //     monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
+         // }
+            memset(monster, 'B', MAX_INPUT_SIZE + 1);
             monster[MAX_INPUT_SIZE + 1] = 0;
 
             SECTION( "Direct assignment of a long string" ){
@@ -259,6 +261,8 @@ TEST_CASE("Twine - Random Testing", "[twine][random]")
         for(int i = 0; i < length; ++i)
         {
             randStr[i] = (rand() % (CHAR_MAX - CHAR_MIN + 1)) + CHAR_MIN;
+            if(randStr[i] == 0) // this is the null character for end of string
+                break; // the rest of the buffer is irrelevant
         }
         randStr[length] = 0; // make sure we have at least one null char in the string
 
