@@ -578,7 +578,7 @@ void Date::AddSec(int i)
 	Normalize();
 }
 
-void Date::Add(SLib::Interval& i)
+void Date::Add(const SLib::Interval& i)
 {
 	m_TimeStruct->tm_sec += i();
 	Normalize();
@@ -870,7 +870,7 @@ SLib::Interval Date::operator-(const Date& d) const
 	return i;
 }
 
-Date Date::operator+(SLib::Interval& i) const
+Date Date::operator+(const SLib::Interval& i) const
 {
 	Date newdate = *this;
 
@@ -878,13 +878,13 @@ Date Date::operator+(SLib::Interval& i) const
 	return newdate;
 }
 
-Date& Date::operator+=(SLib::Interval& i)
+Date& Date::operator+=(const SLib::Interval& i)
 {
 	Add(i);
 	return *this;
 }
 
-Date Date::operator-(SLib::Interval& i) const
+Date Date::operator-(const SLib::Interval& i) const
 {
 	Date newdate = *this;
 
@@ -893,7 +893,7 @@ Date Date::operator-(SLib::Interval& i) const
 	return newdate;
 }
 	
-Date& Date::operator-=(SLib::Interval& i)
+Date& Date::operator-=(const SLib::Interval& i)
 {
 	m_TimeStruct->tm_sec -= i();
 	Normalize();
