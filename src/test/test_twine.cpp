@@ -77,35 +77,32 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
 
     SECTION("Extremely long string") {
         SECTION("MAX_INPUT_SIZE") {
-            SECTION( "Direct assignment of a long string" ){
-                char* monster = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*monster));
-                for(int i = 0; i < MAX_INPUT_SIZE; ++i)
-                {
-                    monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
-                }
-                monster[MAX_INPUT_SIZE] = 0;
-                twine* t = NULL;
-                // This is a valid size, because the exception is
-                // thrown when number of non-zero chars in string
-                // is greater than MAX_INPUT_SIZE
 
-                REQUIRE_NOTHROW([&](){twine t_real = monster; t = &t_real;}());
+            // This is a valid size, because the exception is
+            // thrown when number of non-zero chars in string
+            // is greater than MAX_INPUT_SIZE
+            char* monster = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*monster));
+            for(int i = 0; i < MAX_INPUT_SIZE; ++i)
+            {
+                monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
+            }
+            monster[MAX_INPUT_SIZE] = 0;
+
+            SECTION( "Direct assignment of a long string" ){
+                twine* t = NULL;
+
+                REQUIRE_NOTHROW([&](){t = new twine(monster);}());
                 REQUIRE_FALSE(t->empty());
                 REQUIRE(t->size() == MAX_INPUT_SIZE);
                 REQUIRE(t->capacity() >= MAX_INPUT_SIZE);
                 INFO("t.capacity() is " << t->capacity());
                 INFO("MAX_INPUT_SIZE is " << MAX_INPUT_SIZE);
                 
+                if(t != NULL)
+                    delete t;
             }
 
             SECTION( "Assignment after construction of a long string" ){
-                char* monster = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*monster));
-                for(int i = 0; i < MAX_INPUT_SIZE; ++i)
-                {
-                    monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
-                }
-                monster[MAX_INPUT_SIZE] = 0;
-
                 twine t;
                 REQUIRE_NOTHROW(t = monster);
 
@@ -118,24 +115,20 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
         }
         
         SECTION("MAX_INPUT_SIZE + 1") {
+            // This is an invalid size, because the nonzero portion of the string is of length greater
+            // than MAX_INPUT_SIZE
+            char* monster = (char*)malloc((MAX_INPUT_SIZE + 2) * sizeof(*monster));
+            for(int i = 0; i <= MAX_INPUT_SIZE; ++i)
+            {
+                monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
+            }
+            monster[MAX_INPUT_SIZE + 1] = 0;
+
             SECTION( "Direct assignment of a long string" ){
-                char* monster = (char*)malloc((MAX_INPUT_SIZE + 2) * sizeof(*monster));
-                for(int i = 0; i <= MAX_INPUT_SIZE; ++i)
-                {
-                    monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
-                }
-                monster[MAX_INPUT_SIZE + 1] = 0;
                 REQUIRE_THROWS([&](){twine t = monster;}());
             }
 
             SECTION( "Assignment after construction of a long string" ){
-                char* monster = (char*)malloc((MAX_INPUT_SIZE + 2) * sizeof(*monster));
-                for(int i = 0; i <= MAX_INPUT_SIZE; ++i)
-                {
-                    monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
-                }
-                monster[MAX_INPUT_SIZE + 1] = 0;
-
                 twine t;
                 REQUIRE_THROWS(t = monster);
             }
@@ -216,5 +209,7 @@ TEST_CASE( "Twine - Copy Constructor" )
         }
     } 
 
-
+    SECTION("Copy Long Twine") {
+        twine orig = "";
+    }
 }
