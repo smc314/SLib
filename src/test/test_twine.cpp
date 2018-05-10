@@ -112,6 +112,8 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
                 INFO("t.capacity() is " << t.capacity());
                 INFO("MAX_INPUT_SIZE is " << MAX_INPUT_SIZE);
             }
+
+            free(monster);
         }
         
         SECTION("MAX_INPUT_SIZE + 1") {
@@ -132,7 +134,29 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
                 twine t;
                 REQUIRE_THROWS(t = monster);
             }
+
+            free(monster);
         }
+    }
+
+    SECTION("Randomized String")
+    {
+        srand(time(0));
+
+        int length = rand();
+        char* randStr = (char*)malloc((length + 1) * sizeof(*randStr));
+        for(int i = 0; i < length; ++i)
+        {
+            randStr[i] = (rand() % (CHAR_MAX - CHAR_MIN + 1)) + CHAR_MIN;
+        }
+        randStr[length] = 0; // make sure we have at least one null char in the string
+
+        SECTION("Intentionally failed to test teardown")
+        {
+            REQUIRE(false);
+        }
+
+        free(randStr);
     }
 
 }
@@ -175,8 +199,9 @@ TEST_CASE( "Twine - Copy Constructor" )
     } 
 
     SECTION( "Copy Short Twine" ) {
+        twine orig = "I am a short string";
+
         SECTION( "Calling constructor by name" ){
-            twine orig = "I am a short string";
             twine t = twine(orig);
             REQUIRE_FALSE(t.empty());
             REQUIRE(t.size() == 19);
@@ -187,7 +212,6 @@ TEST_CASE( "Twine - Copy Constructor" )
         }
 
         SECTION("Implicitly calling constructor"){
-            twine orig = "I am a short string";
             twine t = orig;
             REQUIRE_FALSE(t.empty());
             REQUIRE(t.size() == 19);
@@ -198,7 +222,6 @@ TEST_CASE( "Twine - Copy Constructor" )
         }
 
         SECTION("Calling constructor after initial creation"){
-            twine orig = "I am a short string";
             twine t; t = orig;
             REQUIRE_FALSE(t.empty());
             REQUIRE(t.size() == 19);
@@ -210,6 +233,36 @@ TEST_CASE( "Twine - Copy Constructor" )
     } 
 
     SECTION("Copy Long Twine") {
-        twine orig = "";
+        twine orig = "I am a longer string that will not fit in optimized storage.";
+
+        SECTION( "Calling constructor by name" ){
+            twine t = twine(orig);
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60);
+            REQUIRE(t.capacity() >= 60);
+
+            REQUIRE(t.compare(orig) == 0);
+            REQUIRE(&t != &orig);
+        }
+
+        SECTION("Implicitly calling constructor"){
+            twine t = orig;
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60);
+            REQUIRE(t.capacity() >= 60);
+
+            REQUIRE(t.compare(orig) == 0);
+            REQUIRE(&t != &orig);
+        }
+
+        SECTION("Calling constructor after initial creation"){
+            twine t; t = orig;
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60);
+            REQUIRE(t.capacity() >= 60);
+
+            REQUIRE(t.compare(orig) == 0);
+            REQUIRE(&t != &orig);
+        }
     }
 }
