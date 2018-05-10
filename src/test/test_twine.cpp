@@ -139,29 +139,10 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
         }
     }
 
-    SECTION("Randomized String")
-    {
-        srand(time(0));
-
-        int length = rand();
-        char* randStr = (char*)malloc((length + 1) * sizeof(*randStr));
-        for(int i = 0; i < length; ++i)
-        {
-            randStr[i] = (rand() % (CHAR_MAX - CHAR_MIN + 1)) + CHAR_MIN;
-        }
-        randStr[length] = 0; // make sure we have at least one null char in the string
-
-        SECTION("Intentionally failed to test teardown")
-        {
-            REQUIRE(false);
-        }
-
-        free(randStr);
-    }
 
 }
 
-TEST_CASE( "Twine - Copy Constructor" )
+TEST_CASE( "Twine - Copy Constructor", "[twine]" )
 {
     SECTION( "Copy Empty" ) {
         SECTION( "Calling constructor by name" ){
@@ -265,4 +246,65 @@ TEST_CASE( "Twine - Copy Constructor" )
             REQUIRE(&t != &orig);
         }
     }
+}
+
+TEST_CASE("Twine - Random Testing", "[twine][random]")
+{
+    SECTION("Randomized String")
+    {
+        srand(time(0));
+
+        int length = rand();
+        char* randStr = (char*)malloc((length + 1) * sizeof(*randStr));
+        for(int i = 0; i < length; ++i)
+        {
+            randStr[i] = (rand() % (CHAR_MAX - CHAR_MIN + 1)) + CHAR_MIN;
+        }
+        randStr[length] = 0; // make sure we have at least one null char in the string
+
+        SECTION("Create from random String"){
+            if(strlen(randStr) > MAX_INPUT_SIZE)
+                REQUIRE_THROWS([&](){twine t = randStr;});
+            else
+            {
+                twine t = randStr;
+                if(randStr[0] == 0)
+                    REQUIRE(t.empty());
+                else
+                    REQUIRE_FALSE(t.empty());
+
+                REQUIRE(t.size() == strlen(randStr));
+                REQUIRE(t.capacity() >= strlen(randStr));
+                if(strlen(randStr) < TWINE_SMALL_STRING)
+                    REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            } 
+        }
+
+        SECTION("Copy from random String"){
+            twine orig;
+            if(strlen(randStr) > MAX_INPUT_SIZE)
+                REQUIRE_THROWS([&](){orig = randStr;});
+            else
+            {
+                orig = randStr;
+
+                twine t = orig;
+                if(randStr[0] == 0)
+                    REQUIRE(t.empty());
+                else
+                    REQUIRE_FALSE(t.empty());
+
+                REQUIRE(t.size() == strlen(randStr));
+                REQUIRE(t.capacity() >= strlen(randStr));
+                if(strlen(randStr) < TWINE_SMALL_STRING)
+                    REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+                REQUIRE(t.compare(orig) == 0);
+                REQUIRE(&t != &orig);
+            } 
+        }
+
+        free(randStr);
+    }
+
 }

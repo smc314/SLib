@@ -16,6 +16,10 @@ src/test/SLibTest
 #################
 *.swp
 
+# Ctags file #
+#############
+tags
+
 # Everything in the include directory #
 #######################################
 include/*.h
