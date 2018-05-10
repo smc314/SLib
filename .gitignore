@@ -24,3 +24,8 @@ tags
 #######################################
 include/*.h
 include/*.cpp
+
+# MacOSX Generated Files #
+##########################
+.DS_Store
+*.dSYM/

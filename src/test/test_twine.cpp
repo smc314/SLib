@@ -250,6 +250,11 @@ TEST_CASE( "Twine - Copy Constructor", "[twine]" )
     }
 }
 
+TEST_CASE("Twine - assign from xmlChar", "[twine][xml]")
+{
+
+}
+
 TEST_CASE("Twine - Random Testing", "[twine][random]")
 {
     SECTION("Randomized String")
