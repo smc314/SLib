@@ -144,12 +144,12 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
 
 }
 
-TEST_CASE( "Twine - Copy Constructor", "[twine]" )
+TEST_CASE( "Twine - Copying another twine", "[twine]" )
 {
     SECTION( "Copy Empty" ) {
         SECTION( "Calling constructor by name" ){
             twine orig;
-            twine t = twine(orig);
+            twine t(orig);
             REQUIRE(t.empty());
             REQUIRE(t.size() == 0);
             REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
@@ -169,7 +169,7 @@ TEST_CASE( "Twine - Copy Constructor", "[twine]" )
             REQUIRE(&t != &orig);
         }
 
-        SECTION("Calling constructor after initial creation"){
+        SECTION("Calling assignment after initial creation"){
             twine orig;
             twine t; t = orig;
             REQUIRE(t.empty());
@@ -185,7 +185,7 @@ TEST_CASE( "Twine - Copy Constructor", "[twine]" )
         twine orig = "I am a short string";
 
         SECTION( "Calling constructor by name" ){
-            twine t = twine(orig);
+            twine t(orig);
             REQUIRE_FALSE(t.empty());
             REQUIRE(t.size() == 19);
             REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
@@ -204,7 +204,7 @@ TEST_CASE( "Twine - Copy Constructor", "[twine]" )
             REQUIRE(&t != &orig);
         }
 
-        SECTION("Calling constructor after initial creation"){
+        SECTION("Calling assignment after initial creation"){
             twine t; t = orig;
             REQUIRE_FALSE(t.empty());
             REQUIRE(t.size() == 19);
@@ -219,7 +219,7 @@ TEST_CASE( "Twine - Copy Constructor", "[twine]" )
         twine orig = "I am a longer string that will not fit in optimized storage.";
 
         SECTION( "Calling constructor by name" ){
-            twine t = twine(orig);
+            twine t(orig);
             REQUIRE_FALSE(t.empty());
             REQUIRE(t.size() == 60);
             REQUIRE(t.capacity() >= 60);
@@ -238,7 +238,7 @@ TEST_CASE( "Twine - Copy Constructor", "[twine]" )
             REQUIRE(&t != &orig);
         }
 
-        SECTION("Calling constructor after initial creation"){
+        SECTION("Calling assignment after initial creation"){
             twine t; t = orig;
             REQUIRE_FALSE(t.empty());
             REQUIRE(t.size() == 60);
@@ -252,6 +252,98 @@ TEST_CASE( "Twine - Copy Constructor", "[twine]" )
 
 TEST_CASE("Twine - assign from xmlChar", "[twine][xml]")
 {
+    SECTION( "Assign Empty" ) {
+        xmlChar* xml = (xmlChar*)("");
+
+        SECTION( "Calling constructor by name" ){
+            twine t(xml);
+            REQUIRE(t.empty());
+            REQUIRE(t.size() == 0);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+
+        SECTION("Implicitly calling constructor"){
+            twine t = xml;
+            REQUIRE(t.empty());
+            REQUIRE(t.size() == 0);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+
+        SECTION("Calling assignment after initial creation"){
+            twine t; t = xml;
+            REQUIRE(t.empty());
+            REQUIRE(t.size() == 0);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+    } 
+
+    SECTION( "Assign Short xmlChar" ) {
+        xmlChar* xml = (xmlChar*)("I am a short string");
+
+        SECTION( "Calling constructor by name" ){
+            twine t(xml);
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+
+        SECTION("Implicitly calling constructor"){
+            twine t = xml;
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+
+        SECTION("Calling assignment after initial creation"){
+            twine t; t = xml;
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+    } 
+
+    SECTION("Copy Long Twine") {
+        xmlChar* xml = (xmlChar*)("I am a longer string that will not fit in optimized storage.");
+
+        SECTION( "Calling constructor by name" ){
+            twine t(xml);
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60);
+            REQUIRE(t.capacity() >= 60);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+
+        SECTION("Implicitly calling constructor"){
+            twine t = xml;
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60);
+            REQUIRE(t.capacity() >= 60);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+
+        SECTION("Calling assignment after initial creation"){
+            twine t; t = xml;
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60);
+            REQUIRE(t.capacity() >= 60);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+    }
 
 }
 
