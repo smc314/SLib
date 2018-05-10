@@ -10,6 +10,7 @@
 *.pdb
 *.ilk
 src/LogDump
+src/test/SLibTest
 
 # VI Swap files #
 #################
