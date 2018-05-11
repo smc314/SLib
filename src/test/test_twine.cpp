@@ -380,6 +380,15 @@ TEST_CASE("Twine - Assign from a single char", "[twine]")
 */
 }
 
+// TODO: Add testing of twine::twine(const xmlNodePtr, const char*)
+// here. I'm going to have to look into how to do that, though.
+
+// TODO: Somehow make a test that checks whether the destructor properly frees
+// the char* m_data. Not sure how to do this either.
+
+// TODO: implement tests for operator overloads
+
+// TODO: Deal with this.
 // IMPORTANT! This test case MUST be dealt with!
 // However, leaving it in a normal run is too dangerous.
 // It causes a Bus Error:10 when it calls the insert function.
@@ -463,13 +472,13 @@ TEST_CASE("Twine - Append onto Extremely Long String", "[twine][stress][.][appen
     REQUIRE_NOTHROW([&](){t = monster;}());
     printf("364\n");
 
-    SECTION("Insert one extra char"){
+    SECTION("Append one extra char"){
         printf("367\n");
         REQUIRE_THROWS([&](){t.append("B");}());
         printf("369\n");
     }
 
-    SECTION("Insert a few extra chars"){
+    SECTION("Append a few extra chars"){
         printf("373\n");
         int more = t.capacity() - MAX_INPUT_SIZE;
         printf("375\n");
@@ -486,7 +495,7 @@ TEST_CASE("Twine - Append onto Extremely Long String", "[twine][stress][.][appen
         printf("386\n");
     }
 
-    SECTION("Insert many extra chars"){
+    SECTION("Append many extra chars"){
         printf("390\n");
         int more = t.capacity() - MAX_INPUT_SIZE;
         printf("392\n");
