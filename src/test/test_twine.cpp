@@ -346,6 +346,36 @@ TEST_CASE("Twine - assign from xmlChar", "[twine][xml]")
     }
 }
 
+TEST_CASE("Twine - Assign from a single char", "[twine]")
+{
+    SECTION("Calling constructor by name"){
+        twine t('Q');
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 1);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare('Q') == 0);
+    }
+
+    SECTION("Implicitly calling constructor"){
+        twine t = 'Q';
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 1);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare(c) == 0);
+    }
+
+    SECTION("Calling Assignment after initial creation"){
+        twine t; t = 'Q';
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 1);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare(c) == 0);
+    }
+}
+
 // IMPORTANT! This test case MUST be dealt with!
 // However, leaving it in a normal run is too dangerous.
 // It causes a Bus Error:10 when it calls the insert function.
