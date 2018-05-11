@@ -344,7 +344,73 @@ TEST_CASE("Twine - assign from xmlChar", "[twine][xml]")
             REQUIRE(t.compare(xml) == 0);
         }
     }
+}
 
+// IMPORTANT! This test case MUST be dealt with!
+// However, leaving it in a normal run is too dangerous.
+// It causes a Bus Error:10 when it calls the insert function.
+// This is undesired behavior in the insert function itself,
+// but because it's a hardware fault, rather than a software exception,
+// it completely aborts all testing, so we lose all test results after this one.
+TEST_CASE("Twine - Insert into Extremely Long String", "[twine][stress][.]")
+{
+    printf("352\n");
+    char* monster = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*monster));
+    printf("354\n");
+    memset(monster, 'A', MAX_INPUT_SIZE);
+    printf("356\n");
+    monster[MAX_INPUT_SIZE] = 0;
+
+    printf("359\n");
+    twine t;
+
+    printf("362\n");
+    REQUIRE_NOTHROW([&](){t = monster;}());
+    printf("364\n");
+
+    SECTION("Insert one extra char"){
+        printf("367\n");
+        REQUIRE_THROWS([&](){t.insert(0, "B");}());
+        printf("369\n");
+    }
+
+    SECTION("Insert a few extra chars"){
+        printf("373\n");
+        int more = t.capacity() - MAX_INPUT_SIZE;
+        printf("375\n");
+        char* moreChars = (char*)malloc((more + 1) * sizeof(*moreChars));
+        printf("377\n");
+        memset(moreChars, 'B', more);
+        printf("379\n");
+        moreChars[more] = 0;
+        printf("381\n");
+
+        CHECK_THROWS([&](){t.insert(0, moreChars);}());
+        printf("384\n");
+        free(moreChars);
+        printf("386\n");
+    }
+
+    SECTION("Insert many extra chars"){
+        printf("390\n");
+        int more = t.capacity() - MAX_INPUT_SIZE;
+        printf("392\n");
+        char* moreChars = (char*)malloc((more + 3) * sizeof(*moreChars));
+        printf("394\n");
+        memset(moreChars, 'B', more+2);
+        printf("396\n");
+        moreChars[more] = 0;
+        printf("398\n");
+
+        CHECK_THROWS([&](){t.insert(0, moreChars);}());
+        printf("401\n");
+        free(moreChars);
+        printf("403\n");
+    }
+
+    printf("406\n");
+    free(monster);
+    printf("408\n");
 }
 
 TEST_CASE("Twine - Random Testing", "[twine][random]")
