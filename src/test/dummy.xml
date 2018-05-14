@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RootNode>
+
+    <ParentNode nodeAttribute="This is an attribute!">
+
+        <ChildNode nodeAttribute="I have a text node!">
+            This is some text.
+        </ChildNode>
+        <ChildNode nodeAttribute="I have another text node!">
+            This is some more text.
+        </ChildNode>
+
+    </ParentNode>
+
+</RootNode>

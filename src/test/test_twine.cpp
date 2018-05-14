@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "twine.h"
+#include "xmlInc.h"
 using namespace SLib;
 
 #include "catch.hpp"
@@ -382,6 +383,37 @@ TEST_CASE("Twine - Assign from a single char", "[twine]")
 
 // TODO: Add testing of twine::twine(const xmlNodePtr, const char*)
 // here. I'm going to have to look into how to do that, though.
+TEST_CASE("Twine - Construct from xmlNodePtr attribute", "[twine][xml]")
+{
+    xmlDocPtr doc;
+    xmlNodePtr cur;
+
+    doc = xmlParseFile("test/dummy.xml");
+    REQUIRE(doc != NULL);
+
+    cur = xmlDocGetRootElement(doc);
+    REQUIRE(cur != NULL);
+    REQUIRE(xmlStrcmp(cur->name, (const xmlChar *)"RootNode") == 0);
+
+    while(cur != NULL)
+    {
+        if(xmlStrcmp(cur->name, (const xmlChar *)"ParentNode") == 0)
+            break;
+        if(cur->next == NULL)
+            cur = cur->children;
+        else
+            cur = cur->next;
+    }
+    REQUIRE(cur != NULL);
+
+    twine t(cur, "nodeAttribute");
+    REQUIRE_FALSE(t.empty());
+    REQUIRE(t.size() == 21);
+    REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+    
+    REQUIRE(t.compare("This is an attribute!") == 0);
+
+}
 
 // TODO: Somehow make a test that checks whether the destructor properly frees
 // the char* m_data. Not sure how to do this either.
