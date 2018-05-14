@@ -1,0 +1,47 @@
+#
+# This is the linux build version of the makefile for SLib
+###############################################################
+
+CC=g++
+UNAME := $(shell uname)
+
+ifeq ($(UNAME),Linux)
+	OPENSSLDIR=/usr
+else
+	OPENSSLDIR=/usr/local/opt/openssl
+endif
+
+_CFLAGS=-g -Wall -D_REENTRANT -fPIC -fprofile-arcs -ftest-coverage -I$(OPENSSLDIR)/include \
+	-I/usr/include/libxml2 -I/usr/include/curl -I..
+
+_CPPFLAGS=-std=c++14 $(_CFLAGS)
+
+ifeq ($(UNAME),Linux)
+	CFLAGS=$(_CFLAGS) -rdynamic
+	CPPFLAGS=$(_CPPFLAGS) -rdynamic
+	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
+		-lresolv -lxml2 -lz -lcurl -lrt --coverage
+else
+	CFLAGS=$(_CFLAGS)
+	CPPFLAGS=$(_CPPFLAGS)
+	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
+		-lresolv -lxml2 -lz -lcurl -liconv --coverage
+endif
+
+%.o:	%.cpp
+	$(CC) $(CPPFLAGS) -c $< -o $@
+%.o:	%.c
+	gcc $(CFLAGS) -c $< -o $@
+
+# smtp.o is not here because we need to find out how to compile it
+# on a mac before including it in this list.
+DOTOH := testMain.o test_64.o test_date.o test_xml.o test_twine.o
+
+
+all: $(DOTOH) 
+	$(CC) -o SLibTest $(DOTOH) -L.. -lSLib $(LFLAGS)
+
+clean:
+	rm -f $(DOTOH) *.o SLibTest  core *.gcda *.gcno *.gcov *.info
+	rm -rf coverage
+

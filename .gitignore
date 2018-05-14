@@ -12,6 +12,14 @@
 src/LogDump
 src/test/SLibTest
 
+# Command Tracing #
+###################
+*.gcda
+*.gcno
+*.gcov
+*.info
+src/test/coverage
+
 # VI Swap files #
 #################
 *.swp

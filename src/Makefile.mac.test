@@ -1,0 +1,156 @@
+#
+# This is the linux build version of the makefile for SLib
+###############################################################
+
+CC=g++
+AR=ar
+DOC=doc++
+UNAME := $(shell uname)
+
+ifeq ($(UNAME),Linux)
+	OPENSSLDIR=/usr
+else
+	OPENSSLDIR=/usr/local/opt/openssl
+endif
+
+SOCKET_LIB=
+
+_CFLAGS=-g -Wall -D_REENTRANT -fPIC -fprofile-arcs -ftest-coverage -I$(OPENSSLDIR)/include \
+	-I/usr/include/libxml2 -I/usr/include/curl
+
+_CPPFLAGS=-std=c++14 $(_CFLAGS)
+
+ifeq ($(UNAME),Linux)
+	CFLAGS=$(_CFLAGS) -rdynamic
+	CPPFLAGS=$(_CPPFLAGS) -rdynamic
+	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
+		-lresolv -lxml2 -lz -lcurl -lrt
+else
+	CFLAGS=$(_CFLAGS)
+	CPPFLAGS=$(_CPPFLAGS)
+	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
+		-lresolv -lxml2 -lz -lcurl -liconv --coverage
+endif
+
+%.o:	%.cpp
+	$(CC) $(CPPFLAGS) -c $< -o $@
+%.o:	%.c
+	gcc $(CFLAGS) -c $< -o $@
+zip.o:	zip.c
+	gcc $(CFLAGS) -DNOCRYPT -c $< -o $@
+
+# smtp.o is not here because we need to find out how to compile it
+# on a mac before including it in this list.
+DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Mutex.o Tools.o twine.o Date.o \
+	SmtpClient.o Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o XmlHelpers.o BlockingQueue.o File.o \
+	LogFile.o HttpClient.o ZipFile.o MemBuf.o sqlite3.o LogFile2.o
+
+MINIZIP_OH=ioapi.o mztools.o unzip.o zip.o
+
+all: $(DOTOH) $(MINIZIP_OH) LogDump.o SLogDump.o SqlShell.o incs
+	$(CC) -shared -o libSLib.so $(DOTOH) $(MINIZIP_OH) $(LFLAGS)
+	$(CC) -o LogDump LogDump.o -L. -lSLib $(LFLAGS)
+	$(CC) -o SLogDump SLogDump.o -L. -lSLib $(LFLAGS)
+	$(CC) -o SqlShell SqlShell.o -L. -lSLib $(LFLAGS)
+	cp libSLib.so ../lib
+
+incs:
+	cp *.h Pool.cpp ../include
+
+check:
+	cd test && make -f Makefile.mac.test
+	test/SLibTest
+	gcov gcov -f -b *.gcda
+	gcov gcov -f -b test/*.gcda
+	lcov -d . -b . --no-recursion -c -o test/src.info
+	lcov -d test -b test --no-recursion -c -o test/test.info
+	genhtml test/src.info test/test.info -o test/coverage
+
+tests: test_64 test_date test_dptr test_enex test_log test_logfile test_membuf test_queue test_split test_string test_suvect test_timer test_twine test_xml test_zip thrash_timer thrash_twine
+
+test_64: test_64.o $(DOTOH)
+	$(CC) -o test_64 test_64.o -L. -lSLib $(LFLAGS)
+
+test_date: test_date.o $(DOTOH)
+	$(CC) -o test_date test_date.o -L. -lSLib $(LFLAGS)
+
+test_log: test_log.o $(DOTOH)
+	$(CC) -o test_log test_log.o -L. -lSLib $(LFLAGS)
+
+test_membuf: test_membuf.o $(DOTOH)
+	$(CC) -o test_membuf test_membuf.o -L. -lSLib $(LFLAGS)
+
+test_queue: test_queue.o $(DOTOH)
+	$(CC) -o test_queue test_queue.o -L. -lSLib $(LFLAGS)
+
+test_split: test_split.o $(DOTOH)
+	$(CC) -o test_split test_split.o -L. -lSLib $(LFLAGS)
+
+test_string: test_string.o $(DOTOH)
+	$(CC) -o test_string test_string.o -L. -lSLib $(LFLAGS)
+
+test_suvect: test_suvect.o $(DOTOH)
+	$(CC) -o test_suvect test_suvect.o -L. -lSLib $(LFLAGS)
+
+test_timer: test_timer.o $(DOTOH)
+	$(CC) -o test_timer test_timer.o -L. -lSLib $(LFLAGS)
+
+test_twine: test_string.o test_twine.o 
+	$(CC) -o test_twine test_twine.o -L. -lSLib $(LFLAGS)
+	$(CC) -o test_string test_string.o -L. -lSLib $(LFLAGS)
+
+test_enex: test_enex.o $(DOTOH)
+	$(CC) -o test_enex test_enex.o -L. -lSLib $(LFLAGS)
+
+test_dptr: test_dptr.o $(DOTOH)
+	$(CC) -o test_dptr test_dptr.o -L. -lSLib $(LFLAGS)
+
+test_logfile: test_logfile.o $(DOTOH)
+	$(CC) -o test_logfile test_logfile.o -L. -lSLib $(LFLAGS)
+
+test_xml: test_xml.o $(DOTOH)
+	$(CC) -o test_xml test_xml.o -L. -lSLib $(LFLAGS)
+
+test_zip: test_zip.o $(DOTOH)
+	$(CC) -o test_zip test_zip.o -L. -lSLib $(LFLAGS)
+
+thrash_timer: thrash_timer.o $(DOTOH)
+	$(CC) -o thrash_timer thrash_timer.o -L. -lSLib $(LFLAGS)
+
+thrash_twine: thrash_twine.o $(DOTOH)
+	$(CC) -o thrash_twine thrash_twine.o -L. -lSLib $(LFLAGS)
+
+test_runcmd: test_runcmd.o test_echoargs.o $(DOTOH)
+	$(CC) -o test_echoargs test_echoargs.o -L. -lSLib $(LFLAGS)
+	$(CC) -o test_runcmd test_runcmd.o -L. -lSLib $(LFLAGS)
+
+test_tmp: test_tmp.o $(DOTOH)
+	$(CC) -o test_tmp test_tmp.o $(DOTOH) $(MINIZIP_OH) $(LFLAGS)
+
+test_SmtpClient: test_SmtpClient.o $(DOTOH)
+	$(CC) -o test_SmtpClient test_SmtpClient.o $(DOTOH) $(MINIZIP_OH) $(LFLAGS)
+
+
+docs: 
+	cd ../doc
+	rm -f *.html
+	cd ../include
+	doc++ --html --dir ../doc *.h
+
+clean:
+	make -f test/Makefile.mac.test clean
+	rm -f $(DOTOH) *.o libSLib.so core
+	rm -f ../lib/libSLib.so
+	rm -f ../include/*.h
+	rm -f ../include/Pool.cpp
+	rm -f *.gcda *.gcno *.gcov
+
+install:
+	-mkdir -p ../../lib
+	-mkdir -p ../../bin
+	-mkdir -p ../../include
+	cp ../include/*.h ../include/*.cpp ../../include/
+	cp libSLib.so ../../lib/
+	cp LogDump ../../bin/
+	cp SLogDump ../../bin/
+	cp SqlShell ../../bin/
