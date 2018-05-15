@@ -59,7 +59,7 @@ incs:
 
 check:
 	cd test && make -f Makefile.mac.test
-	test/SLibTest
+	-test/SLibTest
 	@echo
 	@printf "gcov src\n--------\n" > test/cov.log
 	gcov -f -b *.gcda &> /tmp/tmp.log
