@@ -44,6 +44,27 @@ TEST_CASE( "Twine - short string", "[twine]" )
 // according to twine.h, a "Short string" is <=32 characters, including the final '\0'
 TEST_CASE( "Twine - assignment from const char", "[twine]" )
 {
+    SECTION("Null string") {
+        SECTION("String is NULL") {
+            SECTION("Direct assignment"){
+                REQUIRE_THROWS([&](){twine t = (char *)NULL;}());
+            }
+
+            SECTION("Assignment after construction"){
+                REQUIRE_THROWS([&](){twine t; t = (char *)NULL;}());
+            }
+        }
+
+        SECTION("String is \"\"") {
+            SECTION("Direct assignment"){
+                REQUIRE_NOTHROW([&](){twine t = "";}());
+            }
+
+            SECTION("Assignment after construction"){
+                REQUIRE_NOTHROW([&](){twine t; t = "";}());
+            }
+        }
+    }
     SECTION( "Short string") {
         SECTION( "Direct assignment" ){
             twine t = "I am a short string";
