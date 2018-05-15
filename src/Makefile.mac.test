@@ -60,11 +60,16 @@ incs:
 check:
 	cd test && make -f Makefile.mac.test
 	test/SLibTest
-	gcov gcov -f -b *.gcda
-	gcov gcov -f -b test/*.gcda
-	lcov -d . -b . --no-recursion -c -o test/src.info
-	lcov -d test -b test --no-recursion -c -o test/test.info
-	genhtml test/src.info test/test.info -o test/coverage
+	@echo
+	gcov -f -b *.gcda 2>&1 > test/cov.log
+	cd test && gcov -f -b *.gcda 2>&1 >> cov.log
+	lcov -d . -b . --no-recursion -c -o test/src.info &> /tmp/tmp.log
+	@cat /tmp/tmp.log >> test/cov.log
+	lcov -d test -b test --no-recursion -c -o test/test.info &> /tmp/tmp.log
+	@cat /tmp/tmp.log >> test/cov.log
+	genhtml test/src.info test/test.info -o test/coverage 2>&1 >> test/cov.log
+	@echo
+	@echo Code coverage report in test/coverage/index.html\; log in test/cov.log.
 
 tests: test_64 test_date test_dptr test_enex test_log test_logfile test_membuf test_queue test_split test_string test_suvect test_timer test_twine test_xml test_zip thrash_timer thrash_twine
 

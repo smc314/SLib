@@ -18,6 +18,7 @@ src/test/SLibTest
 *.gcno
 *.gcov
 *.info
+*.log
 src/test/coverage
 
 # VI Swap files #
