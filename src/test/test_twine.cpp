@@ -104,10 +104,10 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
             // thrown when number of non-zero chars in string
             // is greater than MAX_INPUT_SIZE
             char* monster = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*monster));
-         // for(int i = 0; i < MAX_INPUT_SIZE; ++i)
-         // {
-         //     monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
-         // }
+            // for(int i = 0; i < MAX_INPUT_SIZE; ++i)
+            // {
+            //     monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
+            // }
             memset(monster, 'A', MAX_INPUT_SIZE);
             monster[MAX_INPUT_SIZE] = 0;
 
@@ -120,7 +120,7 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
                 REQUIRE(t->capacity() >= MAX_INPUT_SIZE);
                 INFO("t.capacity() is " << t->capacity());
                 INFO("MAX_INPUT_SIZE is " << MAX_INPUT_SIZE);
-                
+
                 if(t != NULL)
                     delete t;
             }
@@ -138,15 +138,15 @@ TEST_CASE( "Twine - assignment from const char", "[twine]" )
 
             free(monster);
         }
-        
+
         SECTION("MAX_INPUT_SIZE + 1") {
             // This is an invalid size, because the nonzero portion of the string is of length greater
             // than MAX_INPUT_SIZE
             char* monster = (char*)malloc((MAX_INPUT_SIZE + 2) * sizeof(*monster));
-         // for(int i = 0; i <= MAX_INPUT_SIZE; ++i)
-         // {
-         //     monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
-         // }
+            // for(int i = 0; i <= MAX_INPUT_SIZE; ++i)
+            // {
+            //     monster[i] = (i % 94) + 32; // fill it with printable characters! Why? Who cares!
+            // }
             memset(monster, 'B', MAX_INPUT_SIZE + 1);
             monster[MAX_INPUT_SIZE + 1] = 0;
 
@@ -366,6 +366,113 @@ TEST_CASE("Twine - assign from xmlChar", "[twine][xml]")
             REQUIRE(t.compare(xml) == 0);
         }
     }
+
+    SECTION("Using << Operator")
+    {
+        SECTION("NULL xmlChar*"){
+            REQUIRE_THROWS([&](){twine t; t << (xmlChar*)NULL;}());
+        }
+
+        SECTION("Short xmlChar"){
+            xmlChar* xml = (xmlChar*)malloc(20 * sizeof(*xml));
+            memcpy(xml, "I am a short string", 20);
+            twine t; t << xml;
+
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+            REQUIRE(t.compare(xml) == 0);
+        }
+
+        SECTION("Long xmlChar") {
+            xmlChar* xml = (xmlChar*)malloc(61 * sizeof(*xml));
+            memcpy(xml, "I am a longer string that will not fit in optimized storage.", 61);
+            twine t; t << xml;
+
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60);
+            REQUIRE(t.capacity() >= 60);
+
+            REQUIRE(t.compare(xml) == 0);
+
+        }
+    }
+
+    SECTION("Extremely long xmlChar") {
+        SECTION("MAX_INPUT_SIZE") {
+
+            xmlChar* monster = (xmlChar*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*monster));
+            memset(monster, 'A', MAX_INPUT_SIZE);
+            monster[MAX_INPUT_SIZE] = 0;
+
+            bool freeIt = true;
+
+            SECTION( "Direct assignment of a long string" ){
+                twine* t = NULL;
+
+                REQUIRE_NOTHROW([&](){t = new twine(monster);}());
+                REQUIRE_FALSE(t->empty());
+                REQUIRE(t->size() == MAX_INPUT_SIZE);
+                REQUIRE(t->capacity() >= MAX_INPUT_SIZE);
+                INFO("t.capacity() is " << t->capacity());
+                INFO("MAX_INPUT_SIZE is " << MAX_INPUT_SIZE);
+
+                if(t != NULL)
+                    delete t;
+            }
+
+            SECTION( "Assignment after construction of a long string" ){
+                twine t;
+                REQUIRE_NOTHROW(t = monster);
+
+                REQUIRE_FALSE(t.empty());
+                REQUIRE(t.size() == MAX_INPUT_SIZE);
+                REQUIRE(t.capacity() >= MAX_INPUT_SIZE);
+                INFO("t.capacity() is " << t.capacity());
+                INFO("MAX_INPUT_SIZE is " << MAX_INPUT_SIZE);
+            }
+
+            SECTION( "Assignment using <<" ){
+                twine t;
+                REQUIRE_NOTHROW(t << monster);
+
+                freeIt = false;
+
+                REQUIRE_FALSE(t.empty());
+                REQUIRE(t.size() == MAX_INPUT_SIZE);
+                REQUIRE(t.capacity() >= MAX_INPUT_SIZE);
+                INFO("t.capacity() is " << t.capacity());
+                INFO("MAX_INPUT_SIZE is " << MAX_INPUT_SIZE);
+            }
+
+            if(freeIt)
+                free(monster);
+
+        }
+
+        SECTION("MAX_INPUT_SIZE + 1") {
+            xmlChar* monster = (xmlChar*)malloc((MAX_INPUT_SIZE + 2) * sizeof(*monster));
+            memset(monster, 'B', MAX_INPUT_SIZE + 1);
+            monster[MAX_INPUT_SIZE + 1] = 0;
+
+            SECTION( "Direct assignment of a long string" ){
+                REQUIRE_THROWS([&](){twine t = monster;}());
+            }
+
+            SECTION( "Assignment after construction of a long string" ){
+                twine t;
+                REQUIRE_THROWS(t = monster);
+            }
+
+            SECTION( "Assignment using <<" ){
+                twine t;
+                REQUIRE_THROWS(t << monster);
+            }
+
+            free(monster);
+        }
+    }
 }
 
 TEST_CASE("Twine - Assign from a single char", "[twine]")
@@ -389,16 +496,16 @@ TEST_CASE("Twine - Assign from a single char", "[twine]")
         INFO("No compare function exists for char");
         //REQUIRE(t.compare('Q') == 0);
     }
-/*
-    SECTION("Calling Assignment after initial creation"){
-        twine t; t = 'Q';
-        REQUIRE_FALSE(t.empty());
-        REQUIRE(t.size() == 1);
-        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+    /*
+       SECTION("Calling Assignment after initial creation"){
+       twine t; t = 'Q';
+       REQUIRE_FALSE(t.empty());
+       REQUIRE(t.size() == 1);
+       REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
 
-        INFO("No compare function exists for char");
-        //REQUIRE(t.compare('Q') == 0);
-    }
+       INFO("No compare function exists for char");
+//REQUIRE(t.compare('Q') == 0);
+}
 */
 }
 
@@ -431,7 +538,7 @@ TEST_CASE("Twine - Construct from xmlNodePtr attribute", "[twine][xml]")
     REQUIRE_FALSE(t.empty());
     REQUIRE(t.size() == 21);
     REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
-    
+
     REQUIRE(t.compare("This is an attribute!") == 0);
 
 }
