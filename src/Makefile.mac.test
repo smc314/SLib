@@ -61,13 +61,21 @@ check:
 	cd test && make -f Makefile.mac.test
 	test/SLibTest
 	@echo
-	gcov -f -b *.gcda 2>&1 > test/cov.log
-	cd test && gcov -f -b *.gcda 2>&1 >> cov.log
+	@printf "gcov src\n--------\n" > test/cov.log
+	gcov -f -b *.gcda &> /tmp/tmp.log
+	@cat /tmp/tmp.log >> test/cov.log
+	@printf "\ngcov src/test\n-------------\n" >> test/cov.log
+	cd test && gcov -f -b *.gcda &> /tmp/tmp.log
+	@cat /tmp/tmp.log >> test/cov.log
+	@printf "\nlcov src\n--------\n" >> test/cov.log
 	lcov -d . -b . --no-recursion -c -o test/src.info &> /tmp/tmp.log
 	@cat /tmp/tmp.log >> test/cov.log
+	@printf "\nlcov src/test\n-------------\n" >> test/cov.log
 	lcov -d test -b test --no-recursion -c -o test/test.info &> /tmp/tmp.log
 	@cat /tmp/tmp.log >> test/cov.log
-	genhtml test/src.info test/test.info -o test/coverage 2>&1 >> test/cov.log
+	@printf "\ngenhtml\n-------\n" >> test/cov.log
+	genhtml test/src.info test/test.info -o test/coverage &>/tmp/tmp.log
+	@cat /tmp/tmp.log >> test/cov.log
 	@echo
 	@echo Code coverage report in test/coverage/index.html\; log in test/cov.log.
 
@@ -143,7 +151,7 @@ docs:
 	doc++ --html --dir ../doc *.h
 
 clean:
-	make -f test/Makefile.mac.test clean
+	cd test && make -f Makefile.mac.test clean
 	rm -f $(DOTOH) *.o libSLib.so core
 	rm -f ../lib/libSLib.so
 	rm -f ../include/*.h
