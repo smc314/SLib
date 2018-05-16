@@ -483,8 +483,7 @@ TEST_CASE("Twine - Assign from a single char", "[twine]")
         REQUIRE(t.size() == 1);
         REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
 
-        INFO("No compare function exists for char");
-        //REQUIRE(t.compare('Q') == 0);
+        REQUIRE(t[0] == 'Q');
     }
 
     SECTION("Implicitly calling constructor"){
@@ -493,8 +492,7 @@ TEST_CASE("Twine - Assign from a single char", "[twine]")
         REQUIRE(t.size() == 1);
         REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
 
-        INFO("No compare function exists for char");
-        //REQUIRE(t.compare('Q') == 0);
+        REQUIRE(t[0] == 'Q');
     }
     /*
        SECTION("Calling Assignment after initial creation"){
@@ -503,8 +501,7 @@ TEST_CASE("Twine - Assign from a single char", "[twine]")
        REQUIRE(t.size() == 1);
        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
 
-       INFO("No compare function exists for char");
-//REQUIRE(t.compare('Q') == 0);
+       REQUIRE(t[0] == 'Q');
 }
 */
 }
@@ -543,6 +540,15 @@ TEST_CASE("Twine - Construct from xmlNodePtr attribute", "[twine][xml]")
 
 }
 
+TEST_CASE("Twine - properly returns a small string", "[twine]")
+{
+
+    twine t = "This is a small string.";
+
+    REQUIRE(strcmp(t(), "This is a small string.") == 0);
+
+}
+
 // TODO: Somehow make a test that checks whether the destructor properly frees
 // the char* m_data. Not sure how to do this either.
 
@@ -557,124 +563,124 @@ TEST_CASE("Twine - Construct from xmlNodePtr attribute", "[twine][xml]")
 // it completely aborts all testing, so we lose all test results after this one.
 TEST_CASE("Twine - Insert into Extremely Long String", "[twine][stress][.]")
 {
-    printf("352\n");
+    printf("Line %d\n", __LINE__);
     char* monster = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*monster));
-    printf("354\n");
+    printf("Line %d\n", __LINE__);
     memset(monster, 'A', MAX_INPUT_SIZE);
-    printf("356\n");
+    printf("Line %d\n", __LINE__);
     monster[MAX_INPUT_SIZE] = 0;
 
-    printf("359\n");
+    printf("Line %d\n", __LINE__);
     twine t;
 
-    printf("362\n");
+    printf("Line %d\n", __LINE__);
     REQUIRE_NOTHROW([&](){t = monster;}());
-    printf("364\n");
+    printf("Line %d\n", __LINE__);
 
     SECTION("Insert one extra char"){
-        printf("367\n");
+        printf("Line %d\n", __LINE__);
         REQUIRE_THROWS([&](){t.insert(0, "B");}());
-        printf("369\n");
+        printf("Line %d\n", __LINE__);
     }
 
     SECTION("Insert a few extra chars"){
-        printf("373\n");
+        printf("Line %d\n", __LINE__);
         int more = t.capacity() - MAX_INPUT_SIZE;
-        printf("375\n");
+        printf("Line %d\n", __LINE__);
         char* moreChars = (char*)malloc((more + 1) * sizeof(*moreChars));
-        printf("377\n");
+        printf("Line %d\n", __LINE__);
         memset(moreChars, 'B', more);
-        printf("379\n");
+        printf("Line %d\n", __LINE__);
         moreChars[more] = 0;
-        printf("381\n");
+        printf("Line %d\n", __LINE__);
 
         CHECK_THROWS([&](){t.insert(0, moreChars);}());
-        printf("384\n");
+        printf("Line %d\n", __LINE__);
         free(moreChars);
-        printf("386\n");
+        printf("Line %d\n", __LINE__);
     }
 
     SECTION("Insert many extra chars"){
-        printf("390\n");
+        printf("Line %d\n", __LINE__);
         int more = t.capacity() - MAX_INPUT_SIZE;
-        printf("392\n");
+        printf("Line %d\n", __LINE__);
         char* moreChars = (char*)malloc((more + 3) * sizeof(*moreChars));
-        printf("394\n");
+        printf("Line %d\n", __LINE__);
         memset(moreChars, 'B', more+2);
-        printf("396\n");
+        printf("Line %d\n", __LINE__);
         moreChars[more] = 0;
-        printf("398\n");
+        printf("Line %d\n", __LINE__);
 
         CHECK_THROWS([&](){t.insert(0, moreChars);}());
-        printf("401\n");
+        printf("Line %d\n", __LINE__);
         free(moreChars);
-        printf("403\n");
+        printf("Line %d\n", __LINE__);
     }
 
-    printf("406\n");
+    printf("Line %d\n", __LINE__);
     free(monster);
-    printf("408\n");
+    printf("Line %d\n", __LINE__);
 }
 
 TEST_CASE("Twine - Append onto Extremely Long String", "[twine][stress][.][append]")
 {
-    printf("352\n");
+    printf("Line %d\n", __LINE__);
     char* monster = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*monster));
-    printf("354\n");
+    printf("Line %d\n", __LINE__);
     memset(monster, 'A', MAX_INPUT_SIZE);
-    printf("356\n");
+    printf("Line %d\n", __LINE__);
     monster[MAX_INPUT_SIZE] = 0;
 
-    printf("359\n");
+    printf("Line %d\n", __LINE__);
     twine t;
 
-    printf("362\n");
+    printf("Line %d\n", __LINE__);
     REQUIRE_NOTHROW([&](){t = monster;}());
-    printf("364\n");
+    printf("Line %d\n", __LINE__);
 
     SECTION("Append one extra char"){
-        printf("367\n");
+        printf("Line %d\n", __LINE__);
         REQUIRE_THROWS([&](){t.append("B");}());
-        printf("369\n");
+        printf("Line %d\n", __LINE__);
     }
 
     SECTION("Append a few extra chars"){
-        printf("373\n");
+        printf("Line %d\n", __LINE__);
         int more = t.capacity() - MAX_INPUT_SIZE;
-        printf("375\n");
+        printf("Line %d\n", __LINE__);
         char* moreChars = (char*)malloc((more + 1) * sizeof(*moreChars));
-        printf("377\n");
+        printf("Line %d\n", __LINE__);
         memset(moreChars, 'B', more);
-        printf("379\n");
+        printf("Line %d\n", __LINE__);
         moreChars[more] = 0;
-        printf("381\n");
+        printf("Line %d\n", __LINE__);
 
         CHECK_THROWS([&](){t.append(moreChars);}());
-        printf("384\n");
+        printf("Line %d\n", __LINE__);
         free(moreChars);
-        printf("386\n");
+        printf("Line %d\n", __LINE__);
     }
 
     SECTION("Append many extra chars"){
-        printf("390\n");
+        printf("Line %d\n", __LINE__);
         int more = t.capacity() - MAX_INPUT_SIZE;
-        printf("392\n");
+        printf("Line %d\n", __LINE__);
         char* moreChars = (char*)malloc((more + 3) * sizeof(*moreChars));
-        printf("394\n");
+        printf("Line %d\n", __LINE__);
         memset(moreChars, 'B', more+2);
-        printf("396\n");
+        printf("Line %d\n", __LINE__);
         moreChars[more] = 0;
-        printf("398\n");
+        printf("Line %d\n", __LINE__);
 
         CHECK_THROWS([&](){t.append(moreChars);}());
-        printf("401\n");
+        printf("Line %d\n", __LINE__);
         free(moreChars);
-        printf("403\n");
+        printf("Line %d\n", __LINE__);
     }
 
-    printf("406\n");
+    printf("Line %d\n", __LINE__);
     free(monster);
-    printf("408\n");
+    printf("Line %d\n", __LINE__);
 }
 
 TEST_CASE("Twine - Random Testing", "[twine][random]")
