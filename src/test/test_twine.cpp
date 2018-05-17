@@ -674,8 +674,8 @@ TEST_CASE("Twine - assignment from a size_t", "[twine]")
         size_t i = SIZE_MAX;
         twine t;
         t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
         REQUIRE_FALSE(t.empty());
-        INFO("t = " << t());
         REQUIRE(t.size() == (int)log10(SIZE_MAX) + 1);
         if((int)log10(SIZE_MAX) + 1 > TWINE_SMALL_STRING - 1)
             REQUIRE(t.capacity() >= (int)log10(SIZE_MAX) + 1);
@@ -685,7 +685,40 @@ TEST_CASE("Twine - assignment from a size_t", "[twine]")
         REQUIRE(t.compare((size_t)SIZE_MAX) == 0);
 
     }
+    
+    SECTION("Assign unsigned value of smallest possible signed value.")
+    {
+        size_t i = (SIZE_MAX >> 1) + 1; // 0b11111111... > 0b01111111... > 0b10000000...
+        twine t;
+        t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == (int)log10(i) + 1);
+        if((int)log10(i) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(i) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
 
+        REQUIRE(t.compare(i) == 0);
+
+    }
+
+    SECTION("Assign unsigned value of smallest possible signed value - 1")
+    {
+        size_t i = (SIZE_MAX >> 1); // 0b11111111... > 0b01111111...
+        twine t;
+        t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == (int)log10(i) + 1);
+        if((int)log10(i) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(i) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare(i) == 0);
+
+    }
 }
 
 
