@@ -551,8 +551,143 @@ TEST_CASE("Twine - properly returns a small string", "[twine]")
 
 // TODO: Somehow make a test that checks whether the destructor properly frees
 // the char* m_data. Not sure how to do this either.
+// Didn't notice the const before the return type. :|
+TEST_CASE("Twine - free m_data before destroying twine", "[twine][.]")
+{
+    printf("Line %d\n", __LINE__);
+    twine *t = new twine("I am a longer string that will not fit in optimized storage.");
+
+    printf("Line %d\n", __LINE__);
+    //free((*t)());
+    //This line is stupid. WHY DOES THIS WORK???
+    char *str = (char*)(*t)();
+    printf("Line %d\n", __LINE__);
+    free(str);
+    printf("Line %d\n", __LINE__);
+
+    printf("Line %d\n", __LINE__);
+    REQUIRE_THROWS(delete t);
+    printf("Line %d\n", __LINE__);
+}
 
 // TODO: implement tests for operator overloads
+TEST_CASE("Twine - assignment from constant twine reference", "[twine]")
+{
+    SECTION("Assign to self")
+    {
+        twine t("This will be assigned from itself.");
+        twine *p = &t;
+        t = t;
+        REQUIRE(p == &t);
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 34);
+        REQUIRE(t.capacity() >= 34);
+
+        REQUIRE(t.compare("This will be assigned from itself.") == 0);
+    }
+    SECTION("Assign empty to empty"){
+        twine t, s;
+        t = s;
+        REQUIRE(&t != &s);
+        REQUIRE(t.empty());
+        REQUIRE(t.size() == 0);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        
+        REQUIRE(t.compare("") == 0);
+        REQUIRE(t.compare(s) == 0);
+    }
+    SECTION("Assign empty to long"){
+        twine t("I am a longer string that will not fit in optimized storage.");
+        twine s;
+        t = s;
+        REQUIRE(&t != &s);
+        REQUIRE(t.empty());
+        REQUIRE(t.size() == 0);
+        REQUIRE(t.capacity() >= 61);
+
+        REQUIRE(t.compare("") == 0);
+        REQUIRE(t.compare(s) == 0);
+    }
+}
+
+TEST_CASE("Twine - assignment from constant twine pointer", "[twine]")
+{
+
+    SECTION("Assign to self")
+    {
+        twine t("This will be assigned from itself.");
+        twine *p = &t;
+        t = p;
+        REQUIRE(p == &t);
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 34);
+        REQUIRE(t.capacity() >= 34);
+
+        REQUIRE(t.compare("This will be assigned from itself.") == 0);
+    }
+    SECTION("Assign empty to empty"){
+        twine t, s, *p;
+        p = &s;
+        t = p;
+        REQUIRE(&t != p);
+        REQUIRE(&t != &s);
+        REQUIRE(t.empty());
+        REQUIRE(t.size() == 0);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        
+        REQUIRE(t.compare("") == 0);
+        REQUIRE(t.compare(s) == 0);
+    }
+    SECTION("Assign empty to long"){
+        twine t("I am a longer string that will not fit in optimized storage.");
+        twine s, *p;
+        p = &s;
+        t = p;
+        REQUIRE(&t != p);
+        REQUIRE(&t != &s);
+        REQUIRE(t.empty());
+        REQUIRE(t.size() == 0);
+        REQUIRE(t.capacity() >= 61);
+
+        REQUIRE(t.compare("") == 0);
+        REQUIRE(t.compare(s) == 0);
+    }
+
+}
+
+TEST_CASE("Twine - assignment from a size_t", "[twine]")
+{
+    SECTION("Assign 0")
+    {
+        size_t i = 0;
+        twine t;
+        t = i;
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 1);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare("0") == 0);
+    }
+
+    SECTION("Assign SIZE_MAX")
+    {
+        size_t i = SIZE_MAX;
+        twine t;
+        t = i;
+        REQUIRE_FALSE(t.empty());
+        INFO("t = " << t());
+        REQUIRE(t.size() == (int)log10(SIZE_MAX) + 1);
+        if((int)log10(SIZE_MAX) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(SIZE_MAX) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare((size_t)SIZE_MAX) == 0);
+
+    }
+
+}
+
 
 // TODO: Deal with this.
 // IMPORTANT! This test case MUST be dealt with!
