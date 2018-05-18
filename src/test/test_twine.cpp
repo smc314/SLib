@@ -719,6 +719,209 @@ TEST_CASE("Twine - assignment from a size_t", "[twine]")
         REQUIRE(t.compare(i) == 0);
 
     }
+
+    SECTION("Assign max value of atoi()")
+    {
+        size_t i = (size_t)INT_MAX;
+        twine t;
+        t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == (int)log10(i) + 1);
+        if((int)log10(i) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(i) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare(i) == 0);
+
+    }
+
+    SECTION("Assign max value of atoi() + 1")
+    {
+        size_t i = (size_t)INT_MAX + 1;
+        twine t;
+        t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == (int)log10(i) + 1);
+        if((int)log10(i) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(i) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare(i) == 0);
+    }
+}
+
+TEST_CASE("Twine - assignment from a intptr_t", "[twine]")
+{
+    SECTION("Assign 0")
+    {
+        intptr_t i = 0;
+        twine t;
+        t = i;
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 1);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare((size_t)i) == 0);
+    }
+
+    SECTION("Assign INTPTR_MAX")
+    {
+        intptr_t i = INTPTR_MAX;
+        twine t;
+        t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == (int)log10(i) + 1);
+        if((int)log10(i) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(i) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare((size_t)i) == 0);
+
+    }
+    
+    SECTION("Assign smallest possible signed value.")
+    {
+        intptr_t i = INTPTR_MIN;
+        twine t;
+        t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == (int)log10(-(i+1)) + 2); //this is a negative number, also 2's complement edge case
+        if((int)log10(-(i+1)) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(-(i+1)) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare((size_t)i) == 0);
+
+    }
+
+    SECTION("Assign smallest possible signed value - 1")
+    {
+        intptr_t i = INTPTR_MIN - 1;
+        twine t;
+        t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == (int)log10(i) + 1); // This should be a positive number
+        if((int)log10(i) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(i) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare((size_t)i) == 0);
+
+    }
+
+    SECTION("Assign max value of atoi()")
+    {
+        intptr_t i = (intptr_t)INT_MAX;
+        twine t;
+        t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == (int)log10(i) + 1);
+        if((int)log10(i) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(i) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare((size_t)i) == 0);
+
+    }
+
+    SECTION("Assign max value of atoi() + 1")
+    {
+        intptr_t i = (intptr_t)INT_MAX + 1;
+        twine t;
+        t = i;
+        INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == (int)log10(i) + 1);
+        if((int)log10(i) + 1 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(i) + 1);
+        else
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+
+        REQUIRE(t.compare((size_t)i) == 0);
+    }
+}
+
+TEST_CASE("Twine - Assign from floating point", "[twine]")
+{
+    SECTION("Assign +0.0")
+    {
+        float f = +0.0f;
+        twine t;
+        t = f;
+        INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 8);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+    }
+
+    SECTION("Assign -0.0")
+    {
+        float f = -0.0f;
+        twine t;
+        t = f;
+        INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 9);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+    }
+
+    SECTION("Assign +INFINITY")
+    {
+        float f = INFINITY;
+        twine t;
+        t = f;
+        INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() >= 3);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+        
+    }
+
+    SECTION("Assign -INFINITY")
+    {
+        float f = -INFINITY;
+        twine t;
+        t = f;
+        INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() >= 4);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+
+    }
+
+    SECTION("Assign NaN")
+    {
+        // I'm not sure whether I should REQUIRE f and t compare equal or not.
+        // After all, NaN == NaN returns false...
+
+        float f = NAN;
+        twine t;
+        t = f;
+        INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 3);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+    }
+
+    // TODO: Add tests for normal values and for floating point error
+    // Also do stuff with the numeric limits and such.
 }
 
 
