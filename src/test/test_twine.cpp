@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iomanip>
 
 #include "twine.h"
 #include "xmlInc.h"
@@ -909,6 +910,8 @@ TEST_CASE("Twine - Assign from floating point", "[twine]")
     {
         // I'm not sure whether I should REQUIRE f and t compare equal or not.
         // After all, NaN == NaN returns false...
+        //
+        // After discussion with Steven, this should expect f and t to compare equal
 
         float f = NAN;
         twine t;
@@ -922,6 +925,45 @@ TEST_CASE("Twine - Assign from floating point", "[twine]")
 
     // TODO: Add tests for normal values and for floating point error
     // Also do stuff with the numeric limits and such.
+    
+    SECTION("Assign a sane positive value")
+    {
+        float f = 142.123;
+        twine t;
+        t = f;
+        INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() >= 7);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+    }
+
+    SECTION("Assign a sane negative value")
+    {
+        float f = -142.123;
+        twine t;
+        t = f;
+        INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() >= 8);
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+    }
+
+    // The default precision of sprintf() for %f is 6
+    SECTION("Assign a positive value with more than 6 digits")
+    {
+        float f = 1.23012582302;
+        twine t;
+        t = f;
+        INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        //REQUIRE(t.size() >= 8); // Not sure about the size
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+
+
+    }
 }
 
 
