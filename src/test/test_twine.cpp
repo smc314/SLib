@@ -961,10 +961,57 @@ TEST_CASE("Twine - Assign from floating point", "[twine]")
         //REQUIRE(t.size() >= 8); // Not sure about the size
         REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
         REQUIRE(t.compare(f) == 0);
+    }
 
+    SECTION("Assign a negative value with more than 6 digits")
+    {
+        float f = -1.23012582302;
+        twine t;
+        t = f;
+        INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        //REQUIRE(t.size() >= 8); // Not sure about the size
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+    }
 
+    SECTION("Assign a rather small number")
+    {
+        float f = 123e-16;
+        twine t;
+        t = f;
+        INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        //REQUIRE(t.size() >= 8); // Not sure about the size
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+    }
+
+    SECTION("Assign a rather large number")
+    {
+        float f = 123e16;
+        twine t;
+        t = f;
+        INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        //REQUIRE(t.size() >= 8); // Not sure about the size
+        REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+        REQUIRE(t.compare(f) == 0);
+    }
+
+    SECTION("Assign a number with more that 32 digits")
+    {
+        float f = 123e32;
+        twine t;
+        t = f;
+        INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+        REQUIRE_FALSE(t.empty());
+        REQUIRE(t.size() == 42);
+        REQUIRE(t.capacity() >= 42);
+        REQUIRE(t.compare(f) == 0);
     }
 }
+
 
 
 // TODO: Deal with this.
