@@ -3,7 +3,6 @@
 <xsl:transform version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
     <xsl:template match="/Catch">
-        <!DOCTYPE HTML>
         <html>
             <head>
                 <title>SLib Test Results</title>
@@ -80,12 +79,22 @@
                 <code style="margin-left: 4ch">
                     <xsl:value-of select="Expression/@type" />(
                     <xsl:value-of select="Expression/Original" />)</code><br />
-                with expansion:<br />
-                <code style="margin-left: 4ch"><xsl:value-of select="Expression/Expanded" /></code>
-                <xsl:if test="Info">
-                    <br />with message:<br />
-                    <code style="margin-left: 4ch"><xsl:value-of select="Info" /></code>
-                </xsl:if>
+                <xsl:choose>
+                    <xsl:when test="Expression/@type = 'REQUIRE_THROWS'">
+                        because no exception was thrown when one was expected.
+                    </xsl:when>
+                    <xsl:when test="Expression/@type = 'REQUIRE_NOTHROW'">
+                        because an exception was thrown when none was expected.
+                    </xsl:when>
+                    <xsl:otherwise>
+                        with expansion:<br />
+                        <code style="margin-left: 4ch"><xsl:value-of select="Expression/Expanded" /></code>
+                        <xsl:if test="Info">
+                            <br />with message:<br />
+                            <code style="margin-left: 4ch"><xsl:value-of select="Info" /></code>
+                        </xsl:if>
+                    </xsl:otherwise>
+                </xsl:choose>
             </xsl:if>
             <xsl:apply-templates select="Section" />
             <hr />
