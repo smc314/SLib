@@ -59,25 +59,26 @@ incs:
 
 check:
 	cd test && make -f Makefile.mac.test
-	-test/SLibTest
+	-script -q /dev/null test/SLibTest -r console -r xml | test/sepConXml.awk
 	@echo
-	@printf "gcov src\n--------\n" > test/cov.log
+	@printf "gcov src\n--------\n" > test/report/cov.log
 	gcov -f -b *.gcda &> /tmp/tmp.log
-	@cat /tmp/tmp.log >> test/cov.log
-	@printf "\ngcov src/test\n-------------\n" >> test/cov.log
+	@cat /tmp/tmp.log >> test/report/cov.log
+	@printf "\ngcov src/test\n-------------\n" >> test/report/cov.log
 	cd test && gcov -f -b *.gcda &> /tmp/tmp.log
-	@cat /tmp/tmp.log >> test/cov.log
+	@cat /tmp/tmp.log >> test/report/cov.log
 	@printf "\nlcov src\n--------\n" >> test/cov.log
 	lcov -d . -b . --no-recursion -c -o test/src.info &> /tmp/tmp.log
-	@cat /tmp/tmp.log >> test/cov.log
-	@printf "\nlcov src/test\n-------------\n" >> test/cov.log
+	@cat /tmp/tmp.log >> test/report/cov.log
+	@printf "\nlcov src/test\n-------------\n" >> test/report/cov.log
 	lcov -d test -b test --no-recursion -c -o test/test.info &> /tmp/tmp.log
-	@cat /tmp/tmp.log >> test/cov.log
-	@printf "\ngenhtml\n-------\n" >> test/cov.log
-	genhtml test/src.info test/test.info -o test/coverage &>/tmp/tmp.log
-	@cat /tmp/tmp.log >> test/cov.log
+	@cat /tmp/tmp.log >> test/report/cov.log
+	@printf "\ngenhtml\n-------\n" >> test/report/cov.log
+	genhtml test/src.info test/test.info -o test/report/coverage &>/tmp/tmp.log
+	@cat /tmp/tmp.log >> test/report/cov.log
 	@echo
-	@echo Code coverage report in test/coverage/index.html\; log in test/cov.log.
+	@echo Test Report in test/report/results.xml
+	@echo Code coverage report in test/report/coverage/index.html\; log in test/report/cov.log.
 
 tests: test_64 test_date test_dptr test_enex test_log test_logfile test_membuf test_queue test_split test_string test_suvect test_timer test_twine test_xml test_zip thrash_timer thrash_twine
 
