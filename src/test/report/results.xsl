@@ -6,13 +6,33 @@
         <html>
             <head>
                 <title>SLib Test Results</title>
+                <script>
+                    function toggle(Id)
+                    {
+                        var element = document.getElementById(Id);
+                        if(element == null)
+                            return;
+
+                        if(element.style.display == "block")
+                            element.style.display = "none";
+                        else
+                            element.style.display = "block";
+                    }
+                </script>
             </head>
 
             <body>
-                <h1>SLib Test Results</h1>
+                <div onclick="toggle('#{generate-id(.)}_groups'); toggle('#{generate-id(.)}_groupCnt');">
+                    <h1>SLib Test Results</h1>
 
-                <xsl:apply-templates select="OverallResults" />
-                <xsl:apply-templates select="Group" />
+                    <xsl:apply-templates select="OverallResults" />
+                    <xsl:if test="Group">
+                        <p id="#{generate-id(.)}_groupCnt" style="display:block;"><xsl:value-of select="count(Group)" /> Groups</p>
+                    </xsl:if>
+                </div>
+                <div id="#{generate-id(.)}_groups" style="display:none;">
+                    <xsl:apply-templates select="Group" />
+                </div>
             </body>
         </html>
     </xsl:template>
@@ -33,70 +53,114 @@
     </xsl:template>
 
     <xsl:template match="Group">
-        <div style="margin-left: 2em">
-            <h2>Group - <xsl:value-of select="@name" /></h2>
+        <div id="#{generate-id(.)}" style="margin-left: 2em">
+            <div onclick="toggle('#{generate-id(.)}_cases'); toggle('#{generate-id(.)}_caseCnt');">
+                <h2>Group - <xsl:value-of select="@name" /></h2>
 
-            <xsl:apply-templates select="OverallResults" />
-            <xsl:apply-templates select="TestCase" />
+                <xsl:apply-templates select="OverallResults" />
+                <xsl:if test="TestCase">
+                    <p id="#{generate-id(.)}_caseCnt" style="display:block;"><xsl:value-of select="count(TestCase)" /> Test Cases</p>
+                </xsl:if>
+            </div>
+            <div id="#{generate-id(.)}_cases" style="display:none;">
+                <xsl:apply-templates select="TestCase" />
+            </div>
             <hr />
         </div>
 
     </xsl:template>
 
     <xsl:template match="TestCase">
-        <div style="margin-left: 2em">
-            <h3>Test Case - <xsl:value-of select="@name" /></h3>
-            <p>
-                <xsl:value-of select="@filename" />:<xsl:value-of select="@line" />
-                - Tags: <xsl:value-of select="@tags" />
-            </p>
-            <xsl:choose>
-                <xsl:when test="OverallResult/@success = 'true'">
-                    Success
-                </xsl:when>
-                <xsl:otherwise>
-                    Failure
-                </xsl:otherwise>
-            </xsl:choose>
+        <div id="#{generate-id(.)}" style="margin-left: 2em">
+            <div onclick="toggle('#{generate-id(.)}_sections'); toggle('#{generate-id(.)}_sectionCnt');">
+                <h3>Test Case - <xsl:value-of select="@name" /></h3>
+                <p>
+                    <xsl:value-of select="@filename" />:<xsl:value-of select="@line" />
+                    - Tags: <xsl:value-of select="@tags" />
+                </p>
+                <xsl:choose>
+                    <xsl:when test="OverallResult/@success = 'true'">
+                        Success
+                    </xsl:when>
+                    <xsl:otherwise>
+                        Failure
+                    </xsl:otherwise>
+                </xsl:choose><br />
+                <xsl:if test="Expression">
+                    At <xsl:value-of select="Expression/@filename" />:<xsl:value-of select="Expression/@line" />
+                    <br />FAILED:<br />
+                    <code style="margin-left: 4ch">
+                        <xsl:value-of select="Expression/@type" />(
+                        <xsl:value-of select="Expression/Original" />)</code><br />
+                    <xsl:choose>
+                        <xsl:when test="Expression/@type = 'REQUIRE_THROWS'">
+                            because no exception was thrown when one was expected.
+                        </xsl:when>
+                        <xsl:when test="Expression/@type = 'REQUIRE_NOTHROW'">
+                            because an exception was thrown when none was expected.
+                        </xsl:when>
+                        <xsl:otherwise>
+                            with expansion:<br />
+                            <code style="margin-left: 4ch"><xsl:value-of select="Expression/Expanded" /></code>
+                            <xsl:if test="Info">
+                                <br />with message:<br />
+                                <code style="margin-left: 4ch"><xsl:value-of select="Info" /></code>
+                            </xsl:if>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:if>
+                <xsl:if test="Section">
+                    <p id="#{generate-id(.)}_sectionCnt" style="display:block;"><xsl:value-of select="count(Section)" /> Sections</p>
+                </xsl:if>
+            </div>
 
-            <xsl:apply-templates select="Section" />
+            <div id="#{generate-id(.)}_sections" style="display:none;">
+                <xsl:apply-templates select="Section" />
+            </div>
             <hr />
         </div>
     </xsl:template>
 
     <xsl:template match="Section">
-        <div style="margin-left: 2em">
-            <h3>Section - <xsl:value-of select="@name" /></h3>
+        <div id="#{generate-id(.)}" style="margin-left: 2em">
+            <div onclick="toggle('#{generate-id(.)}_subsections'); toggle('#{generate-id(.)}_subsectionCnt');">
+                <h3>Section - <xsl:value-of select="@name" /></h3>
 
-            <p>
-                <xsl:value-of select="@filename" />:<xsl:value-of select="@line" />
-            </p>
+                <p>
+                    <xsl:value-of select="@filename" />:<xsl:value-of select="@line" />
+                </p>
 
-            <xsl:apply-templates select="OverallResults" />
-            <xsl:if test="Expression">
-                At <xsl:value-of select="Expression/@filename" />:<xsl:value-of select="Expression/@line" />
-                <br />FAILED:<br />
-                <code style="margin-left: 4ch">
-                    <xsl:value-of select="Expression/@type" />(
-                    <xsl:value-of select="Expression/Original" />)</code><br />
-                <xsl:choose>
-                    <xsl:when test="Expression/@type = 'REQUIRE_THROWS'">
-                        because no exception was thrown when one was expected.
-                    </xsl:when>
-                    <xsl:when test="Expression/@type = 'REQUIRE_NOTHROW'">
-                        because an exception was thrown when none was expected.
-                    </xsl:when>
-                    <xsl:otherwise>
-                        with expansion:<br />
-                        <code style="margin-left: 4ch"><xsl:value-of select="Expression/Expanded" /></code>
-                        <xsl:if test="Info">
-                            <br />with message:<br />
-                            <code style="margin-left: 4ch"><xsl:value-of select="Info" /></code>
-                        </xsl:if>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:if>
-            <xsl:apply-templates select="Section" />
+                <xsl:apply-templates select="OverallResults" />
+                <xsl:if test="Expression">
+                    At <xsl:value-of select="Expression/@filename" />:<xsl:value-of select="Expression/@line" />
+                    <br />FAILED:<br />
+                    <code style="margin-left: 4ch">
+                        <xsl:value-of select="Expression/@type" />(
+                        <xsl:value-of select="Expression/Original" />)</code><br />
+                    <xsl:choose>
+                        <xsl:when test="Expression/@type = 'REQUIRE_THROWS'">
+                            because no exception was thrown when one was expected.
+                        </xsl:when>
+                        <xsl:when test="Expression/@type = 'REQUIRE_NOTHROW'">
+                            because an exception was thrown when none was expected.
+                        </xsl:when>
+                        <xsl:otherwise>
+                            with expansion:<br />
+                            <code style="margin-left: 4ch"><xsl:value-of select="Expression/Expanded" /></code>
+                            <xsl:if test="Info">
+                                <br />with message:<br />
+                                <code style="margin-left: 4ch"><xsl:value-of select="Info" /></code>
+                            </xsl:if>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:if>
+                <xsl:if test="Section">
+                    <p id="#{generate-id(.)}_subsectionCnt" style="display:block;"><xsl:value-of select="count(Section)" /> Subsections</p>
+                </xsl:if>
+            </div>
+            <div id="#{generate-id(.)}_subsections" style="display:none;">
+                <xsl:apply-templates select="Section" />
+            </div>
             <hr />
         </div>
     </xsl:template>
