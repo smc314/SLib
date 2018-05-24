@@ -43,5 +43,6 @@ all: $(DOTOH)
 
 clean:
 	rm -f $(DOTOH) *.o SLibTest  core *.gcda *.gcno *.gcov *.info
-	rm -rf coverage
+	rm -f report/results.xml report/cov.log
+	rm -rf report/coverage
 
