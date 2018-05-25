@@ -32,6 +32,7 @@
                 </div>
                 <div id="#{generate-id(.)}_groups" style="display:none;">
                     <xsl:apply-templates select="Group" />
+                    <p onclick="toggle('#{generate-id(.)}_groups'); toggle('#{generate-id(.)}_groupCnt');">Collapse</p>
                 </div>
             </body>
         </html>
@@ -64,6 +65,7 @@
             </div>
             <div id="#{generate-id(.)}_cases" style="display:none;">
                 <xsl:apply-templates select="TestCase" />
+                <p onclick="toggle('#{generate-id(.)}_cases'); toggle('#{generate-id(.)}_caseCnt');">Collapse</p>
             </div>
             <hr />
         </div>
@@ -116,6 +118,7 @@
 
             <div id="#{generate-id(.)}_sections" style="display:none;">
                 <xsl:apply-templates select="Section" />
+                <p onclick="toggle('#{generate-id(.)}_sections'); toggle('#{generate-id(.)}_sectionCnt');">Collapse</p>
             </div>
             <hr />
         </div>
@@ -160,6 +163,7 @@
             </div>
             <div id="#{generate-id(.)}_subsections" style="display:none;">
                 <xsl:apply-templates select="Section" />
+                <p onclick="toggle('#{generate-id(.)}_subsections'); toggle('#{generate-id(.)}_subsectionCnt');">Collapse</p>
             </div>
             <hr />
         </div>
