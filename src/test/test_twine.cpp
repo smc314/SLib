@@ -796,8 +796,8 @@ TEST_CASE("Twine - assignment from a intptr_t", "[twine]")
         INFO("i = " << i << "\tt = " << t() << "\tatoi(t) = " << atoi(t()));
         REQUIRE_FALSE(t.empty());
         REQUIRE(t.size() == (int)log10(-(i+1)) + 2); //this is a negative number, also 2's complement edge case
-        if((int)log10(-(i+1)) + 1 > TWINE_SMALL_STRING - 1)
-            REQUIRE(t.capacity() >= (int)log10(-(i+1)) + 1);
+        if((int)log10(-(i+1)) + 2 > TWINE_SMALL_STRING - 1)
+            REQUIRE(t.capacity() >= (int)log10(-(i+1)) + 2);
         else
             REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
 
@@ -1981,7 +1981,313 @@ TEST_CASE("Twine - += a size_t", "[twine]")
             REQUIRE_THROWS(t += i);
         }
     }
+}
 
+TEST_CASE("Twine - += an intptr_t", "[twine]")
+{
+    SECTION("Append 0")
+    {
+        intptr_t i = 0;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 1);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare((size_t)i) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 20);
+            REQUIRE(t.capacity() >= 20);
+            REQUIRE(t.compare("I am a small string0") == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 61);
+            REQUIRE(t.capacity() >= 61);
+            REQUIRE(t.compare("I am a longer string that will not fit in optimized storage.0")
+                    == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += i);
+        }
+    }
+
+    SECTION("Append INTPTR_MAX")
+    {
+        intptr_t i = INTPTR_MAX;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == (int)log10(i) + 1);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare((size_t)i) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + (int)log10(i) + 1);
+            REQUIRE(t.capacity() >= 19 + (int)log10(i) + 1);
+          //Comparing this would require mallocing
+          //REQUIRE(t.compare("I am a small string") == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 61 + (int)log10(i) + 1);
+            REQUIRE(t.capacity() >= 61 + (int)log10(i) + 1);
+         // REQUIRE(t.compare("I am a longer string that will not fit in optimized storage.0")
+         //         == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += i);
+        }
+    }
+    
+    SECTION("Append unsigned value of smallest possible signed value.")
+    {
+        intptr_t i = INTPTR_MIN; // 0b11111111...
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == (int)log10(-(i+1)) + 2);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare((size_t)i) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + (int)log10(-(i+1)) + 2);
+            REQUIRE(t.capacity() >= 19 + (int)log10(-(i+1)) + 2);
+         // REQUIRE(t.compare("I am a small string0") == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60 + (int)log10(-(i+1)) + 2);
+            REQUIRE(t.capacity() >= 60 + (int)log10(-(i+1)) + 2);
+         // REQUIRE(t.compare("I am a longer string that will not fit in optimized storage.0")
+         //         == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += i);
+        }
+    }
+
+    SECTION("Append smallest possible signed value - 1")
+    {
+        intptr_t i = INTPTR_MIN - 1;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == (int)log10(i) + 1); // This should be a positive number
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare((size_t)i) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + (int)log10(i) + 1);
+            REQUIRE(t.capacity() >= 19 + (int)log10(i) + 1);
+         // REQUIRE(t.compare("I am a small string0") == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60 + (int)log10(i) + 1);
+            REQUIRE(t.capacity() >= 60 + (int)log10(i) + 1);
+         // REQUIRE(t.compare("I am a longer string that will not fit in optimized storage.0")
+         //         == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += i);
+        }
+    }
+
+    SECTION("Append max value of atoi()")
+    {
+        intptr_t i = (intptr_t)INT_MAX;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == (int)log10(i) + 1);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare((size_t)i) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + (int)log10(i) + 1);
+            REQUIRE(t.capacity() >= 19 + (int)log10(i) + 1);
+         // REQUIRE(t.compare("I am a small string0") == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60 + (int)log10(i) + 1);
+            REQUIRE(t.capacity() >= 60 + (int)log10(i) + 1);
+         // REQUIRE(t.compare("I am a longer string that will not fit in optimized storage.0")
+         //         == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += i);
+        }
+    }
+
+    SECTION("Append max value of atoi() + 1")
+    {
+        intptr_t i = (intptr_t)INT_MAX + 1;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == (int)log10(i) + 1);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare((size_t)i) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + (int)log10(i) + 1);
+            REQUIRE(t.capacity() >= 19 + (int)log10(i) + 1);
+         // REQUIRE(t.compare("I am a small string0") == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += i;
+            INFO("i = " << i << " t = " << t());
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60 + (int)log10(i) + 1);
+            REQUIRE(t.capacity() >= 60 + (int)log10(i) + 1);
+         // REQUIRE(t.compare("I am a longer string that will not fit in optimized storage.0")
+         //         == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += i);
+        }
+    }
+}
+
+TEST_CASE("Twine - Compare string to zero", "[twine]")
+{
+    INFO("This maps to the belief that string comparison with an integer should not compare a non-numerical"
+            << " string as equal to a number. The other possibility is that which is used by perl: " <<
+            "generate a number from the first digits, with no digits -> 0.");
+    REQUIRE(twine("stuff").compare((size_t)0) != 0);
+    REQUIRE(twine().compare((size_t)0) != 0);
 }
 
 // TODO: Deal with this.
