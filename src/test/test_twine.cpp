@@ -2281,6 +2281,596 @@ TEST_CASE("Twine - += an intptr_t", "[twine]")
     }
 }
 
+TEST_CASE("Twine - += a floating point")
+{
+    SECTION("Assign +0.0")
+    {
+        float f = +0.0f;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 8);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + 8);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60 + 8);
+            REQUIRE(t.capacity() >= 60 + 8);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    SECTION("Assign -0.0")
+    {
+        float f = -0.0f;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 9);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + 9);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60 + 9);
+            REQUIRE(t.capacity() >= 60 + 9);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    SECTION("Assign +INFINITY")
+    {
+        float f = INFINITY;
+        
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 3);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + 3);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60 + 3);
+            REQUIRE(t.capacity() >= 60 + 3);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    SECTION("Assign -INFINITY")
+    {
+        float f = -INFINITY;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 4);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + 4);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60 + 4);
+            REQUIRE(t.capacity() >= 60 + 4);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    SECTION("Assign NaN")
+    {
+        // I'm not sure whether I should REQUIRE f and t compare equal or not.
+        // After all, NaN == NaN returns false...
+        //
+        // After discussion with Steven, this should expect f and t to compare equal
+
+        float f = NAN;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 3);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 19 + 3);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() == 60 + 3);
+            REQUIRE(t.capacity() >= 60 + 3);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    // TODO: Add tests for normal values and for floating point error
+    // Also do stuff with the numeric limits and such.
+    
+    SECTION("Assign a sane positive value")
+    {
+        float f = 142.123;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() >= 7);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() >= 19 + 7);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() >= 60 + 7);
+            REQUIRE(t.capacity() >= 60 + 7);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    SECTION("Assign a sane negative value")
+    {
+        float f = -142.123;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() >= 8);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() >= 19 + 8);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            REQUIRE(t.size() >= 60 + 8);
+            REQUIRE(t.capacity() >= 60 + 8);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    // The default precision of sprintf() for %f is 6
+    SECTION("Assign a positive value with more than 6 digits")
+    {
+        float f = 1.23012582302;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            //REQUIRE(t.size() == 4);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            //REQUIRE(t.size() == 19 + 3);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            //REQUIRE(t.size() == 60 + 3);
+            REQUIRE(t.capacity() >= 60 + 3);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    SECTION("Assign a negative value with more than 6 digits")
+    {
+        float f = -1.23012582302;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            // REQUIRE(t.size() == 4);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+            //REQUIRE(t.size() == 19 + 3);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO(setprecision(15) << "f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+          //REQUIRE(t.size() == 60 + 3);
+            REQUIRE(t.capacity() >= 60 + 3);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    SECTION("Assign a rather small number")
+    {
+        float f = 123e-16;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+          //REQUIRE(t.size() == 4);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+          //REQUIRE(t.size() == 19 + 3);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+          //REQUIRE(t.size() == 60 + 3);
+            REQUIRE(t.capacity() >= 60 + 3);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    SECTION("Assign a rather large number")
+    {
+        float f = 123e16;
+        SECTION("Append to an empty twine")
+        {
+            twine t = "";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+        //  REQUIRE(t.size() == 4);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a small twine")
+        {
+            twine t = "I am a small string";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+         // REQUIRE(t.size() == 19 + 3);
+            REQUIRE(t.capacity() == TWINE_SMALL_STRING - 1);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a large twine")
+        {
+            twine t = "I am a longer string that will not fit in optimized storage.";
+            t += f;
+            INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+            REQUIRE_FALSE(t.empty());
+          //REQUIRE(t.size() == 60 + 3);
+            REQUIRE(t.capacity() >= 60 + 3);
+            //REQUIRE(t.compare(f) == 0);
+        }
+
+        SECTION("Append to a max length twine")
+        {
+            char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+            memset(mon, 'A', MAX_INPUT_SIZE);
+            mon[MAX_INPUT_SIZE] = 0;
+            twine t = mon;
+            free(mon);
+            
+            REQUIRE_THROWS(t += f);
+        }
+    }
+
+    SECTION("Append a number with more that 32 digits")
+    {
+        float f = 123e32;
+     // SECTION("Append to an empty twine")
+     // {
+     //     twine t = "";
+     //     t += f;
+     //     INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+     //     REQUIRE_FALSE(t.empty());
+     //     REQUIRE(t.size() == 42);
+     //     REQUIRE(t.capacity() >= 42);
+     //     REQUIRE(t.compare(f) == 0);
+     // }
+
+     // SECTION("Append to a small twine")
+     // {
+     //     twine t = "I am a small string";
+     //     t += f;
+     //     INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+     //     REQUIRE_FALSE(t.empty());
+     //     REQUIRE(t.size() == 19 + 42);
+     //     REQUIRE(t.capacity() >= 19 + 42);
+     //     //REQUIRE(t.compare(f) == 0);
+     // }
+
+     // SECTION("Append to a large twine")
+     // {
+     //     twine t = "I am a longer string that will not fit in optimized storage.";
+     //     t += f;
+     //     INFO("f = " << f << "\tt = " << t() << "\tatof(t) = " << atof(t()));
+     //     REQUIRE_FALSE(t.empty());
+     //     REQUIRE(t.size() == 60 + 42);
+     //     REQUIRE(t.capacity() >= 60 + 42);
+     //     //REQUIRE(t.compare(f) == 0);
+     // }
+
+     // SECTION("Append to a max length twine")
+     // {
+     //     char* mon = (char*)malloc((MAX_INPUT_SIZE + 1) * sizeof(*mon));
+     //     memset(mon, 'A', MAX_INPUT_SIZE);
+     //     mon[MAX_INPUT_SIZE] = 0;
+     //     twine t = mon;
+     //     free(mon);
+     //     
+     //     REQUIRE_THROWS(t += f);
+     // }
+    }
+
+}
+
 TEST_CASE("Twine - Compare string to zero", "[twine]")
 {
     INFO("This maps to the belief that string comparison with an integer should not compare a non-numerical"
