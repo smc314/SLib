@@ -115,6 +115,14 @@
                         </xsl:otherwise>
                     </xsl:choose>
                 </xsl:if>
+                <xsl:if test="Exception">
+                    At <xsl:value-of select="Exception/@filename" />:<xsl:value-of select="Exception/@line" />
+                    <br />FAILED:<br />
+                    due to an unexpected exception with message:<br />
+                    <code style="margin-left: 4ch">
+                        <xsl:value-of select="Exception" />
+                    </code>
+                </xsl:if>
                 <xsl:if test="Section">
                     <p id="#{generate-id(.)}_sectionCnt" style="display:block;"><xsl:value-of select="count(Section)" /> Sections</p>
                 </xsl:if>
@@ -162,6 +170,14 @@
                             </xsl:if>
                         </xsl:otherwise>
                     </xsl:choose>
+                </xsl:if>
+                <xsl:if test="Exception">
+                    At <xsl:value-of select="Exception/@filename" />:<xsl:value-of select="Exception/@line" />
+                    <br />FAILED:<br />
+                    due to an unexpected exception with message:<br />
+                    <code style="margin-left: 4ch">
+                        <xsl:value-of select="Exception" />
+                    </code>
                 </xsl:if>
                 <xsl:if test="Section">
                     <p id="#{generate-id(.)}_subsectionCnt" style="display:block;"><xsl:value-of select="count(Section)" /> Subsections</p>
