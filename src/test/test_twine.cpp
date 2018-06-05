@@ -2880,6 +2880,384 @@ TEST_CASE("Twine - Compare string to zero", "[twine]")
     REQUIRE(twine().compare((size_t)0) != 0);
 }
 
+TEST_CASE("Twine - Get Integer from String", "[twine]")
+{
+    SECTION("Get 0")
+    {
+        size_t i = 0;
+        twine t;
+        t = i;
+
+        INFO("i = " << i << "\tt = " << t() << "\tstoll(string(t())) = " << stoll(string(t())));
+        REQUIRE(t.get_int() == stoll(string(t())));
+        REQUIRE(i == t.get_int());
+    }
+
+    SECTION("Get SIZE_MAX")
+    {
+        size_t i = SIZE_MAX;
+        twine t;
+        t = i;
+
+        INFO("i = " << i << "\tt = " << t() << "\tstoll(string(t())) = " << stoll(string(t())));
+        REQUIRE(t.get_int() == stoll(string(t())));
+        REQUIRE(i == t.get_int());
+    }
+    
+    SECTION("Get unsigned value of smallest possible signed value.")
+    {
+        size_t i = (SIZE_MAX >> 1) + 1;;
+        twine t;
+        t = i;
+
+        INFO("i = " << i << "\tt = " << t() << "\tstoll(string(t())) = " << stoll(string(t())));
+        REQUIRE(t.get_int() == stoll(string(t())));
+        REQUIRE(i == t.get_int());
+    }
+
+    SECTION("Get unsigned value of smallest possible signed value - 1")
+    {
+        size_t i = SIZE_MAX >> 1;
+        twine t;
+        t = i;
+
+        INFO("i = " << i << "\tt = " << t() << "\tstoll(string(t())) = " << stoll(string(t())));
+        REQUIRE(t.get_int() == stoll(string(t())));
+        REQUIRE(i == t.get_int());
+    }
+
+    SECTION("Get max value of atoi()")
+    {
+        size_t i = (size_t)INT_MAX;
+        twine t;
+        t = i;
+
+        INFO("i = " << i << "\tt = " << t() << "\tstoll(string(t())) = " << stoll(string(t())));
+        REQUIRE(t.get_int() == stoll(string(t())));
+        REQUIRE(i == t.get_int());
+    }
+
+    SECTION("Get max value of atoi() + 1")
+    {
+        size_t i = (size_t)INT_MAX + 1;
+        twine t;
+        t = i;
+
+        INFO("i = " << i << "\tt = " << t() << "\tstoll(string(t())) = " << stoll(string(t())));
+        REQUIRE(t.get_int() == stoll(string(t())));
+        REQUIRE(i == t.get_int());
+    }
+
+    SECTION("Get not an integer")
+    {
+        twine t = "Not an integer.";
+
+        INFO("t = " << t());
+        REQUIRE_THROWS(stoll(string(t())));
+        REQUIRE(t.get_int() == 0);
+    }
+
+}
+
+TEST_CASE("Twine - Get Single-Precision Floating Point from String", "[twine]")
+{
+    SECTION("Get +0.0")
+    {
+        float f = +0.0f;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get -0.0")
+    {
+        float f = -0.0f;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get +INFINITY")
+    {
+        float f = INFINITY;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get -INFINITY")
+    {
+        float f = -INFINITY;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get NaN")
+    {
+        float f = NAN;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+      //REQUIRE(t.get_float() == stof(string(t())));
+      //REQUIRE(f == t.get_float());
+        REQUIRE(isnan(t.get_double()));
+        REQUIRE(isnan(stod(string(t()))));
+        REQUIRE(isnan(f));
+    }
+
+    SECTION("Get a sane positive value")
+    {
+        float f = 142.123;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get a sane negative value")
+    {
+        float f = -142.123;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    // The default precision of sprintf() for %f is 6
+    SECTION("Get a positive value with more than 6 digits")
+    {
+        float f = 1.23012582302;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get a negative value with more than 6 digits")
+    {
+        float f = -1.23012582302;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get a rather small number")
+    {
+        float f = 123e-16;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get a rather large number")
+    {
+        float f = 123e16;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get a number with more that 32 digits")
+    {
+        float f = 123e32;
+        twine t;
+        t = f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstof(string(t())) = " << stof(string(t())));
+        REQUIRE(t.get_float() == stof(string(t())));
+        REQUIRE(f == t.get_float());
+    }
+
+    SECTION("Get not a float")
+    {
+        twine t = "Not a float.";
+
+        INFO("t = " << t());
+        REQUIRE_THROWS(stof(string(t())));
+        REQUIRE(t.get_float() == 0);
+
+    }
+
+}
+
+TEST_CASE("Twine - Get Double-Precision Floating Point from String", "[twine]")
+{
+    SECTION("Get +0.0")
+    {
+        double f = +0.0f;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get -0.0")
+    {
+        double f = -0.0f;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get +INFINITY")
+    {
+        double f = INFINITY;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get -INFINITY")
+    {
+        double f = -INFINITY;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get NaN")
+    {
+        double f = NAN;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+      //REQUIRE(t.get_double() == stod(string(t())));
+      //REQUIRE(f == t.get_double());
+        REQUIRE(isnan(t.get_double()));
+        REQUIRE(isnan(stod(string(t()))));
+        REQUIRE(isnan(f));
+    }
+
+    SECTION("Get a sane positive value")
+    {
+        double f = 142.123;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get a sane negative value")
+    {
+        double f = -142.123;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    // The default precision of sprintf() for %f is 6
+    SECTION("Get a positive value with more than 6 digits")
+    {
+        double f = 1.23012582302;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get a negative value with more than 6 digits")
+    {
+        double f = -1.23012582302;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get a rather small number")
+    {
+        double f = 123e-16;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get a rather large number")
+    {
+        double f = 123e16;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get a number with more that 32 digits")
+    {
+        double f = 123e32;
+        twine t;
+        t = (float)f;
+
+        INFO("f = " << f << "\tt = " << t() << "\tstod(string(t())) = " << stod(string(t())));
+        REQUIRE(t.get_double() == stod(string(t())));
+        REQUIRE(f == t.get_double());
+    }
+
+    SECTION("Get not a double")
+    {
+        twine t = "Not a double.";
+
+        INFO("t = " << t());
+        REQUIRE_THROWS(stod(string(t())));
+        REQUIRE(t.get_double() == 0);
+
+    }
+
+}
 // TODO: Deal with this.
 // IMPORTANT! This test case MUST be dealt with!
 // However, leaving it in a normal run is too dangerous.
