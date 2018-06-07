@@ -226,17 +226,25 @@ class DLLEXPORT MemBuf
 		  */
 		twine hex(void);
 			
-		/**
-		  * Handles converting the contents of our MemBuf into a base64 encoded
+		/** Handles converting the contents of our MemBuf into a base64 encoded
 		  * version.
 		  */
 		MemBuf& encode64();
 
-		/**
-		  * Handles converting the contents of our MemBuf into a base64 decoded
+		/** Handles converting the contents of our MemBuf into a base64url encoded
+		  * version that is safe to use in url's.
+		  */
+		MemBuf& encode64url();
+
+		/** Handles converting the contents of our MemBuf into a base64 decoded
 		  * version.
 		  */
 		MemBuf& decode64();
+
+		/** Handles converting the contents of our MemBuf into a base64url decoded
+		  * version.
+		  */
+		MemBuf& decode64url();
 
 		/**
 		  * Zip up the contents of our MemBuf.

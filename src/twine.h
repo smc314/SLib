@@ -496,17 +496,25 @@ class DLLEXPORT twine
 		  */
 		vector < twine > tokenize(const twine& tokensep) const;
 
-		/**
-		  * Handles converting the contents of our twine into a base64 encoded
+		/** Handles converting the contents of our twine into a base64 encoded
 		  * version.
 		  */
 		twine& encode64();
 
-		/**
-		  * Handles converting the contents of our twine into a base64 decoded
+		/** Handles converting the contents of our twine into a base64url encoded
+		  * version which is safe to be used in the contents of url's.
+		  */
+		twine& encode64url();
+
+		/** Handles converting the contents of our twine into a base64 decoded
 		  * version.
 		  */
 		twine& decode64();
+
+		/** Handles converting the contents of our twine into a base64url decoded
+		  * version which is safe to be used in the contents of url's.
+		  */
+		twine& decode64url();
 
 		/** Determines if the given twine pointer is null, or if the
 		 * twine itself is empty.

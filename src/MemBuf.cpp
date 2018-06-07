@@ -524,6 +524,33 @@ MemBuf& MemBuf::encode64()
 	return *this;
 }
 
+MemBuf& MemBuf::encode64url()
+{
+	EnEx ee("MemBuf::encode64url()");
+
+	// First do the standard base64 encode:
+	encode64();
+
+	// Now convert our contents to a twine so they are easier to manipulate.
+	twine tmp; tmp.set( (const char*)m_data, m_data_size );
+
+	// Now adjust the twine a bit:
+	// Strip out any newlines in the content
+	tmp.replaceAll( "\n", "" );
+
+	// Remove any trailing '='s
+	tmp.replaceAll( "=", "" );
+
+	tmp.replace( '+', '-' ); // Plusses convert to dashes
+	tmp.replace( '/', '_' ); // Slashes become underscores
+
+	// Re-set our contents from the twine
+	set( tmp(), tmp.size() );
+
+	// Return ourselves
+	return *this;
+}
+
 MemBuf& MemBuf::decode64()
 {
 	EnEx ee("MemBuf::decode64()");
@@ -543,6 +570,42 @@ MemBuf& MemBuf::decode64()
 	m_data_size = len;
 
 	return *this;
+}
+
+MemBuf& MemBuf::decode64url()
+{
+	EnEx ee("MemBuf::decode64url()");
+
+	// First convert our contents to a twine so they are easier to manipulate
+	twine tmp; tmp.set( (const char*)m_data, m_data_size );
+
+	tmp.replace( '-', '+' ); // dashes convert to plusses
+	tmp.replace( '_', '/' ); // underscores become slashes
+	tmp.replace( ',', '=' ); // commas become equals
+	switch(tmp.length() % 4){ // Pad with trailing '='s
+		case 0: break; // Nothing to do
+		case 2: tmp.append( "==" ); // Add 2 equals to the end of the string
+		case 3: tmp.append( "=" ); // Add 1 equals to the end of the string
+		default:
+			throw AnException(0, FL, "Invalid length for base64 url decoding.");
+	}
+
+	// Split into 64 character lines
+	size_t i = 64;
+	while(i < tmp.size()){
+		tmp.insert(i, "\n");
+		i++; // for the newline
+		i += 64; // next 64 characters
+	}
+
+	// Add a linefeed at the end
+	append( "\n" );
+
+	// Re-set our contents from the twine
+	set( tmp(), tmp.size() );
+
+	// Now do the actual decode
+	return decode64();
 }
 
 MemBuf& MemBuf::zip()
@@ -723,10 +786,12 @@ MemBuf MemBuf::Digest(RSA* keypair)
 		// Convert the RSA keypair into an EVP keypair:
 		EVP_PKEY *pkey = EVP_PKEY_new();
 		if(pkey == NULL){
+			EVP_MD_CTX_destroy(mdctx);
 			throw AnException(0, FL, "Could not create an EVP key to hold the RSA keypair for signing.");
 		}
 		rCode = EVP_PKEY_set1_RSA(pkey, keypair);
 		if(rCode == 0){
+			EVP_MD_CTX_destroy(mdctx);
 			throw AnException(0, FL, "Could not set the RSA keypair given into the EVP key.");
 		}
 
@@ -734,6 +799,7 @@ MemBuf MemBuf::Digest(RSA* keypair)
 		EVP_PKEY_CTX *pctx = NULL;
 		rCode = EVP_DigestSignInit( mdctx, &pctx, md, NULL, pkey );
 		if(rCode == 0){
+			EVP_MD_CTX_destroy(mdctx);
 			throw AnException(0, FL, "Could not initialize the digest signature context.");
 		}
 

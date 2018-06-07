@@ -184,3 +184,112 @@ echo "Hello World" | openssl dgst -sha256 -hex -sign SLib.rsa
 	);
 
 }
+
+TEST_CASE( "MemBuf - Digest - Unsigned - JWS Test", "[membuf]" )
+{
+	twine jwsHeader = "{\"typ\":\"JWT\",\r\n \"alg\":\"HS256\"}";
+	jwsHeader.encode64url();
+	REQUIRE( jwsHeader == "eyJ0eXAiOiJKV1QiLA0KICJhbGciOiJIUzI1NiJ9" );
+
+	twine jwsPayload = "{\"iss\":\"joe\",\r\n \"exp\":1300819380,\r\n \"http://example.com/is_root\":true}";
+	jwsPayload.encode64url();
+	REQUIRE( jwsPayload == "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ" );
+
+	twine jwsSignInput = jwsHeader + "." + jwsPayload;
+	
+	MemBuf jwsSign( jwsSignInput );
+	MemBuf digest = jwsSign.Digest();
+	digest.encode64url();
+	twine jwsSignOut; jwsSignOut.set( digest.data(), digest.size() );
+
+	RSA* keypair = MemBufTest_GetKeypair();
+	// Get the binary representation of RSA->n - modulus
+	MemBuf keypair_n( BN_num_bytes( keypair->n ) ); // first setup the buffer with the right size.
+	BN_bn2bin( keypair->n, (unsigned char*)keypair_n.data() ); // copy the data into the buffer
+	twine nHex = keypair_n.hex();
+	printf("Modulus:\n%s\n", nHex() );
+	keypair_n.encode64url();
+	printf("Modulus 64url:\n%s\n", keypair_n() );
+
+	// Get the binary representation of RSA->e - public exponent
+	MemBuf keypair_e( BN_num_bytes( keypair->e ) ); // first setup the buffer with the right size.
+	BN_bn2bin( keypair->e, (unsigned char*)keypair_e.data() ); // copy the data into the buffer
+	twine eHex = keypair_e.hex();
+	printf("Public Exponent:\n%s\n", eHex() );
+	keypair_e.encode64url();
+	printf("Public Exponent 64url:\n%s\n", keypair_e() );
+
+	// Get the binary representation of RSA->d - private exponent
+	MemBuf keypair_d( BN_num_bytes( keypair->d ) ); // first setup the buffer with the right size.
+	BN_bn2bin( keypair->d, (unsigned char*)keypair_d.data() ); // copy the data into the buffer
+	twine dHex = keypair_d.hex();
+	printf("Private Exponent:\n%s\n", dHex() );
+	keypair_d.encode64url();
+	printf("Private Exponent 64url:\n%s\n", keypair_d() );
+
+}
+
+TEST_CASE( "MemBuf - Create CSR Programatically", "[membuf]" )
+{
+	// Goal here is to replicate what happens when you do:
+	// openssl req -new -sha256 -key SLib.rsa -subj "/CN=zed.hericus.com" > SLib.csr
+	
+	// Use the source, Luke: https://github.com/openssl/openssl/blob/master/apps/req.c
+
+	int ret = 0;
+
+	// Convert our RSA keypair into an EVP_PKEY keypair
+	EVP_PKEY *pkey = EVP_PKEY_new();
+	ret = EVP_PKEY_set1_RSA(pkey, MemBufTest_GetKeypair());
+	if(ret != 1){
+		throw std::runtime_error("Error converting RSA to EVP keypair.");
+	}
+
+	X509_REQ* req = X509_REQ_new(); // Line 637
+	if(req == NULL){
+		throw std::runtime_error("Error creating new X509 request.");
+	}
+	ret = X509_REQ_set_version( req, 0L ); // Line 942
+	if(ret != 1){
+		throw std::runtime_error("Error setting X509 version.");
+	}
+
+	X509_NAME *nm = X509_NAME_new();
+	ret = X509_NAME_add_entry_by_txt( nm, "CN", MBSTRING_ASC, (const unsigned char*)"zed.hericus.com", -1, -1, 0 );
+	if(ret != 1){
+		throw std::runtime_error("Error adding X509 name entry");
+	}
+	ret = X509_REQ_set_subject_name( req, nm); // Line 975
+	if(ret != 1){
+		throw std::runtime_error("Error setting X509 subject name");
+	}
+	X509_NAME_free( nm );
+
+	ret = X509_REQ_set_pubkey( req, pkey ); // Line 955
+	if(ret != 1){
+		throw std::runtime_error("Error setting X509 public key");
+	}
+
+	// Use sha256 to sign the request
+	const EVP_MD *digest = EVP_get_digestbyname( "sha256" );
+	if(digest == NULL){
+		throw std::runtime_error("Error loading the sha256 digest routines from OpenSSL");
+	}
+
+	// Run the signature step
+	ret = X509_REQ_sign(req, pkey, digest);
+	if(ret == 0){
+		throw std::runtime_error("Error signing X509 CSR");
+	}
+	// ret is the size of the signature in bytes
+
+	BIO* mem = BIO_new( BIO_s_mem() );
+	ret = PEM_write_bio_X509_REQ(mem, req);
+	BUF_MEM *bptr;
+	size_t memSize = BIO_get_mem_data(mem, &bptr);
+	twine x509_output; x509_output.set( (char*)bptr, memSize );
+	BIO_free(mem);
+
+	printf("Memory X509 CSR:\n%s\n", x509_output() );
+
+}
