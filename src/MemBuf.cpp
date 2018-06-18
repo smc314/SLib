@@ -21,6 +21,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include <openssl/evp.h>
+
 #include "MemBuf.h"
 #include "AnException.h"
 #include "EnEx.h"
@@ -522,6 +524,33 @@ MemBuf& MemBuf::encode64()
 	return *this;
 }
 
+MemBuf& MemBuf::encode64url()
+{
+	EnEx ee("MemBuf::encode64url()");
+
+	// First do the standard base64 encode:
+	encode64();
+
+	// Now convert our contents to a twine so they are easier to manipulate.
+	twine tmp; tmp.set( (const char*)m_data, m_data_size );
+
+	// Now adjust the twine a bit:
+	// Strip out any newlines in the content
+	tmp.replaceAll( "\n", "" );
+
+	// Remove any trailing '='s
+	tmp.replaceAll( "=", "" );
+
+	tmp.replace( '+', '-' ); // Plusses convert to dashes
+	tmp.replace( '/', '_' ); // Slashes become underscores
+
+	// Re-set our contents from the twine
+	set( tmp(), tmp.size() );
+
+	// Return ourselves
+	return *this;
+}
+
 MemBuf& MemBuf::decode64()
 {
 	EnEx ee("MemBuf::decode64()");
@@ -541,6 +570,42 @@ MemBuf& MemBuf::decode64()
 	m_data_size = len;
 
 	return *this;
+}
+
+MemBuf& MemBuf::decode64url()
+{
+	EnEx ee("MemBuf::decode64url()");
+
+	// First convert our contents to a twine so they are easier to manipulate
+	twine tmp; tmp.set( (const char*)m_data, m_data_size );
+
+	tmp.replace( '-', '+' ); // dashes convert to plusses
+	tmp.replace( '_', '/' ); // underscores become slashes
+	tmp.replace( ',', '=' ); // commas become equals
+	switch(tmp.length() % 4){ // Pad with trailing '='s
+		case 0: break; // Nothing to do
+		case 2: tmp.append( "==" ); // Add 2 equals to the end of the string
+		case 3: tmp.append( "=" ); // Add 1 equals to the end of the string
+		default:
+			throw AnException(0, FL, "Invalid length for base64 url decoding.");
+	}
+
+	// Split into 64 character lines
+	size_t i = 64;
+	while(i < tmp.size()){
+		tmp.insert(i, "\n");
+		i++; // for the newline
+		i += 64; // next 64 characters
+	}
+
+	// Add a linefeed at the end
+	append( "\n" );
+
+	// Re-set our contents from the twine
+	set( tmp(), tmp.size() );
+
+	// Now do the actual decode
+	return decode64();
 }
 
 MemBuf& MemBuf::zip()
@@ -690,4 +755,84 @@ MemBuf& MemBuf::Decrypt(xmlDocPtr doc, RSA* keypair, bool usePrivate)
 
 	// Finally, return ourselves
 	return *this;
+}
+
+MemBuf MemBuf::Digest(RSA* keypair)
+{
+	EnEx ee("MemBuf::Digest(RSA* keypair)");
+
+	int rCode = 0;
+	MemBuf ret((size_t)EVP_MAX_MD_SIZE);
+
+	const EVP_MD *md = EVP_get_digestbyname( "sha256" );
+	if(md == NULL){
+		// Try loading all of the digest algorithms - they may not have been loaded yet
+		OpenSSL_add_all_digests();
+		md = EVP_get_digestbyname( "sha256" );
+		if(md == NULL){
+			throw AnException(0, FL, "Could not load the sha256 digest routines from OpenSSL");
+		}
+	}
+
+	EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
+	if(keypair == NULL) {
+		// No signature required - just a refular digest
+		unsigned int md_len = 0;
+		EVP_DigestInit_ex(mdctx, md, NULL);
+		EVP_DigestUpdate(mdctx, (unsigned char*)m_data, m_data_size );
+		EVP_DigestFinal_ex(mdctx, (unsigned char*)ret.data(), &md_len);
+		ret.size( (size_t)md_len );
+	} else {
+		// Convert the RSA keypair into an EVP keypair:
+		EVP_PKEY *pkey = EVP_PKEY_new();
+		if(pkey == NULL){
+			EVP_MD_CTX_destroy(mdctx);
+			throw AnException(0, FL, "Could not create an EVP key to hold the RSA keypair for signing.");
+		}
+		rCode = EVP_PKEY_set1_RSA(pkey, keypair);
+		if(rCode == 0){
+			EVP_MD_CTX_destroy(mdctx);
+			throw AnException(0, FL, "Could not set the RSA keypair given into the EVP key.");
+		}
+
+		// Create our signing context
+		EVP_PKEY_CTX *pctx = NULL;
+		rCode = EVP_DigestSignInit( mdctx, &pctx, md, NULL, pkey );
+		if(rCode == 0){
+			EVP_MD_CTX_destroy(mdctx);
+			throw AnException(0, FL, "Could not initialize the digest signature context.");
+		}
+
+		// Pass in the data to be digested and signed
+		EVP_DigestSignUpdate(mdctx, (unsigned char*)m_data, m_data_size );
+
+		// Finalize with a NULL output buffer so that we can get the size of the output required
+		size_t sd_len = 0;
+		EVP_DigestSignFinal(mdctx, NULL, &sd_len);
+
+		ret.reserve( sd_len );
+
+		// Call Finalize again with the real output buffer to get the data
+		EVP_DigestSignFinal(mdctx, (unsigned char*)ret.data(), &sd_len );
+		ret.size( sd_len );
+		
+	}
+	EVP_MD_CTX_destroy(mdctx);
+
+	//printf("Internal value:\n%s\n", ret.hex()() );
+
+	return ret;
+}
+
+twine MemBuf::hex()
+{
+	EnEx ee("MemBuf::hex()");
+
+	twine ret;
+	for(size_t i = 0; i < size(); i++){
+		twine hexChar; hexChar.format("%02x", (unsigned)(unsigned char)(*this)[i]);
+		ret += hexChar;
+	}
+
+	return ret;
 }

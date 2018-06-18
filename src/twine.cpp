@@ -1246,6 +1246,24 @@ twine& twine::encode64()
 	return *this;
 }
 
+twine& twine::encode64url()
+{
+	// First do the standard base64 encode:
+	encode64();
+
+	// Strip out any newlines in the content
+	replaceAll( "\n", "" );
+
+	// Remove any trailing '='s
+	replaceAll( "=", "" );
+
+	replace( '+', '-' ); // Plusses convert to dashes
+	replace( '/', '_' ); // Slashes become underscores
+
+	// Return ourselves
+	return *this;
+}
+
 twine& twine::decode64()
 {
 	//EnEx ee("twine::decode64()");
@@ -1266,6 +1284,36 @@ twine& twine::decode64()
 
 	// Return ourselves.
 	return *this;
+}
+
+twine& twine::decode64url()
+{
+	replace('-', '+'); // dashes convert to plusses
+	replace('_', '/'); // underscores become slashes
+	replace(',', '='); // comma become equals
+	switch(length() % 4){ // Pad with trailing '='s
+		case 0: break; // nothing to do
+		case 2: append( "==" ); break; // Add 2 equals to the end of the string
+		case 3: append( "=" ); break; // Add 1 equals to the end of the string
+		default:
+			throw AnException(0, FL, "Invalid lengthfor base64 url decoding.");
+	}
+
+	// Split into 64 character lines
+	size_t i = 64;
+	while(i < size()){
+		insert(i, "\n");
+		i++; // for the newline
+		i += 64; // next 64 characters
+	}
+
+	// Add a linefeed at the end
+	append( "\n" );
+
+	//printf("String for decoding --%s--\n", (char*)m_data);
+
+	// Now do the actual base64 decode
+	return decode64();
 }
 
 twine& twine::to_utf8(const twine& fromEncoding, bool withChatter)

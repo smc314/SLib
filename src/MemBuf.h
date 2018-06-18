@@ -220,18 +220,31 @@ class DLLEXPORT MemBuf
 		  * Deletes our current memory buffer, and resets our size back to zero.
 		  */
 		MemBuf& clear(void);
-			
+
 		/**
-		  * Handles converting the contents of our MemBuf into a base64 encoded
+		  * Returns a twine that is a hex representation of our internal value.
+		  */
+		twine hex(void);
+			
+		/** Handles converting the contents of our MemBuf into a base64 encoded
 		  * version.
 		  */
 		MemBuf& encode64();
 
-		/**
-		  * Handles converting the contents of our MemBuf into a base64 decoded
+		/** Handles converting the contents of our MemBuf into a base64url encoded
+		  * version that is safe to use in url's.
+		  */
+		MemBuf& encode64url();
+
+		/** Handles converting the contents of our MemBuf into a base64 decoded
 		  * version.
 		  */
 		MemBuf& decode64();
+
+		/** Handles converting the contents of our MemBuf into a base64url decoded
+		  * version.
+		  */
+		MemBuf& decode64url();
 
 		/**
 		  * Zip up the contents of our MemBuf.
@@ -262,6 +275,12 @@ class DLLEXPORT MemBuf
 		  * we will decrypt with the RSA private key.
 		  */
 		MemBuf& Decrypt(xmlDocPtr doc, RSA* keypair, bool usePrivate = true);
+
+		/** This method will create an SHA256 message digest of the current contents of MemBuf and
+		  * return a new MemBuf with the (optionally) signed digest.  The contents of the current
+		  * MemBuf are not changed.  Pass in an RSA keypair if you want the digest to be signed
+		  */
+		MemBuf Digest(RSA* keypair = NULL);
 
 		/** Sometimes, notably in ODBC applications, it's useful to have an externally public
 		  * length indicator that goes along with this object.  Use this for those purposes.

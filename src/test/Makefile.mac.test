@@ -35,8 +35,7 @@ endif
 
 # smtp.o is not here because we need to find out how to compile it
 # on a mac before including it in this list.
-DOTOH := testMain.o test_64.o test_date.o test_xml.o test_twine_str.o test_twine_num.o test_twine_bigmem.o
-
+DOTOH := testMain.o test_64.o test_date.o test_xml.o test_twine_str.o test_twine_num.o test_twine_bigmem.o test_membuf.o
 
 all: $(DOTOH) 
 	$(CC) -o SLibTest $(DOTOH) -L.. -lSLib $(LFLAGS)
