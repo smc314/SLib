@@ -982,22 +982,91 @@ TEST_CASE("Twine - get C-style string", "[twine]")
 
 TEST_CASE("Twine - compare a twine reference", "[twine]")
 {
-    // grep -B1 -A1 ^`perl -e 'open IN, "</usr/share/dict/words";rand($.) < 1 && ($n=$_) while <IN>;print $n'`$ /usr/share/dict/words
-    twine b = "agistator";
-    twine t = "agistment"; //the act of feeding or pasturing livestock for a fee
-    twine a = "agistor"; // one who agists
+    SECTION("Normal Comparisons")
+    {
+        // grep -B1 -A1 ^`perl -e 'open IN, "</usr/share/dict/words";rand($.) < 1 && ($n=$_) while <IN>;print $n'`$ /usr/share/dict/words
+        twine b = "agistator";
+        twine t = "agistment"; //the act of feeding or pasturing livestock for a fee
+        twine a = "agistor"; // one who agists
 
-    REQUIRE(b.compare(b) == 0);
-    REQUIRE(b.compare(t) < 0);
-    REQUIRE(b.compare(a) < 0);
+        INFO("b: " << b() << "\tt: " << t() << "\ta: " << a());
 
-    REQUIRE(t.compare(b) > 0);
-    REQUIRE(t.compare(t) == 0);
-    REQUIRE(t.compare(a) < 0);
+        REQUIRE(b.compare(b) == 0);
+        REQUIRE(b.compare(t) < 0);
+        REQUIRE(b.compare(a) < 0);
 
-    REQUIRE(a.compare(b) > 0);
-    REQUIRE(a.compare(t) > 0);
-    REQUIRE(a.compare(a) == 0);
+        REQUIRE(t.compare(b) > 0);
+        REQUIRE(t.compare(t) == 0);
+        REQUIRE(t.compare(a) < 0);
+
+        REQUIRE(a.compare(b) > 0);
+        REQUIRE(a.compare(t) > 0);
+        REQUIRE(a.compare(a) == 0);
+    }
+
+    SECTION("Compare Empty Strings")
+    {
+        twine e = "";
+        twine f = "full";
+
+        INFO("e: " << e() << "\tf: " << f());
+
+        REQUIRE(e.compare(e) == 0);
+        REQUIRE(e.compare(f) < 0);
+
+        REQUIRE(f.compare(e) > 0);
+        REQUIRE(f.compare(f) == 0);
+    }
+}
+
+TEST_CASE("Twine - compare a C-style string", "[twine]")
+{
+
+    SECTION("Normal Comparisons")
+    {
+        // grep -B1 -A1 ^`perl -e 'open IN, "</usr/share/dict/words";rand($.) < 1 && ($n=$_) while <IN>;print $n'`$ /usr/share/dict/words
+        char *b = "batrachoid";
+        char *w = "batrachoididae";
+        char *a = "batrachophagous";
+        
+        twine bt = b;
+        twine wt = w;
+        twine at = a;
+
+        INFO("bt: " << bt() << "\twt: " << wt() << "\tat: " << at());
+
+        REQUIRE(bt.compare(b) == 0);
+        REQUIRE(bt.compare(w) < 0);
+        REQUIRE(bt.compare(a) < 0);
+
+        REQUIRE(wt.compare(b) > 0);
+        REQUIRE(wt.compare(w) == 0);
+        REQUIRE(wt.compare(a) < 0);
+
+        REQUIRE(at.compare(b) > 0);
+        REQUIRE(at.compare(w) > 0);
+        REQUIRE(at.compare(a) == 0);
+    }
+
+    SECTION("Compare NULLs")
+    {
+        twine et = "";
+        twine ft = "full";
+
+        char* nc = NULL;
+        char* ec = "";
+        char* fc = "full";
+
+        INFO("et: " << et() << "\tft: " << ft()); //<< "\tnc: " << nc);
+
+        REQUIRE(et.compare(nc) == 0);
+        REQUIRE(et.compare(ec) == 0);
+        REQUIRE(et.compare(fc) < 0);
+
+        REQUIRE(ft.compare(nc) > 0);
+        REQUIRE(ft.compare(ec) > 0);
+        REQUIRE(ft.compare(fc) == 0);
+    }
 }
 
 TEST_CASE("Twine - Random Testing", "[twine][random]")
