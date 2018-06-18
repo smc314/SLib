@@ -43,11 +43,13 @@
     <xsl:template match="OverallResults">
         <table>
             <tr>
+                <th>Total</th>
                 <th>Successes</th>
                 <th>Failures</th>
                 <th>Expected</th>
             </tr>
             <tr>
+                <td><xsl:value-of select="@successes + @failures" /></td>
                 <td><xsl:value-of select="@successes" /></td>
                 <td><xsl:value-of select="@failures" /></td>
                 <td><xsl:value-of select="@expectedFailures" /></td>
