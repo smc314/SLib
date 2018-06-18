@@ -36,4 +36,12 @@ BEGIN { printf "" > "test/report/results.xml" }
     }
 }
 
+/<FatalErrorCondition filename="[^"]*" line="[^"]*">/ {
+    while($0 !~ /.*<\/FatalErrorCondition>.*/)
+    {
+        getline
+        print $0 >> "test/report/results.xml"
+    }
+}
+
 $0 !~ /.*<[\/\?]?[[:alpha:]]+( [[:alpha:]]+=".*")*[\/\?]?>.*/ { print $0 }
