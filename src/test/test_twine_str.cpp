@@ -980,6 +980,26 @@ TEST_CASE("Twine - get C-style string", "[twine]")
     }
 }
 
+TEST_CASE("Twine - compare a twine reference", "[twine]")
+{
+    // grep -B1 -A1 ^`perl -e 'open IN, "</usr/share/dict/words";rand($.) < 1 && ($n=$_) while <IN>;print $n'`$ /usr/share/dict/words
+    twine b = "agistator";
+    twine t = "agistment"; //the act of feeding or pasturing livestock for a fee
+    twine a = "agistor"; // one who agists
+
+    REQUIRE(b.compare(b) == 0);
+    REQUIRE(b.compare(t) < 0);
+    REQUIRE(b.compare(a) < 0);
+
+    REQUIRE(t.compare(b) > 0);
+    REQUIRE(t.compare(t) == 0);
+    REQUIRE(t.compare(a) < 0);
+
+    REQUIRE(a.compare(b) > 0);
+    REQUIRE(a.compare(t) > 0);
+    REQUIRE(a.compare(a) == 0);
+}
+
 TEST_CASE("Twine - Random Testing", "[twine][random]")
 {
     SECTION("Randomized String")
