@@ -906,6 +906,13 @@ TEST_CASE("Twine - += a floating point - bigmem", "[twine][bigmem][.]")
     }
 }
 
+// TODO: Deal with this.
+// IMPORTANT! This test case MUST be dealt with!
+// However, leaving it in a normal run is too dangerous.
+// It causes a Bus Error:10 when it calls the insert function.
+// This is undesired behavior in the insert function itself,
+// but because it's a hardware fault, rather than a software exception,
+// it completely aborts all testing, so we lose all test results after this one.
 TEST_CASE("Twine - Insert into Extremely Long String", "[twine][bigmem][.]")
 {
     printf("Line %d\n", __LINE__);
