@@ -955,13 +955,31 @@ TEST_CASE("Twine - array indexing", "[twine]")
     }
 }
 
-// TODO: Deal with this.
-// IMPORTANT! This test case MUST be dealt with!
-// However, leaving it in a normal run is too dangerous.
-// It causes a Bus Error:10 when it calls the insert function.
-// This is undesired behavior in the insert function itself,
-// but because it's a hardware fault, rather than a software exception,
-// it completely aborts all testing, so we lose all test results after this one.
+TEST_CASE("Twine - get C-style string", "[twine]")
+{
+    SECTION("Short String")
+    {
+        char* s = "I am a short string";
+        twine t = s; 
+
+        INFO("s: " << s << "\tt(): " << t() << "\tt.c_str(): " << t.c_str());
+        REQUIRE(strcmp(t(), s) == 0);
+        REQUIRE(strcmp(t.c_str(), s) == 0);
+        REQUIRE(t() == t.c_str());
+    }
+
+    SECTION("Long String")
+    {
+        char* s = "I am a longer string that will not fit in optimized storage.";
+        twine t = s; 
+
+        INFO("s: " << s << "\tt(): " << t() << "\tt.c_str(): " << t.c_str());
+        REQUIRE(strcmp(t(), s) == 0);
+        REQUIRE(strcmp(t.c_str(), s) == 0);
+        REQUIRE(t() == t.c_str());
+    }
+}
+
 TEST_CASE("Twine - Random Testing", "[twine][random]")
 {
     SECTION("Randomized String")
