@@ -1319,8 +1319,10 @@ TEST_CASE("Twine - Compare string to zero", "[twine]")
     INFO("This maps to the belief that string comparison with an integer should not compare a non-numerical"
             << " string as equal to a number. The other possibility is that which is used by perl: " <<
             "generate a number from the first digits, with no digits -> 0.");
-    REQUIRE(twine("stuff").compare((size_t)0) != 0);
-    REQUIRE(twine().compare((size_t)0) != 0);
+    CHECK(twine("stuff").compare((size_t)0) != 0);
+    CHECK(twine().compare((size_t)0) != 0);
+    CHECK(twine("stuff").compare(0.0f) != 0);
+    CHECK(twine().compare(0.0f) != 0);
 }
 
 TEST_CASE("Twine - Get Integer from String", "[twine]")
@@ -1349,7 +1351,7 @@ TEST_CASE("Twine - Get Integer from String", "[twine]")
     
     SECTION("Get unsigned value of smallest possible signed value.")
     {
-        size_t i = (SIZE_MAX >> 1) + 1;;
+        size_t i = (SIZE_MAX >> 1) + 1;
         twine t;
         t = i;
 

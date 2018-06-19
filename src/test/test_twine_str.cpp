@@ -991,17 +991,43 @@ TEST_CASE("Twine - compare a twine reference", "[twine]")
 
         INFO("b: " << b() << "\tt: " << t() << "\ta: " << a());
 
-        REQUIRE(b.compare(b) == 0);
-        REQUIRE(b.compare(t) < 0);
-        REQUIRE(b.compare(a) < 0);
+        SECTION("Compare whole twine")
+        {
+            REQUIRE(b.compare(b) == 0);
+            REQUIRE(b.compare(t) < 0);
+            REQUIRE(b.compare(a) < 0);
 
-        REQUIRE(t.compare(b) > 0);
-        REQUIRE(t.compare(t) == 0);
-        REQUIRE(t.compare(a) < 0);
+            REQUIRE(t.compare(b) > 0);
+            REQUIRE(t.compare(t) == 0);
+            REQUIRE(t.compare(a) < 0);
 
-        REQUIRE(a.compare(b) > 0);
-        REQUIRE(a.compare(t) > 0);
-        REQUIRE(a.compare(a) == 0);
+            REQUIRE(a.compare(b) > 0);
+            REQUIRE(a.compare(t) > 0);
+            REQUIRE(a.compare(a) == 0);
+        }
+
+        SECTION("Compare part of twine")
+        {
+            REQUIRE(t.compare(b, 0) == 0);
+            REQUIRE(t.compare(t, 0) == 0);
+            REQUIRE(t.compare(a, 0) == 0);
+
+            REQUIRE(t.compare(b, 4) == 0);
+            REQUIRE(t.compare(t, 4) == 0);
+            REQUIRE(t.compare(a, 4) == 0);
+
+            REQUIRE(t.compare(b, 5) == 0);
+            REQUIRE(t.compare(t, 5) == 0);
+            REQUIRE(t.compare(a, 5) == 0);
+
+            REQUIRE(t.compare(b, 6) > 0);
+            REQUIRE(t.compare(t, 6) == 0);
+            REQUIRE(t.compare(a, 6) < 0);
+
+            REQUIRE(t.compare(b, 8) > 0);
+            REQUIRE(t.compare(t, 8) == 0);
+            REQUIRE(t.compare(a, 8) < 0);
+        }
     }
 
     SECTION("Compare Empty Strings")
@@ -1011,11 +1037,32 @@ TEST_CASE("Twine - compare a twine reference", "[twine]")
 
         INFO("e: " << e() << "\tf: " << f());
 
-        REQUIRE(e.compare(e) == 0);
-        REQUIRE(e.compare(f) < 0);
+        SECTION("Compare whole twine")
+        {
+            REQUIRE(e.compare(e) == 0);
+            REQUIRE(e.compare(f) < 0);
 
-        REQUIRE(f.compare(e) > 0);
-        REQUIRE(f.compare(f) == 0);
+            REQUIRE(f.compare(e) > 0);
+            REQUIRE(f.compare(f) == 0);
+        }
+
+        SECTION("Compare part of twine")
+        {
+            REQUIRE(e.compare(e, 0) == 0);
+            REQUIRE(e.compare(f, 0) == 0);
+            REQUIRE(f.compare(e, 0) == 0);
+            REQUIRE(f.compare(f, 0) == 0);
+
+            REQUIRE(e.compare(e, 2) == 0);
+            REQUIRE(e.compare(f, 2) < 0);
+            REQUIRE(f.compare(e, 2) > 0);
+            REQUIRE(f.compare(f, 2) == 0);
+
+            REQUIRE(e.compare(e, 4) == 0);
+            REQUIRE(e.compare(f, 4) < 0);
+            REQUIRE(f.compare(e, 4) > 0);
+            REQUIRE(f.compare(f, 4) == 0);
+        }
     }
 }
 
@@ -1035,17 +1082,35 @@ TEST_CASE("Twine - compare a C-style string", "[twine]")
 
         INFO("bt: " << bt() << "\twt: " << wt() << "\tat: " << at());
 
-        REQUIRE(bt.compare(b) == 0);
-        REQUIRE(bt.compare(w) < 0);
-        REQUIRE(bt.compare(a) < 0);
+        SECTION("Compare whole twine")
+        {
+            REQUIRE(bt.compare(b) == 0);
+            REQUIRE(bt.compare(w) < 0);
+            REQUIRE(bt.compare(a) < 0);
 
-        REQUIRE(wt.compare(b) > 0);
-        REQUIRE(wt.compare(w) == 0);
-        REQUIRE(wt.compare(a) < 0);
+            REQUIRE(wt.compare(b) > 0);
+            REQUIRE(wt.compare(w) == 0);
+            REQUIRE(wt.compare(a) < 0);
 
-        REQUIRE(at.compare(b) > 0);
-        REQUIRE(at.compare(w) > 0);
-        REQUIRE(at.compare(a) == 0);
+            REQUIRE(at.compare(b) > 0);
+            REQUIRE(at.compare(w) > 0);
+            REQUIRE(at.compare(a) == 0);
+        }
+
+        SECTION("Compare part of twine")
+        {
+            REQUIRE(wt.compare(b, 0) == 0);
+            REQUIRE(wt.compare(w, 0) == 0);
+            REQUIRE(wt.compare(a, 0) == 0);
+
+            REQUIRE(wt.compare(b, 8) == 0);
+            REQUIRE(wt.compare(w, 8) == 0);
+            REQUIRE(wt.compare(a, 8) == 0);
+
+            REQUIRE(wt.compare(b, 9) > 0);
+            REQUIRE(wt.compare(w, 9) == 0);
+            REQUIRE(wt.compare(a, 9) < 0);
+        }
     }
 
     SECTION("Compare NULLs")
@@ -1059,14 +1124,74 @@ TEST_CASE("Twine - compare a C-style string", "[twine]")
 
         INFO("et: " << et() << "\tft: " << ft()); //<< "\tnc: " << nc);
 
-        REQUIRE(et.compare(nc) == 0);
-        REQUIRE(et.compare(ec) == 0);
-        REQUIRE(et.compare(fc) < 0);
+        SECTION("Compare whole twine")
+        {
+            REQUIRE(et.compare(nc) == 0);
+            REQUIRE(et.compare(ec) == 0);
+            REQUIRE(et.compare(fc) < 0);
 
-        REQUIRE(ft.compare(nc) > 0);
-        REQUIRE(ft.compare(ec) > 0);
-        REQUIRE(ft.compare(fc) == 0);
+            REQUIRE(ft.compare(nc) > 0);
+            REQUIRE(ft.compare(ec) > 0);
+            REQUIRE(ft.compare(fc) == 0);
+        }
+
+        SECTION("Compare part of twine")
+        {
+            REQUIRE(et.compare(nc, 0) == 0);
+            REQUIRE(et.compare(ec, 0) == 0);
+            REQUIRE(et.compare(fc, 0) == 0);
+
+            REQUIRE(ft.compare(nc, 0) == 0);
+            REQUIRE(ft.compare(ec, 0) == 0);
+            REQUIRE(ft.compare(fc, 0) == 0);
+
+            REQUIRE(et.compare(nc, 2) == 0);
+            REQUIRE(et.compare(ec, 2) == 0);
+            REQUIRE(et.compare(fc, 2) < 0);
+
+            REQUIRE(ft.compare(nc, 2) > 0);
+            REQUIRE(ft.compare(ec, 2) > 0);
+            REQUIRE(ft.compare(fc, 2) == 0);
+
+            REQUIRE(et.compare(nc, 4) == 0);
+            REQUIRE(et.compare(ec, 4) == 0);
+            REQUIRE(et.compare(fc, 4) < 0);
+
+            REQUIRE(ft.compare(nc, 4) > 0);
+            REQUIRE(ft.compare(ec, 4) > 0);
+            REQUIRE(ft.compare(fc, 4) == 0);
+        }
     }
+}
+
+TEST_CASE("Twine - test prefixes", "[twine]")
+{
+    twine b = "calycanthaceous";
+    twine t = "calycanthemous";
+    twine a = "calycanthemy";
+
+    twine e = "";
+    twine p = "calycanth";
+    twine np = "calycanthe";
+    twine bi = "calycanthaceous";
+
+    INFO("b: " << b() << "\tt: " << t() << "\ta: " << a() << "\te: " << e() << "\tp: " << p() << "\tnp: " << np() << "\tbi: " << bi());
+
+    REQUIRE(b.startsWith(p));
+    REQUIRE_FALSE(b.startsWith(np));
+    REQUIRE(b.startsWith(bi));
+
+    REQUIRE(t.startsWith(p));
+    REQUIRE(t.startsWith(np));
+    REQUIRE_FALSE(t.startsWith(bi));
+
+    REQUIRE(a.startsWith(p));
+    REQUIRE(a.startsWith(np));
+    REQUIRE_FALSE(a.startsWith(bi));
+
+    REQUIRE(b.startsWith(e));
+    REQUIRE(t.startsWith(e));
+    REQUIRE(a.startsWith(e));
 }
 
 TEST_CASE("Twine - Random Testing", "[twine][random]")
