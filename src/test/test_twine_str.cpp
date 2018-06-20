@@ -1194,6 +1194,47 @@ TEST_CASE("Twine - test prefixes", "[twine]")
     REQUIRE(a.startsWith(e));
 }
 
+TEST_CASE("Twine - test suffixes", "[twine]")
+{
+    twine t1 = "ditetragonal";
+    twine t2 = "pseudotetragonal";
+    twine t3 = "rotundotetragonal";
+    twine t4 = "tetragonal";
+
+    twine es = "";
+    twine cs = "tetragonal";
+    twine hs = "dotetragonal";
+    twine ns = "udotetragonal";
+    twine ls = "rotundotetragonal";
+
+    INFO("t1: " << t1() << "\tt2: " << t2() << "\tt3: " << t3() << "\tt4: " << t4());
+
+    REQUIRE(t1.endsWith(cs));
+    REQUIRE_FALSE(t1.endsWith(hs));
+    REQUIRE_FALSE(t1.endsWith(ns));
+    REQUIRE_FALSE(t1.endsWith(ls));
+
+    REQUIRE(t2.endsWith(cs));
+    REQUIRE(t2.endsWith(hs));
+    REQUIRE(t2.endsWith(ns));
+    REQUIRE_FALSE(t2.endsWith(ls));
+
+    REQUIRE(t3.endsWith(cs));
+    REQUIRE(t3.endsWith(hs));
+    REQUIRE_FALSE(t3.endsWith(ns));
+    REQUIRE(t3.endsWith(ls));
+
+    REQUIRE(t4.endsWith(cs));
+    REQUIRE_FALSE(t4.endsWith(hs));
+    REQUIRE_FALSE(t4.endsWith(ns));
+    REQUIRE_FALSE(t4.endsWith(ls));
+
+    REQUIRE(t1.endsWith(es));
+    REQUIRE(t2.endsWith(es));
+    REQUIRE(t3.endsWith(es));
+    REQUIRE(t4.endsWith(es));
+}
+
 TEST_CASE("Twine - Random Testing", "[twine][random]")
 {
     SECTION("Randomized String")
