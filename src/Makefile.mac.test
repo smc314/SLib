@@ -59,7 +59,7 @@ incs:
 
 check:
 	cd test && make -f Makefile.mac.test
-	-script -q /dev/null test/SLibTest -r console -r xml | test/sepConXml.awk
+	-script -q /dev/null test/SLibTest -r compact -r xml | test/sepConXml.awk
 	@echo
 	@printf "gcov src\n--------\n" > test/report/cov.log
 	gcov -f -b *.gcda &> /tmp/tmp.log

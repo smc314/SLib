@@ -43,11 +43,13 @@
     <xsl:template match="OverallResults">
         <table>
             <tr>
+                <th>Total</th>
                 <th>Successes</th>
                 <th>Failures</th>
                 <th>Expected</th>
             </tr>
             <tr>
+                <td><xsl:value-of select="@successes + @failures" /></td>
                 <td><xsl:value-of select="@successes" /></td>
                 <td><xsl:value-of select="@failures" /></td>
                 <td><xsl:value-of select="@expectedFailures" /></td>
@@ -126,6 +128,14 @@
                 <xsl:if test="Section">
                     <p id="#{generate-id(.)}_sectionCnt" style="display:block;"><xsl:value-of select="count(Section)" /> Sections</p>
                 </xsl:if>
+                <xsl:if test="FatalErrorCondition">
+                    At <xsl:value-of select="FatalErrorCondition/@filename" />:<xsl:value-of select="FatalErrorCondition/@line" />
+                    <br />FAILED:<br />
+                    due to a fatal error condition:<br />
+                    <code style="margin-left: 4ch">
+                        <xsl:value-of select="FatalErrorCondition" />
+                    </code>
+                </xsl:if>
             </div>
 
             <div id="#{generate-id(.)}_sections" style="display:none;">
@@ -177,6 +187,14 @@
                     due to an unexpected exception with message:<br />
                     <code style="margin-left: 4ch">
                         <xsl:value-of select="Exception" />
+                    </code>
+                </xsl:if>
+                <xsl:if test="FatalErrorCondition">
+                    At <xsl:value-of select="FatalErrorCondition/@filename" />:<xsl:value-of select="FatalErrorCondition/@line" />
+                    <br />FAILED:<br />
+                    due to a fatal error condition:<br />
+                    <code style="margin-left: 4ch">
+                        <xsl:value-of select="FatalErrorCondition" />
                     </code>
                 </xsl:if>
                 <xsl:if test="Section">

@@ -11,6 +11,8 @@
 *.ilk
 src/LogDump
 src/test/SLibTest
+src/SqlShell
+src/SLogDump
 
 # Command Tracing #
 ###################
@@ -19,7 +21,8 @@ src/test/SLibTest
 *.gcov
 *.info
 *.log
-src/test/coverage
+src/test/report/coverage/
+src/test/report/results.xml
 
 # VI Swap files #
 #################
