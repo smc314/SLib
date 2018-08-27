@@ -392,8 +392,10 @@ class DLLEXPORT XmlHelpers {
 			xmlChar* buffer;
 			int buf_size;
 			xmlIndentTreeOutput = 1;
+			xmlKeepBlanksDefault(0);
 			xmlDocDumpFormatMemory(doc, &buffer, &buf_size, 1);
 			xmlIndentTreeOutput = 0;
+			xmlKeepBlanksDefault(1);
 
 			twine ret;
 			ret.set((char*)buffer, buf_size);
