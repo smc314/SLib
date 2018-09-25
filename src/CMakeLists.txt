@@ -1,8 +1,8 @@
-# CMake File for SLib
-project(libSlib LANGUAGES CXX C)
-
 # We require at least a minimum version of cmake as 3.5
 cmake_minimum_required(VERSION 3.5)
+
+# CMake File for SLib
+project(libSlib LANGUAGES CXX C)
 
 # The primary library definition
 add_library(SLib 
@@ -16,10 +16,7 @@ add_library(SLib
 add_library(SLib::SLib ALIAS SLib)
 
 
-target_compile_features(SLib
-	PUBLIC
-		cxx_std_14
-)
+target_compile_features(SLib PUBLIC cxx_std_14)
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 
 if(WIN32)
@@ -36,7 +33,7 @@ else() # Linux or Mac
 	)
 	target_link_libraries(SLib 
 		PUBLIC 
-			ssl crypto pthread resolv xml2 z curl
+			pthread resolv xml2 z curl
 	)
 endif()
 
@@ -47,7 +44,7 @@ if( "${CMAKE_SYSTEM_NAME}" MATCHES "Linux" )
 	)
 	target_link_libraries(SLib 
 		PUBLIC 
-			rt
+			ssl crypto rt
 	)
 elseif(APPLE)
 	target_include_directories(SLib
@@ -56,7 +53,7 @@ elseif(APPLE)
 	)
 	target_link_libraries(SLib 
 		PUBLIC 
-			iconv
+			iconv /usr/local/opt/openssl/lib/libssl.dylib /usr/local/opt/openssl/lib/libcrypto.dylib
 	)
 endif()
 
