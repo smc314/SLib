@@ -86,6 +86,31 @@ class DLLEXPORT HttpClient
 		  */
 		MemBuf ResponseBuffer;
 
+		/**
+		  * Allows the caller to provide proxy information for us.  We pass this directly
+		  * to the CURLOPT_PROXY config setting.
+		  */
+		void SetProxy( const twine& proxy );
+
+		/**
+		  * Allows the caller to provide header information for us.  We pass this directly
+		  * to the CURLOPT_HTTPHEADER config setting.
+		  */
+		void AddPostHeader( const twine& postHeader );
+
+		/**
+		  * Allows the caller to provide header information for us.  We pass this directly
+		  * to the CURLOPT_HTTPHEADER config setting.
+		  */
+		void AddGetHeader( const twine& getHeader );
+
+		/** When absolute full control is required, use this to obtain the CURL handle itself.
+		  * Note that the handle is cleaned up before Get/Post return, so it's main use is to
+		  * add extra headers and setup config prior to calling Get/Post.
+		  */
+		CURL* CurlHandle( );
+
+
 	protected:
 		/** This is an internal method that is called by PostRaw just before the curl_easy_perform is
 		 * called.  This allows you to set any other options you need for curl to do it's work.
@@ -116,6 +141,18 @@ class DLLEXPORT HttpClient
 
 		/// Assignment operator is private to prevent use
 		HttpClient& operator=(const HttpClient& c) { return *this; }
+
+		/// Our proxy information - if any
+		twine m_proxy;
+
+		/// Our list of POST headers
+		vector<twine> m_post_headers;
+		struct curl_slist* m_post_headerlist = nullptr;
+
+		/// Our list of GET headers
+		vector<twine> m_get_headers;
+		struct curl_slist* m_get_headerlist = nullptr;
+
 
 };
 

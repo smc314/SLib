@@ -192,22 +192,50 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 
 void HttpClient::PostOptions()
 {
-	// Our implementation does nothing with this method.  Child classes can override this as necessary.
+	// Check proxy setting and any post headers given to us
+	
+	if(!m_proxy.empty()){
+		DEBUG(FL, "Using POST proxy of (%s)", m_proxy() );
+		curl_easy_setopt( m_curl_handle, CURLOPT_PROXY, m_proxy() );
+	}
+
+	if(m_post_headers.size() != 0){
+		for(auto& header : m_post_headers) m_post_headerlist = curl_slist_append( m_post_headerlist, header() );
+		curl_easy_setopt( m_curl_handle, CURLOPT_HTTPHEADER, m_post_headerlist );
+	}
 }
 
 void HttpClient::PostFree()
 {
-	// Our implementation does nothing with this method.  Child classes can override this as necessary.
+	// Check our header list and free it if required
+	if(m_post_headerlist != nullptr){
+		curl_slist_free_all( m_post_headerlist );
+		m_post_headerlist = nullptr;
+	}
 }
 
 void HttpClient::GetOptions()
 {
-	// Our implementation does nothing with this method.  Child classes can override this as necessary.
+	// Check proxy setting and any get headers given to us
+	
+	if(!m_proxy.empty()){
+		DEBUG(FL, "Using GET proxy of (%s)", m_proxy() );
+		curl_easy_setopt( m_curl_handle, CURLOPT_PROXY, m_proxy() );
+	}
+
+	if(m_get_headers.size() != 0){
+		for(auto& header : m_get_headers) m_get_headerlist = curl_slist_append( m_get_headerlist, header() );
+		curl_easy_setopt( m_curl_handle, CURLOPT_HTTPHEADER, m_get_headerlist );
+	}
 }
 
 void HttpClient::GetFree()
 {
-	// Our implementation does nothing with this method.  Child classes can override this as necessary.
+	// Check our header list and free it if required
+	if(m_get_headerlist != nullptr){
+		curl_slist_free_all( m_get_headerlist );
+		m_get_headerlist = nullptr;
+	}
 }
 
 xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)
@@ -297,5 +325,28 @@ xmlDocPtr HttpClient::PostXml(const twine& url, xmlDocPtr doc)
 
 	twine docStr = XmlHelpers::docToString( doc );
 	return HttpClient::PostPage( url, docStr(), docStr.length() );
+}
+
+CURL* HttpClient::CurlHandle()
+{
+	return m_curl_handle;
+}
+
+void HttpClient::AddPostHeader( const twine& postHeader )
+{
+	m_post_headers.push_back( postHeader );
+}
+
+void HttpClient::AddGetHeader( const twine& postHeader )
+{
+	m_get_headers.push_back( postHeader );
+}
+
+void HttpClient::SetProxy( const twine& proxy)
+{
+	EnEx ee(FL, "HttpClient::SetProxy()");
+
+	DEBUG(FL, "Setting HttpClient.Proxy to (%s)", proxy() );
+	m_proxy = proxy;
 }
 
