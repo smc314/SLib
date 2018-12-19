@@ -136,7 +136,7 @@ twine HelixCompileTask::GetCommandLine()
 		printf("Logic name is %s\n", logicName() );
 		auto deps = HelixConfig::getInstance().LogicDepends( logicName );
 		for(auto depName : deps){
-			cmd.append( " -I ../" + depName + "/sqldo " );
+			cmd.append( " -I ../../" + depName + "/sqldo " );
 		}
 		printf("Finished adding dependencies\n");
 
