@@ -1,0 +1,36 @@
+		/** This is an INSERT method.  It is designed to run a single insert
+		  * statement and return. If something goes wrong, we will throw AnException.
+		  * <P>
+		  * Developer Comments:
+		  * <P>${comment}
+		  * <P>
+		  * Sql Statement:
+		  * <pre>${sql}
+		  * </pre>
+		  */
+		static intptr_t ${methodName}(OdbcObj& odbc, ${doName}& obj, bool suppressTrace = false );
+
+		/** This mimics the above in functionality, but allows you to pass in your own
+		  * sql statement for us to execute.  You can tell us whether to use or ignore
+		  * the inputs as well.
+		  */
+		static intptr_t ${methodName}(OdbcObj& odbc, twine& stmt, bool useInputs, ${doName}& obj, bool suppressTrace = false );
+
+		/** This method will do a replacement of all of the parameter markers in
+		  * the sql statement with the standard parameter list that is defined.
+		  * This is useful for automatically prepping a SQL statement that doesn't
+		  * work with parameter markers.
+		  */
+		static twine ${methodName}_prepSQL(IOConn& ioc, ${doName}& obj );
+
+		/** This method will do a replacement of all of the parameter markers in
+		  * the sql statement with the standard parameter list that is defined.
+		  * This is useful for automatically prepping a SQL statement that doesn't
+		  * work with parameter markers.
+		  */
+		static twine ${methodName}_prepSQL(OdbcObj& odbc, ${doName}& obj );
+
+		/** This method returns the sql statement that is used by the above functions.
+		  */
+		static twine ${methodName}_getSQL();
+

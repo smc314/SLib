@@ -1,0 +1,363 @@
+/* **************************************************************************
+
+   Copyright (c): 2008 - 2013 Hericus Software, LLC
+
+   License: The MIT License (MIT)
+
+   Authors: Steven M. Cherry
+
+************************************************************************** */
+
+#include <AnException.h>
+#include <EnEx.h>
+#include <Log.h>
+#include <XmlHelpers.h>
+#include <Timer.h>
+using namespace SLib;
+
+#include "${shortName}.h"
+using namespace Helix::Logic::${shortPackage};
+
+#include "Statics.h"
+using namespace Helix::Logic::util;
+
+/* ************************************************************************** */
+/* This is a generated data object class that is used for interfacing with a  */
+/* database.  This class was generated based on the settings in the file:     */
+/* ${m_currentFile} */
+/* ************************************************************************** */
+
+// Our Object Name, which is also used to create Xml Elements
+static twine ${shortName}Name = "${shortName}";
+
+${shortName}::${shortName}()
+{
+	EnEx ee(FL, "${shortName}::${shortName}()");
+
+	init();
+
+}
+
+${shortName}::${shortName}(const ${shortName}& c)
+{
+	EnEx ee(FL, "${shortName}::${shortName}(const ${shortName}& c)");
+
+${MemberCopyStatements}
+
+}
+
+${shortName}& ${shortName}::operator=(const ${shortName}& c)
+{
+	EnEx ee(FL, "${shortName}::operator=(const ${shortName}& c)");
+
+${MemberCopyStatements}
+
+	return *this;
+}
+
+${shortName}::~${shortName}()
+{
+	EnEx ee(FL, "${shortName}::~${shortName}()");
+
+}
+
+${shortName}& ${shortName}::init()
+{
+	EnEx ee(FL, "${shortName}::init()");
+
+${MemberInitStatements}
+
+	return *this;
+}
+
+${shortName}& ${shortName}::checkSize()
+{
+	EnEx ee(FL, "${shortName}::checkSize()");
+
+${MemberCheckSizeStatements}
+
+	return *this;
+}
+
+/* ********************************************************************** */
+/* Construct from an xmlNodePtr                                           */
+/* ********************************************************************** */
+${shortName}::${shortName}(xmlNodePtr node)
+{
+	EnEx ee(FL, "${shortName}::${shortName}(xmlNodePtr node)");
+
+	// Make sure we're properly initialized first.
+	init();
+
+	// Read everything from the given xmlNodePtr
+	readXmlNode(node);
+}
+
+/* ********************************************************************** */
+/* Read from an xmlNodePtr                                                */
+/* ********************************************************************** */
+${shortName}& ${shortName}::readXmlNode(xmlNodePtr node)
+{
+	EnEx ee(FL, "${shortName}::readXmlNode(xmlNodePtr node)");
+
+	if(node == NULL){
+		throw AnException(0, FL, "xmlNodePtr passed to construct ${shortName} is NULL.");
+	}
+
+${XmlReadMembers}
+
+	return *this;
+}
+
+/* ********************************************************************** */
+/* Create an xmlNodePtr child of the given parent node                    */
+/* ********************************************************************** */
+xmlNodePtr ${shortName}::createXmlNode(xmlNodePtr parent) const
+{
+	EnEx ee(FL, "${shortName}::createXmlNode(xmlNodePtr parent)");
+
+	if(parent == NULL){
+		throw AnException(0, FL, "xmlNodePtr passed to ${shortName}::createXmlNode is NULL.");
+	}
+
+	xmlNodePtr child = xmlNewChild(parent, NULL, (const xmlChar*)"${shortName}", NULL);
+${XmlWriteMembers}
+
+	return child;
+}
+
+/* ********************************************************************** */
+/* Create an xmlDocPtr from our data object                               */
+/* ********************************************************************** */
+xmlDocPtr ${shortName}::createXmlDoc() const
+{
+	EnEx ee(FL, "${shortName}::createXmlDoc()");
+
+	xmlDocPtr doc = xmlNewDoc((const xmlChar*)"1.0");
+	doc->children = xmlNewDocNode(doc, NULL, (const xmlChar*)"${shortName}", NULL);
+	xmlNodePtr child = xmlDocGetRootElement(doc);
+${XmlWriteMembers}
+
+	return doc;
+}
+
+/* ********************************************************************** */
+/* Create a series of these objects by reading all children of the parent */
+/* ********************************************************************** */
+${shortName}_svect ${shortName}::readXmlChildren(xmlNodePtr parent)
+{
+	EnEx ee(FL, "${shortName}::readXmlChildren(xmlNodePtr parent)");
+
+	if(parent == NULL){
+		throw AnException(0, FL, "xmlNodePtr passed to ${shortName}::readXmlChildren is NULL.");
+	}
+
+	// Use an sptr to ensure that if the method throws or causes an exception to be
+	// thrown the vector will be cleaned up before leaving this method.
+	${shortName}_svect ret( new vector<${shortName}* >() );
+
+	for(xmlNodePtr child = parent->xmlChildrenNode; child != NULL; child = child->next){
+		if(strcmp( (const char*)child->name, "${shortName}") == 0){
+			ret->push_back( new ${shortName}(child) );
+		}
+	}
+
+	// When we return, the unique_ptr semantics make this work correctly
+	return ret;
+}
+
+/* ********************************************************************** */
+/* Create a series of child nodes based on the input vector.              */
+/* ********************************************************************** */
+void ${shortName}::createXmlChildren(xmlNodePtr parent, vector<${shortName}* >* vect)
+{
+	EnEx ee(FL, "${shortName}::createXmlChildren(xmlNodePtr parent, vector<${shortName}* >* vect)");
+
+	if(parent == NULL){
+		throw AnException(0, FL, "xmlNodePtr passed to ${shortName}::createXmlChildren is NULL.");
+	}
+
+	if(vect != NULL){
+		for(size_t i = 0; i < vect->size(); i++){
+			(*vect)[i]->createXmlNode(parent);
+		}
+	}
+
+}
+
+/* ********************************************************************** */
+/* Create a child node and a series of grand-child nodes from the vector. */
+/* ********************************************************************** */
+xmlNodePtr ${shortName}::createXmlChildAndGrandchildren(xmlNodePtr parent, const twine& childName, vector<${shortName}* >* vect)
+{
+	EnEx ee(FL, "${shortName}::createXmlChildAndGrandchildren(xmlNodePtr parent, const twine& childName, vector<${shortName}* >* vect)");
+
+	if(parent == NULL){
+		throw AnException(0, FL, "xmlNodePtr passed to ${shortName}::createXmlChildAndGrandchildren is NULL.");
+	}
+
+	xmlNodePtr child = xmlNewChild( parent, NULL, childName, NULL);
+	${shortName}::createXmlChildren( child, vect );
+
+	return child;
+}
+
+/* ********************************************************************** */
+/* Construct from a JSON String                                           */
+/* ********************************************************************** */
+${shortName}::${shortName}(const twine& jsonString)
+{
+	EnEx ee(FL, "${shortName}::${shortName}(const twine& jsonString)");
+
+	// Make sure we're properly initialized first.
+	init();
+
+	// Read everything from the given JSON String
+	readJSON(jsonString);
+}
+
+/* ********************************************************************** */
+/* Construct from a JSON Object                                           */
+/* ********************************************************************** */
+${shortName}::${shortName}(cJSON* jsonObj)
+{
+	EnEx ee(FL, "${shortName}::${shortName}(cJSON* jsonObj)");
+
+	// Make sure we're properly initialized first.
+	init();
+
+	// Read everything from the given JSON Object
+	readJSON(jsonObj);
+}
+
+/* ********************************************************************** */
+/* Read from a JSON String                                                */
+/* ********************************************************************** */
+${shortName}& ${shortName}::readJSON(const twine& jsonString)
+{
+	EnEx ee(FL, "${shortName}::readJSON(const twine& jsonString)");
+
+	if(jsonString.empty()){
+		throw AnException(0, FL, "JSON String passed to construct ${shortName} is empty.");
+	}
+
+	sptr<cJSON, cJSON_Delete> root = cJSON_Parse( jsonString() );
+	readJSON( root );
+
+	return *this;
+}
+
+/* ********************************************************************** */
+/* Read from a JSON Object                                                */
+/* ********************************************************************** */
+${shortName}& ${shortName}::readJSON(cJSON* jsonObj)
+{
+	EnEx ee(FL, "${shortName}::readJSON(cJSON* jsonObj)");
+
+	if(jsonObj == NULL){
+		throw AnException(0, FL, "JSON Object passed to construct ${shortName} is NULL.");
+	}
+
+${JSONReadMembers}
+
+	return *this;
+}
+
+/* ********************************************************************** */
+/* Create a JSON Object as a Child of the given parent                    */
+/* ********************************************************************** */
+cJSON* ${shortName}::createJSONChild(cJSON* parent) const
+{
+	EnEx ee(FL, "${shortName}::createJSONChild(cJSON* parent)");
+
+	if(parent == NULL){
+		throw AnException(0, FL, "cJSON* passed to ${shortName}::createJSONChild is NULL.");
+	}
+
+	cJSON* child = createJSON();
+	cJSON_AddItemToObject(parent, "${shortName}", child);
+
+	return child;
+}
+
+/* ********************************************************************** */
+/* Create a JSON Object from our data object                              */
+/* ********************************************************************** */
+cJSON* ${shortName}::createJSON() const
+{
+	EnEx ee(FL, "${shortName}::createJSON()");
+
+	cJSON* child = cJSON_CreateObject();
+${JSONWriteMembers}
+
+	return child;
+}
+
+/* ********************************************************************** */
+/* Create a series of these objects by reading all children of the parent */
+/* ********************************************************************** */
+${shortName}_svect ${shortName}::readJSONChildren(cJSON* array)
+{
+	EnEx ee(FL, "${shortName}::readJSONChildren(cJSON* array)");
+
+	if(array == NULL){
+		throw AnException(0, FL, "cJSON* passed to ${shortName}::readJSONChildren is NULL.");
+	}
+
+	// Use an sptr to ensure that if the method throws or causes an exception to be
+	// thrown the vector will be cleaned up before leaving this method.
+	${shortName}_svect ret( new vector<${shortName}* >() );
+
+	for(cJSON* child = array->child; child != NULL; child = child->next){
+		ret->push_back( new ${shortName}(child) );
+	}
+
+	// When we return, the unique_ptr semantics make this work correctly
+	return ret;
+}
+
+/* ********************************************************************** */
+/* Create a series of array entries based on the input vector.            */
+/* ********************************************************************** */
+void ${shortName}::createJSONArrayEntries(cJSON* array, vector<${shortName}* >* vect)
+{
+	EnEx ee(FL, "${shortName}::createJSONArrayEntries(cJSON* array, vector<${shortName}* >* vect)");
+
+	if(array == NULL){
+		throw AnException(0, FL, "cJSON passed to ${shortName}::createJSONArrayEntries is NULL.");
+	}
+
+	if(vect != NULL){
+		for(size_t i = 0; i < vect->size(); i++){
+			cJSON_AddItemToArray( array, (*vect)[i]->createJSON() );
+		}
+	}
+
+}
+
+/* ********************************************************************** */
+/* Create an array and series of array entries based on the input vector. */
+/* ********************************************************************** */
+cJSON* ${shortName}::createJSONArray(cJSON* parent, const twine& arrayName, vector<${shortName}* >* vect)
+{
+	EnEx ee(FL, "${shortName}::createJSONArray(cJSON* parent, const twine& arrayName, vector<${shortName}* >* vect)");
+
+	if(parent == NULL){
+		throw AnException(0, FL, "cJSON passed to ${shortName}::createJSONArray is NULL.");
+	}
+
+	cJSON* array = cJSON_CreateArray();
+	cJSON_AddItemToObject(parent, arrayName(), array );
+	${shortName}::createJSONArrayEntries( array, vect );
+
+	return array;
+}
+
+/* ********************************************************************** */
+/* Return the name of our object.                                         */
+/* ********************************************************************** */
+twine& ${shortName}::Name()
+{
+	return ${shortName}Name;
+}
+

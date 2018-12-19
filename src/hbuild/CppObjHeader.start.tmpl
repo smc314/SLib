@@ -1,0 +1,142 @@
+/* **************************************************************************
+
+   Copyright (c): 2013 Hericus Software, Inc.
+
+   License: The MIT License (MIT)
+
+   Authors: Steven M. Cherry
+
+************************************************************************** */
+
+#ifndef ${ifdefName}
+#define ${ifdefName}
+
+#include <vector>
+#include <memory>
+using namespace std;
+
+#include <twine.h>
+#include <Date.h>
+#include <xmlinc.h>
+#include <sptr.h>
+using namespace SLib;
+
+#include "IOConn.h"
+#include "OdbcObj.h"
+#include "OdbcDate.h"
+#include "SqlDB.h"
+#include "cJSON.h"
+using namespace Helix::Glob;
+
+${ChildObjectIncludes}
+
+namespace Helix {
+namespace Logic {
+namespace ${shortPackage} {
+
+// Forward declaration to allow the svect to be defined
+class DLLEXPORT ${shortName};
+
+/** This typedef makes it easy to declare smart pointer vectors of the ${shortName}
+  * object type.  Use this to keep your code clean and easy to read.  For example:
+  * <pre>
+  * ${shortName}_svect myVect = ${shortName}::selectSomething(odbc);
+  * </pre>
+  */
+typedef std::unique_ptr< vector<${shortName}* >, VectorDelete<${shortName}> > ${shortName}_svect;
+
+/** This is a generated data object class that is used for interfacing with a
+  * database.  This class was generated based on the settings in the file:
+  * ${m_currentFile}
+  */
+class DLLEXPORT ${shortName}
+{
+	public:
+
+		/// All Data Members are public
+${DefineDataMembers}
+
+		/// Any Child Vectors will be defined here
+${ChildVectorDefines}
+
+		/// Standard Constructor
+		${shortName}();
+
+		/// Standard Copy Constructor
+		${shortName}(const ${shortName}& c);
+
+		/// Standard Assignment Operator
+		${shortName}& operator=(const ${shortName}& c);
+
+		/// Standard Destructor
+		virtual ~${shortName}();
+
+		/// Initialize this data object to have all empty or 0 values.
+		${shortName}& init();
+
+		/// Call check_size() on all of our twine members.
+		${shortName}& checkSize();
+
+		/* ************************************************************************** */
+		/* XML Handling for this data object.                                         */
+		/* ************************************************************************** */
+		/// Construct from an XML Node
+		${shortName}(xmlNodePtr node);
+
+		/// Read an XML Node to set our contents
+		${shortName}& readXmlNode(xmlNodePtr node);
+
+		/// Create an XML Node as a child of the given parent
+		xmlNodePtr createXmlNode(xmlNodePtr parent) const;
+
+		/// Create an XML Document from this data object
+		xmlDocPtr createXmlDoc() const;
+
+		/// Create a series of these objects by reading all children of the given parent
+		static ${shortName}_svect readXmlChildren(xmlNodePtr parent);
+
+		/// Create a series of xml child nodes based on the input vector
+		static void createXmlChildren(xmlNodePtr parent, vector<${shortName}* >* vect);
+
+		/// Create a child and series of grandchild nodes based on the input vector.
+		static xmlNodePtr createXmlChildAndGrandchildren(xmlNodePtr parent, const twine& childName, vector<${shortName}* >* vect);
+
+		/* ************************************************************************** */
+		/* JSON Handling for this data object.                                        */
+		/* ************************************************************************** */
+		/// Construct from a JSON String
+		${shortName}(const twine& jsonString);
+
+		/// Construct from a JSON Object
+		${shortName}(cJSON* jsonObj);
+
+		/// Read a JSON String to set our contents
+		${shortName}& readJSON(const twine& jsonString);
+
+		/// Read a JSON Object to set our contents
+		${shortName}& readJSON(cJSON* jsonObj);
+
+		/// Create a JSON Object as a child of the given parent
+		cJSON* createJSONChild(cJSON* parent) const;
+
+		/// Create a JSON Document from this data object
+		cJSON* createJSON() const;
+
+		/// Create a series of these objects by reading all members of the given array
+		static ${shortName}_svect readJSONChildren(cJSON* array);
+
+		/// Create a series of JSON array entries based on the input vector
+		static void createJSONArrayEntries(cJSON* array, vector<${shortName}* >* vect);
+
+		/// Create an array and series of array entries based on the input vector.
+		static cJSON* createJSONArray(cJSON* parent, const twine& arrayName, vector<${shortName}* >* vect);
+
+		/// Static method to retrieve the name of this object.
+		static twine& Name();
+
+		/* ******************************************************************************** */
+		/* The following are a series of static methods created based on the SQL Statements */
+		/* defined in the file ${m_currentFile} */
+		/* ******************************************************************************** */
+
+

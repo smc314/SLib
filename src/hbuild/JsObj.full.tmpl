@@ -1,0 +1,175 @@
+/**
+  * Copyright (c) 2013 Hericus Software, Inc.
+  * License: The MIT License (MIT)
+  */
+qx.Class.define("${package}.sqldo.${shortName}", {
+	extend : qx.core.Object,
+
+	construct : function() {
+		this.base(arguments);
+
+		// Setup our date formatter for reading/writing sqldo dates in the XML
+		this.sqldoDFMT = ${app}.Statics.sqldoDFMT;
+
+${childArrayInit}
+	},
+
+	properties : {
+${jsProperties}
+	},
+
+	members : {
+${jsArrayProperties}
+
+		/** Converts our object into a JSON string by using the qx.util.Serializer class.
+		  * 
+		  */
+		convertToJson : function( ){
+			return qx.util.Serializer.toJson( this );
+		},
+		
+		/** Handles reading a date value from an XML attribute
+		  * 
+		  */
+		readDate: function( elem, dateAttrName ){
+			var attrValue = elem.getAttribute( dateAttrName );
+			var setter = "set" + dateAttrName;
+			if(attrValue){
+				if(attrValue === "null"){
+					this[ setter ]( null );
+				} else {
+					this[ setter ]( this.sqldoDFMT.parse( attrValue.substr(0,19) ) );
+				}
+			} else {
+				this[ setter ]( null );
+			}
+		},
+
+		/** Handles writing a date value into an XML attribute
+		  *
+		  */
+		writeDate : function( elem, dateAttrName ){
+			var getter = "get" + dateAttrName;
+			var dateVal = this[ getter ]();
+			if(dateVal !== null){
+				elem.setAttribute( dateAttrName, this.sqldoDFMT.format(dateVal) );
+			}
+		},
+		
+		/** Populates our object from the given XML node
+		  * 
+		  * @param elem {Object} The XML node that we will read to populate our object.
+		  */
+		readFromXML : function( elem ){
+			if(elem.nodeName === null){
+				// figure out how to throw an exception!
+				return;
+			}
+${jsReadFromXml}
+		},
+
+		/** This will create a new xml element as a child of the given
+		  * parent that will have the same name as this object.  All
+		  * of this object's properties will be added to the XML element
+		  * created.
+		  *
+		  * @param parent {Object} The parent XML node that will hold our new child.
+		  * @param altName {String} An optional name for the new XML node.
+		  */
+		createXMLElement : function( parent , altName ) {
+			var doc = parent.ownerDocument;
+			var subElem;
+			if(altName){
+				subElem = doc.createElement(altName);
+			} else {
+				subElem = doc.createElement("${shortName}");
+			}
+			parent.appendChild(subElem);
+${jsWriteToXml}
+			return subElem;
+		},
+
+		/** This will create a brand new object that is a copy of ours.  This differs from createDuplicate
+		  * in that we'll do a deep clone, and you don't have to pass in an existing object for us to copy
+		  * into.
+		  */
+		cloneDeep : function() {
+			// Create a brand new object
+			var newObj = new ${package}.sqldo.${shortName}();
+
+			// Copy over all of our attributes to the new object
+			this.createDuplicate( newObj );
+
+			// Now duplicate our child arrays - this will recurse into each object
+${jsCloneArrays}
+
+			// Finally, return the new object
+			return newObj;
+		},
+
+		/** This will create a duplicate object that has the same
+		  * settings as this object.
+		  *
+		  * @param newObj {Object} The new object that we will populate and return.
+		  */
+		createDuplicate : function( newObj ) {
+${jsCloneProperties}
+			return newObj;
+		}
+	},
+
+	statics : {
+
+		/** This will read all children of the given element and for
+		  * any that are found that are our type of XML node, we will
+		  * process them and return them in an array.
+		  *
+		  * @param elem {Object} The parent node that has children that match our name.
+		  */
+		readElementChildren : function ( elem ){
+			var ret = [];
+			if( elem === null || elem === undefined ){
+				return ret;
+			}
+			var i, l;
+			for (i=0, l = elem.childNodes.length; i<l; i++) {
+				var node = elem.childNodes[i];
+				if(node.nodeName === "${shortName}") {
+					var obj = new ${package}.sqldo.${shortName}();
+					obj.readFromXML( node );
+					ret.push( obj );
+				}
+			}
+			return ret;
+		},
+
+		/** This will write all items in the given array, as child
+		  * nodes of the given XML element.
+		  *
+		  * @param list {Array} The array of objects to write.
+		  * @param elem {Object} The parent XML Node object that will hold the new children.
+		  */
+		writeArray : function ( list, elem ){
+			var i, l;
+			for (i=0, l = list.length; i<l; i++) {
+				list[i].createXMLElement(elem);
+			}
+		},
+
+		/** This will clone an entire array of our objects using a deep clone approach.
+		  */
+		cloneArray : function( list ){
+			var ret = [];
+			for(var i = 0, l = list.length; i<l; i++){
+				ret.push( list[i].cloneDeep() );
+			}
+			return ret;
+		}
+
+
+	},
+
+	destruct : function() {
+${childArrayDispose}
+	}
+});

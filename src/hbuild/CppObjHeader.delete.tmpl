@@ -1,0 +1,35 @@
+		/** This is an DELETE method.  It is designed to run a single delete
+		  * statement and return. If something goes wrong, we will throw AnException.
+		  * <P>
+		  * Developer Comments:
+		  * <P>${comment}
+		  * <P>
+		  * Sql Statement:
+		  * <pre>${sql}
+		  * </pre>
+		  */
+		static void ${methodName}(OdbcObj& odbc${TypedParms}, bool suppressTrace = false );
+
+		/** This one matches the above in functionality, but allows you to pass in the sql
+		  * statement and a flag to indicate whether the input parameters will be used.
+		  */
+		static void ${methodName}(OdbcObj& odbc, twine& stmt, bool useInputs${TypedParms}, bool suppressTrace = false );
+
+		/** This method will do a replacement of all of the parameter markers in
+		  * the sql statement with the standard parameter list that is defined.
+		  * This is useful for automatically prepping a SQL statement that doesn't
+		  * work with parameter markers.
+		  */
+		static twine ${methodName}_prepSQL(IOConn& ioc${TypedParms} );
+
+		/** This method will do a replacement of all of the parameter markers in
+		  * the sql statement with the standard parameter list that is defined.
+		  * This is useful for automatically prepping a SQL statement that doesn't
+		  * work with parameter markers.
+		  */
+		static twine ${methodName}_prepSQL(OdbcObj& odbc${TypedParms} );
+
+		/** This method returns the sql statement that is used by the above functions.
+		  */
+		static twine ${methodName}_getSQL();
+

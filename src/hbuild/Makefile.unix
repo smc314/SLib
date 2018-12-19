@@ -1,0 +1,20 @@
+#
+# This is the Mac build version of the makefile
+# Use make -f Makefile.mac to run this
+###############################################################
+
+include ../gmake.unix
+
+CFLAGS=$(GCFLAGS) -I ../glob
+
+GLOBOBJS=
+
+DOTOH=GenerateSqlClasses.o AutoAsset.o CopyIcons.o CopyCommon.o MakeMakefiles.o
+
+all: $(DOTOH)
+	$(LINK) -o ../bin/GenerateSqlClasses GenerateSqlClasses.o $(GLOBOBJS) $(LLIBS) $(LFLAGS)
+	$(LINK) -o ../bin/AutoAsset AutoAsset.o $(GLOBOBJS) $(LLIBS) $(LFLAGS)
+	$(LINK) -o ../bin/CopyIcons CopyIcons.o $(GLOBOBJS) $(LLIBS) $(LFLAGS)
+	$(LINK) -o ../bin/CopyCommon CopyCommon.o $(GLOBOBJS) $(LLIBS) $(LFLAGS)
+	$(LINK) -o ../bin/MakeMakefiles MakeMakefiles.o $(GLOBOBJS) $(LLIBS) $(LFLAGS)
+

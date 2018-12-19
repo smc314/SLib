@@ -1,0 +1,79 @@
+		/// <summary>
+		/// This is an INSERT method.  It is designed to run a single insert
+		/// statement and return.  If something  goes wrong, we will throw AnException.
+		///
+		/// Developer Comments:
+		/* ${comment}
+		*/
+		/// Sql Statement:
+		/* ${sql} 
+		*/
+		/// </summary>
+		public static int ${methodName}(SqlConnection conn, ${doName} obj)
+		{
+			// Replace all parameter markers
+			String stmt = ${methodName}_prepSQL(conn, obj);
+
+			return ${methodName}_exec(conn, stmt);
+		}
+
+		/// <summary>
+		/// This one matches the above in functionality, but allows you to pass in the sql
+		/// statement and a flag to indicate whether the input parameters will be used.
+		/// </summary>
+		public static int ${methodName}_exec(SqlConnection conn, String stmt)
+		{
+			// Add a read of the scope_identity to the end of the statement
+			String fullStmt = stmt + ";\r\nselect CAST(scope_identity() AS INT) as Id;";
+
+			// Set the statement
+			using(SqlCommand cmd = new SqlCommand( fullStmt, conn )){
+
+				// Execute the statement and walk the results to pick up the scope identity
+				using(SqlDataReader reader = cmd.ExecuteReader()){
+					// Check for empty result sets
+					while(reader.FieldCount == 0){
+						if(reader.NextResult() == false){
+							// No more results to process
+							throw new Exception("No resultset found after insert statement.  Can't read scope identity.");
+						}
+					}
+
+					// Only one row so just read once:
+					reader.Read();
+
+					// Return the first column in the result set as an integer
+					return reader.GetInt32(0);
+				}
+			}
+		}
+
+		/// <summary>
+		/// This method will do a replacement of all of the parameter markers in
+		/// the sql statement with the standard parameter list that is defined.
+		/// This is useful for automatically prepping a SQL statement that doesn't
+		/// work with parameter markers.
+		/// </summary>
+		public static String ${methodName}_prepSQL(SqlConnection conn, ${doName} obj )
+		{
+
+${CSInputParmsIdx}
+			String stmt = ${methodName}_getSQL();
+
+${CSSqlReplaceObjParms}
+
+			// Also take a look at the statement and replace any session variables
+			stmt = Util.Statics.ReplaceSessionVars(stmt);
+
+			return stmt;
+
+		}
+
+		/// <summary>
+		/// This method returns the sql statement that is used by the above functions.
+		/// </summary>
+		public static String ${methodName}_getSQL()
+		{
+			return "${flatSql}";
+		}
+

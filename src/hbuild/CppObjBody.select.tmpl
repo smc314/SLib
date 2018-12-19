@@ -1,0 +1,169 @@
+/* ************************************************************************************** */
+/* This is an SELECTTODO method.  It is designed to run a single select                   */
+/* statement and create a vector of data objects that represent the result set.           */
+/* This method returns the resulting vector of data objects.  If something                */
+/* goes wrong, we will throw AnException.                                                 */
+/*                                                                                        */
+/* Developer Comments:                                                                    */
+/* ${comment} */
+/*                                                                                        */
+/* Sql Statement:                                                                         */
+/* ${sql} */
+/*                                                                                        */
+/* ************************************************************************************** */
+${doName}_svect ${doName}::${methodName}(OdbcObj& odbc${TypedParms}, bool suppressTrace)
+{
+	EnEx ee(FL, "${doName}::${methodName}()");
+
+	// Replace all parameter markers
+	twine stmt = ${doName}::${methodName}_prepSQL(odbc${UntypedParms} );
+
+	return ${doName}::${methodName}(odbc, stmt, false${UntypedParms}, suppressTrace);
+
+}
+
+/* ************************************************************************************** */
+/* This one matches the above in functionality, but allows you to pass in the sql         */
+/* statement and a flag to indicate whether the input parameters will be used.            */
+/* ************************************************************************************** */
+${doName}_svect ${doName}::${methodName}(OdbcObj& odbc, twine& stmt, bool useInputs${TypedParms}, bool suppressTrace)
+{
+	EnEx ee(FL, "${doName}::${methodName}()");
+
+	Timer selectTimer;
+	Timer fetchTimer;
+
+	// Grab the current user name for logging
+	twine currentUser;
+	if(odbc.GetSessionInfo() != NULL){
+		currentUser = odbc.GetSessionInfo()->fullname;
+	}
+
+	if(odbc.isConnected() == 0){
+		throw AnException(0, FL, "OdbcObj passed into ${doName}::${methodName} is not connected.");
+	}
+
+	// Use an sptr to ensure that if this method throws or causes an exception to be
+	// thrown the vector will be cleaned up before leaving this method
+	${doName}_svect ret( new vector<${doName}* >() );
+
+	if(!suppressTrace){
+		SQLTRACE(UFL, "Using SQL: %s", stmt() );
+	}
+	odbc.SetStmt(stmt, SQL_TYPE_SELECT);
+
+	if(useInputs){
+		throw AnException(0, FL, "useInputs no longer supported." );
+	}
+
+	selectTimer.Start();
+	{ // Used for scope for the timing object.
+		EnEx eeExe("${doName}::${methodName}()-ExecStmt");
+
+		// Execute the statement
+		if(!suppressTrace){
+			DEBUG(UFL, "Executing the statement for ${doName}::${methodName}");
+		}
+		odbc.ExecStmt();
+	}
+	selectTimer.Finish();
+	if(selectTimer.Duration() > 0.5){
+		WARN(UFL, "Statement ${doName}::${methodName} took longer than 500ms to execute: %f", selectTimer.Duration());
+	}
+
+	// Now that we've executed the statement, we'll know how many output columns we have.
+	// Grab the column count so that we don't bind invalid output positions.
+	int colCount = odbc.GetResultsetColumnCount();
+	while( colCount == 0 ){
+		DEBUG(UFL, "Statement returned a result set with 0 columns.  Checking for another result set.");
+		if(odbc.GetNextResultset() == false){
+			// No more result sets to process.  Bail out
+			return ret;
+		}
+
+		// Check the next result set column count
+		colCount = odbc.GetResultsetColumnCount();
+	}
+
+	if( ${SqlOutputColCount} > colCount ){
+		throw AnException(0, FL, "Column count mismatch ${doName}::${methodName} results col count is %d, bound col count is %d.", colCount, ${SqlOutputColCount} );
+	}
+
+	int count;
+	fetchTimer.Start();
+	{ // Used for scope for the timing object
+		EnEx eeExe("${doName}::${methodName}()-FetchLoop");
+		if(!suppressTrace){
+			DEBUG(UFL, "Fetching data...");
+		}
+
+		while( (count = odbc.FetchData()) != 0 ){
+			${doName}* obj = new ${doName}(); // Create a new empty object
+${CPPReadResultOutput}
+
+			ret->push_back( obj ); // Add it to our return vector
+		}
+	}
+	fetchTimer.Finish();
+	if(fetchTimer.Duration() > 1.0){
+		WARN(UFL, "Statement ${doName}::${methodName} took longer than 1000ms to fetch: %f", fetchTimer.Duration() );
+	}
+
+	// When we return, the unique_ptr semantics make this work correctly
+	return ret;
+}
+
+/* ************************************************************************************** */
+/* This method will do a replacement of all of the parameter markers in                   */
+/* the sql statement with the standard parameter list that is defined.                    */
+/* This is useful for automatically prepping a SQL statement that doesn't                 */
+/* work with parameter markers.                                                           */
+/* ************************************************************************************** */
+twine ${doName}::${methodName}_prepSQL(IOConn& ioc${TypedParms} )
+{
+	EnEx ee(FL, "${doName}::${methodName}_prepSQL()");
+
+	size_t idx = 0;
+	twine stmt = ${doName}::${methodName}_getSQL();
+
+${SqlReplaceParms}
+
+	// Also take a look at the statement and replace any session variables
+	Statics::ReplaceSessionVars(ioc, stmt);
+
+	return stmt;
+
+}
+
+/* ************************************************************************************** */
+/* This method will do a replacement of all of the parameter markers in                   */
+/* the sql statement with the standard parameter list that is defined.                    */
+/* This is useful for automatically prepping a SQL statement that doesn't                 */
+/* work with parameter markers.                                                           */
+/* ************************************************************************************** */
+twine ${doName}::${methodName}_prepSQL(OdbcObj& odbc${TypedParms} )
+{
+	EnEx ee(FL, "${doName}::${methodName}_prepSQL()");
+
+	size_t idx = 0;
+	twine stmt = ${doName}::${methodName}_getSQL();
+
+${SqlReplaceParms}
+
+	// Also take a look at the statement and replace any session variables
+	if(odbc.GetSessionInfo() != NULL){
+		Statics::ReplaceSessionVars(*odbc.GetSessionInfo(), stmt);
+	}
+
+	return stmt;
+
+}
+
+/* ************************************************************************************** */
+/* This method returns the sql statement that is used by the above functions.             */
+/* ************************************************************************************** */
+twine ${doName}::${methodName}_getSQL()
+{
+	return "${flatSql}";
+}
+

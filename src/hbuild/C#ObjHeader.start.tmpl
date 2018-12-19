@@ -1,0 +1,147 @@
+/* **************************************************************************
+
+   Copyright (c): 2013 Hericus Software, Inc.
+
+   License: The MIT License (MIT)
+
+   Authors: Steven M. Cherry
+
+************************************************************************** */
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Xml;
+
+using HelixPdfGen.Util;
+using HelixPdfGen.DO.admin;
+using HelixPdfGen.DO.dev;
+using HelixPdfGen.DO.project;
+using HelixPdfGen.DO.ttvx;
+using HelixPdfGen.DO.util;
+
+namespace HelixPdfGen.DO.${shortPackage} 
+{
+
+	/** This is a generated data object class that is used for interfacing with a
+	  * database.  This class was generated based on the settings in the file:
+	  * /logic/${shortPackage}/${shortName}.sql.xml
+	  */
+	public class ${shortName}
+	{
+		/// All Data Members are public
+${C#DefineDataMembers}
+
+		/// Any Child Vectors will be defined here
+${C#ChildVectorDefines}
+
+		/// Standard Constructor
+		public ${shortName}() {
+			init();
+		}
+
+		/// Initialize this data object to have all empty or 0 values.
+		public ${shortName} init() {
+${C#MemberInitStatements}
+
+			return this;
+		}
+
+		/* ************************************************************************** */
+		/* XML Handling for this data object.                                         */
+		/* ************************************************************************** */
+		/// Construct from an XML Node
+		public ${shortName}(XmlElement  node){
+			// Make sure we're properly initialized first
+			init();
+
+			// Read everything from the given xml element
+			readXmlNode( node );
+		}
+
+		/// Read an XML Node to set our contents
+		public ${shortName} readXmlNode(XmlElement node){
+
+			if(node == null){
+				throw new Exception("XmlElement passed to construct ${shortName} is NULL.");
+			}
+
+${C#XmlReadMembers}
+
+			return this;
+		}
+
+		/// Create an XML Node as a child of the given parent
+		public XmlElement createXmlNode(XmlElement parent){
+			
+			if(parent == null){
+				throw new Exception("XmlElement parent given to ${shortName}.createXmlNode is NULL.");
+			}
+
+			XmlElement child = parent.OwnerDocument.CreateElement( "${shortName}" );
+			parent.AppendChild( child );
+
+${C#XmlWriteMembers}
+
+			return child;
+		}
+
+		/// Create an XML Document from this data object
+		public XmlDocument createXmlDoc(){
+			XmlDocument doc = new XmlDocument();
+			doc.AppendChild( doc.CreateElement( "${shortName}" ) );
+			XmlElement child = doc.DocumentElement;
+
+${C#XmlWriteMembers}
+
+			return doc;
+		}
+
+		/// Create a series of these objects by reading all children of the given parent
+		public static List<${shortName}> readXmlChildren(XmlElement parent) {
+
+			if(parent == null){
+				throw new Exception("XmlElement passed to ${shortName}.readXmlChildren is NULL.");
+			}
+
+			List<${shortName}> ret = new List<${shortName}>();
+			foreach(XmlNode node in parent.ChildNodes){
+				if(node.NodeType == XmlNodeType.Element && node.Name == "${shortName}"){
+					ret.Add( new ${shortName}( (XmlElement) node ) );
+				}
+			}
+
+			return ret;
+		}
+
+		/// Create a series of xml child nodes based on the input vector
+		public static void createXmlChildren(XmlElement parent, List<${shortName}> vect) {
+			
+			if(parent == null){
+				throw new Exception("XmlElement passed to ${shortName}.createXmlChildren is NULL.");
+			}
+
+			if(vect != null){
+				foreach( ${shortName} obj in vect ){
+					obj.createXmlNode( parent );
+				}
+			}
+		}
+
+		/// Create a child and series of grandchild nodes based on the input vector.
+		public static XmlElement createXmlChildAndGrandchildren(XmlElement parent, string childName, List<${shortName}> vect) {
+
+			if(parent == null){
+				throw new Exception("XmlElement passed to ${shortName}.createXmlChildAndGrandchildren is NULL.");
+			}
+
+			XmlElement child = parent.OwnerDocument.CreateElement( childName );
+			parent.AppendChild( child );
+			${shortName}.createXmlChildren( child, vect );
+			
+			return child;
+		}
+
+
+

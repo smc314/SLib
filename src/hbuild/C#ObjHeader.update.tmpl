@@ -1,0 +1,96 @@
+		/// <summary>
+		/// This is an UPDATE method.  It is designed to run a single update
+		/// statement and return.  If something  goes wrong, we will throw AnException.
+		///
+		/// Developer Comments:
+		/* ${comment}
+		*/
+		/// Sql Statement:
+		/* ${sql} 
+		*/
+		/// </summary>
+		public static void ${methodName}(SqlConnection conn, ${doName} obj)
+		{
+			// Replace all parameter markers
+			String stmt = ${methodName}_prepSQL(conn, obj);
+
+			${methodName}_exec(conn, stmt);
+		}
+
+		/// <summary>
+		/// This is an UPDATE method.  It is designed to run a single update
+		/// statement and return.  If something  goes wrong, we will throw AnException.
+		///
+		/// Developer Comments:
+		/* ${comment}
+		*/
+		/// Sql Statement:
+		/* ${sql} 
+		*/
+		/// </summary>
+		public static void ${methodName}(SqlConnection conn${CSTypedParms})
+		{
+			// Replace all parameter markers
+			String stmt = ${methodName}_prepSQL(conn${UntypedParms});
+
+			${methodName}_exec(conn, stmt);
+		}
+
+		/// <summary>
+		/// This one matches the above in functionality, but allows you to pass in the sql
+		/// statement and a flag to indicate whether the input parameters will be used.
+		/// </summary>
+		public static void ${methodName}_exec(SqlConnection conn, String stmt)
+		{
+			// Set the statement
+			using(SqlCommand cmd = new SqlCommand( stmt, conn )){
+				cmd.ExecuteNonQuery(); // Execute the statement
+			}
+		}
+
+		/// <summary>
+		/// This method will do a replacement of all of the parameter markers in
+		/// the sql statement with the standard parameter list that is defined.
+		/// This is useful for automatically prepping a SQL statement that doesn't
+		/// work with parameter markers.
+		/// </summary>
+		public static String ${methodName}_prepSQL(SqlConnection conn, ${doName} obj )
+		{
+${CSInputParmsIdx}
+			String stmt = ${methodName}_getSQL();
+
+${CSSqlReplaceObjParms}
+
+			// Also take a look at the statement and replace any session variables
+			stmt = Util.Statics.ReplaceSessionVars(stmt);
+
+			return stmt;
+		}
+
+		/// <summary>
+		/// This method will do a replacement of all of the parameter markers in
+		/// the sql statement with the standard parameter list that is defined.
+		/// This is useful for automatically prepping a SQL statement that doesn't
+		/// work with parameter markers.
+		/// </summary>
+		public static String ${methodName}_prepSQL(SqlConnection conn${CSTypedParms})
+		{
+${CSInputParmsIdx}
+			String stmt = ${methodName}_getSQL();
+
+${CSSqlReplaceParms}
+
+			// Also take a look at the statement and replace any session variables
+			stmt = Util.Statics.ReplaceSessionVars(stmt);
+
+			return stmt;
+		}
+
+		/// <summary>
+		/// This method returns the sql statement that is used by the above functions.
+		/// </summary>
+		public static String ${methodName}_getSQL()
+		{
+			return "${flatSql}";
+		}
+

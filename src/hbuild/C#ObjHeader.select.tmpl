@@ -1,0 +1,84 @@
+		/// <summary>
+		/// This is a SELECTTODO method, it is designed to run a single select statement and create
+		/// a list of data objects that represent the result set.  This method returns the resulting list
+		/// of data objects.  If something goes wrong, we'll throw an Exception.
+		///
+		/// Sql Statement:
+		/* ${sql}
+		*/
+		/// </summary>
+		public static List<${doName}> ${methodName} (SqlConnection conn${CSTypedParms} ) 
+		{
+
+			// Replace all parameter markers
+			String stmt = ${doName}.${methodName}_prepSQL( conn${UntypedParms} );
+
+			return ${doName}.${methodName}_exec( conn, stmt );
+
+		}
+
+		/// <summary>
+		/// This one matches the above in functionality, but allows you to pass in the sql statement
+		/// and a flag to indicate whether the input parameters will be used.
+		/// </summary>
+		public static List<${doName}> ${methodName}_exec (SqlConnection conn, String stmt) 
+		{
+			List<${doName}> ret = new List<${doName}>();
+
+			// Verify the SqlConnection is alive
+
+			// Set the statement
+			using(SqlCommand cmd = new SqlCommand( stmt, conn )){
+
+				// Execute the statement and walk the results
+				using(SqlDataReader reader = cmd.ExecuteReader()){
+
+					// Check for empty result sets - this can happen during stored procedure execution
+					while(reader.FieldCount == 0){
+						if(reader.NextResult() == false){
+							// No more result sets to process.  Bail out.
+							return ret;
+						}
+					}
+
+					// Transfer the results into our Data objects
+					while(reader.Read()){
+						${doName} local = new ${doName}();
+
+${CSReadResultOutput}
+
+						// Add the object to our return list
+						ret.Add( local );
+					}
+				}
+			}
+
+			// Return the results
+			return ret;
+		}
+
+		/// <summary>
+		/// This method will do a replacement of all of the parameter markers in the sql statement 
+		/// with the standard parameter list that is defined.
+		/// </summary>
+		public static String ${methodName}_prepSQL (SqlConnection conn${CSTypedParms} ) 
+		{
+${CSInputParmsIdx}
+			String stmt = ${doName}.${methodName}_getSQL();
+
+${CSSqlReplaceParms}
+
+			// Also take a look at the statement and replace any session variables
+			// FIXME
+
+			return stmt;
+		}
+
+		/// <summary>
+		/// This method returns the sql statement that is used by the above functions
+		/// </summary>
+		public static String ${methodName}_getSQL () 
+		{
+			return "${flatSql}";
+		}
+
