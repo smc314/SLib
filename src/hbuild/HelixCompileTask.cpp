@@ -126,8 +126,8 @@ twine HelixCompileTask::GetCommandLine()
 
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName().startsWith("logic/") && m_file->FolderName().endsWith("/sqldo")){
-		cmd.append("-I " + tpl6 + "/include -I " + tpl6 + "/include/libxml2 -I. -I sqldo -I../../glob "
-			"-I../../client -I../util -I../util/sqldo -I../admin -I../admin/sqldo "
+		cmd.append("-I " + tpl6 + "/include -I " + tpl6 + "/include/libxml2 -I. -I../../../glob "
+			"-I../../../client -I../../util -I../../util/sqldo -I../../admin -I../../admin/sqldo "
 		);
 
 		// Pick up any dependent folders from our config file
