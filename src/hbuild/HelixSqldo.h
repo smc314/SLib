@@ -25,6 +25,7 @@ using namespace SLib;
 #include "HelixSqldoChildObject.h"
 #include "HelixSqldoSortFunction.h"
 #include "HelixSqldoMatchFunction.h"
+#include "HelixSqldoValidateFunction.h"
 
 namespace Helix {
 namespace Build {
@@ -66,6 +67,7 @@ class DLLEXPORT HelixSqldo
 		const vector<HelixSqldoChildObject>& ChildObjects();
 		const vector<HelixSqldoSortFunction>& SortFunctions();
 		const vector<HelixSqldoMatchFunction>& MatchFunctions();
+		const vector<HelixSqldoValidateFunction>& ValidateFunctions();
 
 		HelixFSFile File();
 		HelixFSFolder Folder();
@@ -97,6 +99,7 @@ class DLLEXPORT HelixSqldo
 		vector< HelixSqldoChildObject > m_child_objects;
 		vector< HelixSqldoSortFunction > m_sorts;
 		vector< HelixSqldoMatchFunction > m_matches;
+		vector< HelixSqldoValidateFunction > m_validations;
 		map< twine, twine > m_parms;
 		
 		HelixFSFolder m_folder;

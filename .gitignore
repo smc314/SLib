@@ -13,6 +13,7 @@ src/LogDump
 src/test/SLibTest
 src/SqlShell
 src/SLogDump
+src/hbuild/hbuild
 
 # Command Tracing #
 ###################

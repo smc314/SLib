@@ -83,39 +83,36 @@ twine HelixCompileTask::GetCommandLine()
 	twine tpl5( "../../../../../3rdParty" );
 	twine tpl4( "../../../../3rdParty" );
 	twine cmd;
-	cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && cl.exe /std:c++14 -c -wd4251 -Zp8 -EHsc -O2 -D_WIN64 -DWIN64 -D_AMD64=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MP8 -MD -W3 -D \"_CRT_SECURE_NO_DEPRECATE\" -D \"_CRT_NON_COMFORMING_SWPRINTFS\" -D CS_NO_LARGE_IDENTIFIERS ";
+	cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && ";
 
 	if(m_file->FolderName() == "logic/util"){
-		cmd.append("-I " + tpl5 + "/include -I " + tpl5 + 
-			"/include/libxml2 -I . -I sqldo -I ../../glob -I ../../client -I ../admin -I ../admin/sqldo " 
+		cmd.append(CC(tpl5) + "-I sqldo -I ../../glob -I ../../client -I ../admin -I ../admin/sqldo " 
 		);
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName() == "logic/admin"){
-		cmd.append("-I " + tpl5 + "/include -I " + tpl5 + 
-			"/include/libxml2 -I . -I sqldo -I ../../glob -I ../../client -I ../util -I ../util/sqldo "
-		);
+		cmd.append(CC(tpl5) + "-I sqldo -I ../../glob -I ../../client -I ../util -I ../util/sqldo ");
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName() == "glob"){
 		if(m_file->FileName() == "Jvm.cpp") return ""; // Skip this one
-		cmd.append("-I " + tpl4 + "/include -I " + tpl4 + 
-			"/include/libxml2 -I. -I../logic/util -I../logic/util/sqldo -I ../logic/admin -I ../logic/admin/sqldo "
+		cmd.append(CC(tpl4) + 
+			"-I../logic/util -I../logic/util/sqldo -I ../logic/admin -I ../logic/admin/sqldo "
 		);
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName() == "server"){
+#ifdef _WIN32
 		if(m_file->FileName() == "HelixDaemon.cpp") return ""; // Skip this one
-		cmd.append("-I " + tpl4 + "/include -I " + tpl4 + 
-			"/include/libxml2 -I ../glob -I ../logic/admin -I../logic/util "
-		);
+#else
+		if(m_file->FileName() == "HelixSvc.cpp") return ""; // Skip this one
+#endif
+		cmd.append(CC(tpl4) + "-I ../glob -I ../logic/admin -I../logic/util ");
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName() == "client"){
-		cmd.append("-I " + tpl4 + "/include -I " + tpl4 + "/include/libxml2 "
+		cmd.append(CC(tpl4) + 
 			"-I../glob -I../logic/admin -I../logic/admin/sqldo -I../logic/util -I../logic/util/sqldo "
 		);
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName().startsWith("logic/") && !m_file->FolderName().endsWith("/sqldo")){
-		cmd.append("-I " + tpl5 + "/include -I " + tpl5 + "/include/libxml2 -I. -I sqldo -I../../glob "
-			"-I../../client -I../util -I../util/sqldo -I../admin -I../admin/sqldo "
-		);
+		cmd.append(CC(tpl5) + "-I sqldo " + LogicIncludes());
 
 		// Pick up any dependent folders from our config file
 		auto splits = twine(m_file->FolderName()).split("/");
@@ -126,9 +123,7 @@ twine HelixCompileTask::GetCommandLine()
 
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName().startsWith("logic/") && m_file->FolderName().endsWith("/sqldo")){
-		cmd.append("-I " + tpl6 + "/include -I " + tpl6 + "/include/libxml2 -I. -I../../../glob "
-			"-I../../../client -I../../util -I../../util/sqldo -I../../admin -I../../admin/sqldo "
-		);
+		cmd.append(CC(tpl6) + LogicIncludes(true));
 
 		// Pick up any dependent folders from our config file
 		auto splits = twine(m_file->FolderName()).split("/");
@@ -155,3 +150,69 @@ twine HelixCompileTask::FixPhysical(const twine& path)
 	return ret;
 }
 
+twine HelixCompileTask::CC(const twine& tpl)
+{
+#ifdef _WIN32
+#	ifdef _X86_
+	// ///////////////////////////////////////////////////////////////////////////////////
+	// 32-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////////
+	throw AnException(0, FL, "Compiling on 32-bit Windows not yet supported");
+
+#	else
+	// ///////////////////////////////////////////////////////////////////////////////////
+	// 64-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////////
+	return "cl.exe /std:c++14 -c -wd4251 -Zp8 -EHsc -O2 -D_WIN64 -DWIN64 -D_AMD64=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MP8 -MD -W3 -D \"_CRT_SECURE_NO_DEPRECATE\" -D \"_CRT_NON_COMFORMING_SWPRINTFS\" -D CS_NO_LARGE_IDENTIFIERS -I " + tpl + "/include -I " + tpl + "/include/libxml2 -I . ";
+#	endif
+#elif __APPLE__
+	// ///////////////////////////////////////////////////////////////////////////////////
+	// 64-bit mac
+	// ///////////////////////////////////////////////////////////////////////////////////
+	return "g++ -std=c++14 -c -g -Wall -D_REENTRANT -O2 -I/usr/local/opt/openssl/include -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+
+#elif __linux__
+	// ///////////////////////////////////////////////////////////////////////////////////
+	// 64-bit linux
+	// ///////////////////////////////////////////////////////////////////////////////////
+	return "g++ -std=c++14 -c -g -Wall -D_REENTRANT -O2 -rdynamic -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+
+#else
+	throw AnException(0, FL, "Unknown compile environment.");
+#endif
+}
+
+twine HelixCompileTask::LogicIncludes(bool fromSqldo)
+{
+	if(HelixConfig::getInstance().UseCore()){
+		twine coreFolder = HelixConfig::getInstance().CoreFolder();
+		if(fromSqldo){
+			return "-I../../../" + coreFolder + "/server/c/glob "
+				"-I../../../" + coreFolder + "/server/c/client "
+				"-I../../../" + coreFolder + "/server/c/logic/util "
+				"-I../../../" + coreFolder + "/server/c/logic/util/sqldo "
+				"-I../../../" + coreFolder + "/server/c/logic/admin "
+				"-I../../../" + coreFolder + "/server/c/logic/admin/sqldo ";
+		} else {
+			return "-I../../" + coreFolder + "/server/c/glob "
+				"-I../../" + coreFolder + "/server/c/client "
+				"-I../../" + coreFolder + "/server/c/logic/util "
+				"-I../../" + coreFolder + "/server/c/logic/util/sqldo "
+				"-I../../" + coreFolder + "/server/c/logic/admin "
+				"-I../../" + coreFolder + "/server/c/logic/admin/sqldo ";
+		}
+	} else {
+		if(fromSqldo){
+			return "-I../../../glob "
+				"-I../../../client "
+				"-I../../util -I../../util/sqldo "
+				"-I../../admin -I../../admin/sqldo ";
+		} else {
+			return "-I../../glob "
+				"-I../../client "
+				"-I../util -I../util/sqldo "
+				"-I../admin -I../admin/sqldo ";
+		}
+	}
+
+}

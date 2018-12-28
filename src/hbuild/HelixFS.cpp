@@ -16,6 +16,7 @@
 using namespace SLib;
 
 #include "HelixFS.h"
+#include "HelixConfig.h"
 using namespace Helix::Build;
 
 // Our global instance of the filesystem
@@ -53,11 +54,18 @@ void HelixFS::Load()
 
 	// Hard code our top level folders
 	auto root = std::make_shared<HelixFSFolder_Bare>( "root" ); root->Load(); m_folders.push_back( root );
-	auto build = std::make_shared<HelixFSFolder_Bare>( "build" ); build->Load(); m_folders.push_back( build );
-	auto client = std::make_shared<HelixFSFolder_Bare>( "client" ); client->Load(); m_folders.push_back( client );
-	auto glob = std::make_shared<HelixFSFolder_Bare>( "glob" ); glob->Load(); m_folders.push_back( glob );
+	if(HelixConfig::getInstance().UseCore() == false){
+		// Load these folders only when not using a core project helper
+		auto build = std::make_shared<HelixFSFolder_Bare>( "build" ); 
+		build->Load(); m_folders.push_back( build );
+		auto client = std::make_shared<HelixFSFolder_Bare>( "client" ); 
+		client->Load(); m_folders.push_back( client );
+		auto glob = std::make_shared<HelixFSFolder_Bare>( "glob" ); 
+		glob->Load(); m_folders.push_back( glob );
+		auto server = std::make_shared<HelixFSFolder_Bare>( "server" ); 
+		server->Load(); m_folders.push_back( server );
+	}
 	auto logic = std::make_shared<HelixFSFolder_Bare>( "logic" ); logic->Load(); m_folders.push_back( logic );
-	auto server = std::make_shared<HelixFSFolder_Bare>( "server" ); server->Load(); m_folders.push_back( server );
 }
 
 HelixFSFile HelixFS::FindFile(const twine& fileName)

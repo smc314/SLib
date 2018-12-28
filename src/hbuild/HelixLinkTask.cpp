@@ -78,76 +78,59 @@ twine HelixLinkTask::GetCommandLine()
 	} else if(m_folder->FolderName() == "logic/admin"){
 		// Nothing to do - logic/admin gets linked into helix glob.
 	} else if(m_folder->FolderName() == "glob"){
-		twine tp( "..\\..\\..\\..\\3rdParty\\" );
-		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && link.exe -machine:x64 -subsystem:console "
-			"/OUT:..\\bin\\libhelix.glob.dll /DLL *.obj "
-			"..\\logic\\util\\*.obj ..\\logic\\util\\sqldo\\*.obj "
-			"..\\logic\\admin\\*.obj ..\\logic\\admin\\sqldo\\*.obj " 
-			+ tp + "lib\\libeay32.lib "
-			+ tp + "lib\\ssleay32.lib "
-			+ tp + "lib\\libxml2.lib "
-			+ tp + "lib\\libSLib.lib "
-			+ tp + "lib\\zdll.lib "
-			+ tp + "lib\\libcurl.lib "
-			+ tp + "lib\\libiconv.lib "
-			+ tp + "lib\\libhpdf.lib "
-			"ws2_32.lib odbc32.lib rpcrt4.lib Advapi32.lib";
+		twine tp( "../../../../3rdParty/" );
+		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && " +
+			Link("../bin/", "libhelix.glob") +
+			ObjList( "./" ) + 
+			ObjList( "../logic/util/" ) + ObjList( "../logic/util/sqldo/" ) +
+			ObjList( "../logic/admin/" ) + ObjList( "../logic/admin/sqldo/" ) +
+			+ LinkLibs1( tp );
 	} else if(m_folder->FolderName() == "server"){
 		// Nothing to do
 	} else if(m_folder->FolderName() == "client"){
-		twine tp( "..\\..\\..\\..\\3rdParty\\" );
-		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && link.exe -machine:x64 -subsystem:console "
-			"/OUT:..\\bin\\libhelix.client.dll /DLL HelixApi_Part1.obj HelixApi_Part2.obj "
-			+ tp + "lib\\libeay32.lib "
-			+ tp + "lib\\ssleay32.lib "
-			+ tp + "lib\\libxml2.lib "
-			+ tp + "lib\\libSLib.lib "
-			+ tp + "lib\\zdll.lib "
-			+ tp + "lib\\libcurl.lib "
-			+ tp + "lib\\libiconv.lib "
-			"ws2_32.lib odbc32.lib rpcrt4.lib "
-			"..\\bin\\libhelix.glob.lib";
+		twine tp( "../../../../3rdParty/" );
+		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && " +
+			Link("../bin/", "libhelix.client") +
+			"HelixApi_Part1" + ObjExt() + 
+			"HelixApi_Part2" + ObjExt() +
+			LinkLibs2( tp ) +
+			BinLib( "../bin/", "libhelix.glob" );
 	} else if(m_folder->FolderName().startsWith("logic/") && !m_folder->FolderName().endsWith("/sqldo")){
 		auto splits = twine(m_folder->FolderName()).split("/");
 		auto subFolder = splits[1];
-		twine tp( "..\\..\\..\\..\\..\\3rdParty\\" );
-		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && link.exe -machine:x64 -subsystem:console "
-			"/OUT:..\\..\\bin\\libhelix.logic." + subFolder + ".dll /DLL *.obj sqldo\\*.obj "
-			+ tp + "lib\\libeay32.lib "
-			+ tp + "lib\\ssleay32.lib "
-			+ tp + "lib\\libxml2.lib "
-			+ tp + "lib\\libSLib.lib "
-			+ tp + "lib\\zdll.lib "
-			+ tp + "lib\\libcurl.lib "
-			+ tp + "lib\\libiconv.lib "
-			+ tp + "lib\\libhpdf.lib "
-			"ws2_32.lib odbc32.lib rpcrt4.lib "
-			"..\\..\\bin\\libhelix.glob.lib "
-			"..\\..\\bin\\libhelix.client.lib ";
+		twine tp( "../../../../../3rdParty/" );
+		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && " +
+			Link("../../bin/", "libhelix.logic." + subFolder ) +
+			ObjList( "./" ) + ObjList( "./sqldo/" ) +
+			LinkLibs3( tp ) +
+			BinLib( "../../bin/", "libhelix.glob" ) +
+			BinLib( "../../bin/", "libhelix.client" );
 
 		// Pick up any dependent folders from our config file
 		for(auto depName : HelixConfig::getInstance().LogicDepends( subFolder ) ){
-			cmd.append( "..\\..\\bin\\libhelix.logic." + depName + ".lib " );
+			cmd.append( 
+				BinLib( "../../bin/", "libhelix.logic." + depName )
+			);
 		}
 
 	} else if(m_folder->FolderName().startsWith("logic/") && m_folder->FolderName().endsWith("/sqldo")){
 		// Nothing to do
 	} else if(m_folder->FolderName() == "HelixMain"){
-		twine tp( "..\\..\\..\\..\\3rdParty\\" );
-		cmd = "cd .\\bin && link.exe -machine:x64 -subsystem:console "
-			"/OUT:HelixMain.exe ..\\server\\HelixMain.obj "
-			"libhelix.glob.lib "
-			+ tp + "lib\\libeay32.lib "
-			+ tp + "lib\\ssleay32.lib "
-			+ tp + "lib\\libxml2.lib "
-			+ tp + "lib\\libSLib.lib "
-			+ tp + "lib\\zdll.lib "
-			"ws2_32.lib odbc32.lib advapi32.lib user32.lib Shlwapi.lib rpcrt4.lib ";
+		twine tp( "../../../../3rdParty/" );
+		cmd = "cd " + FixPhysical("./bin") + " && " +
+			LinkMain( "./", "HelixMain" ) +
+			FixPhysical("../server/HelixMain") + ObjExt() +
+			BinLib( "./", "libhelix.glob" ) +
+			LinkLibs4( tp );
 
 	} else if(m_folder->FolderName() == "HelixDaemon"){
-		cmd = "cd .\\bin && link.exe -machine:x64 -subsystem:console "
-			"/OUT:HelixSvc.exe ..\\server\\HelixSvc.obj "
-			"advapi32.lib user32.lib Shlwapi.lib";
+		cmd = "cd " + FixPhysical("./bin") + " && " +
+#ifdef _WIN32
+			LinkMain( "./", "HelixSvc" ) + FixPhysical("../server/HelixSvc") + 
+#else
+			LinkMain( "./", "HelixDaemon" ) + FixPhysical("../server/HelixDaemon") + 
+#endif
+			ObjExt() + LinkLibs5( );
 	}
 
 	return cmd;
@@ -169,21 +152,25 @@ twine HelixLinkTask::LinkTarget()
 	} else if(m_folder->FolderName() == "logic/admin"){
 		return ""; // no library to link
 	} else if(m_folder->FolderName() == "glob"){
-		return "./bin/libhelix.glob.dll";
+		return "./bin/libhelix.glob" + DLLExt();
 	} else if(m_folder->FolderName() == "server"){
 		return ""; // no library to link
 	} else if(m_folder->FolderName() == "client"){
-		return "./bin/libhelix.client.dll";
+		return "./bin/libhelix.client" + DLLExt();
 	} else if(m_folder->FolderName().startsWith("logic/") && !m_folder->FolderName().endsWith("/sqldo")){
 		vector<twine> splits = twine(m_folder->FolderName()).split("/");
 		twine subFolder = splits[1];
-		return "./bin/libhelix.logic." + subFolder + ".dll";
+		return "./bin/libhelix.logic." + subFolder + DLLExt();
 	} else if(m_folder->FolderName().startsWith("logic/") && m_folder->FolderName().endsWith("/sqldo")){
 		return ""; // no library to link
 	} else if(m_folder->FolderName() == "HelixMain"){
-		return "./bin/HelixMain.exe";
+		return "./bin/HelixMain" + BinExt();
 	} else if(m_folder->FolderName() == "HelixDaemon"){
+#ifdef _WIN32
 		return "./bin/HelixSvc.exe";
+#else
+		return "./bin/HelixDaemon";
+#endif
 	} else {
 		return "";
 	}
@@ -224,3 +211,329 @@ bool HelixLinkTask::RequiresLink()
 
 	return false;
 }
+
+twine HelixLinkTask::LinkLibs1( const twine& tpl )
+{
+#ifdef _WIN32
+#	ifdef _X86_
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 32-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	throw AnException(0, FL, "Linking on 32-bit Windows not yet supported");
+
+#	else
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	twine win3pl = FixPhysical( tpl );
+	return 	
+		win3pl + "lib\\libeay32.lib "
+		+ win3pl + "lib\\ssleay32.lib "
+		+ win3pl + "lib\\libxml2.lib "
+		+ win3pl + "lib\\libSLib.lib "
+		+ win3pl + "lib\\zdll.lib "
+		+ win3pl + "lib\\libcurl.lib "
+		+ win3pl + "lib\\libiconv.lib "
+		+ win3pl + "lib\\libhpdf.lib "
+		"ws2_32.lib odbc32.lib rpcrt4.lib Advapi32.lib";
+#	endif
+#elif __APPLE__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit mac
+	// ///////////////////////////////////////////////////////////////////////////////
+	return "-L/usr/local/opt/openssl/lib -lssl -lcrypto -lpthread -lresolv -lxml2 -lz -lodbc -lcurl -liconv -lhpdf -L" + tpl + "/lib -lSLib ";
+
+#elif __linux__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit linux
+	// ///////////////////////////////////////////////////////////////////////////////
+	return "-L/usr/lib -lssl -lcrypto -lpthread -lresolv -lxml2 -luuid -lz -lodbc -lcurl -lrt -lhpdf -L" + tpl + "/lib -lSLib ";
+
+#else
+	throw AnException(0, FL, "Unknown link environment.");
+#endif
+
+}
+
+twine HelixLinkTask::LinkLibs2( const twine& tpl )
+{
+#ifdef _WIN32
+#	ifdef _X86_
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 32-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	throw AnException(0, FL, "Linking on 32-bit Windows not yet supported");
+
+#	else
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	twine win3pl = FixPhysical( tpl );
+	return 	
+		win3pl + "lib\\libeay32.lib "
+		+ win3pl + "lib\\ssleay32.lib "
+		+ win3pl + "lib\\libxml2.lib "
+		+ win3pl + "lib\\libSLib.lib "
+		+ win3pl + "lib\\zdll.lib "
+		+ win3pl + "lib\\libcurl.lib "
+		+ win3pl + "lib\\libiconv.lib "
+		"ws2_32.lib odbc32.lib rpcrt4.lib ";
+
+#	endif
+#elif __APPLE__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit mac
+	// ///////////////////////////////////////////////////////////////////////////////
+	return LinkLibs1( tpl );
+
+#elif __linux__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit linux
+	// ///////////////////////////////////////////////////////////////////////////////
+	return LinkLibs1( tpl );
+
+
+#else
+	throw AnException(0, FL, "Unknown link environment.");
+#endif
+
+}
+
+twine HelixLinkTask::LinkLibs3( const twine& tpl )
+{
+#ifdef _WIN32
+#	ifdef _X86_
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 32-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	throw AnException(0, FL, "Linking on 32-bit Windows not yet supported");
+
+#	else
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	twine win3pl = FixPhysical( tpl );
+	return 	
+		win3pl + "lib\\libeay32.lib "
+		+ win3pl + "lib\\ssleay32.lib "
+		+ win3pl + "lib\\libxml2.lib "
+		+ win3pl + "lib\\libSLib.lib "
+		+ win3pl + "lib\\zdll.lib "
+		+ win3pl + "lib\\libcurl.lib "
+		+ win3pl + "lib\\libiconv.lib "
+		+ win3pl + "lib\\libhpdf.lib "
+		"ws2_32.lib odbc32.lib rpcrt4.lib ";
+
+#	endif
+#elif __APPLE__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit mac
+	// ///////////////////////////////////////////////////////////////////////////////
+	return LinkLibs1( tpl );
+
+#elif __linux__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit linux
+	// ///////////////////////////////////////////////////////////////////////////////
+	return LinkLibs1( tpl );
+
+#else
+	throw AnException(0, FL, "Unknown link environment.");
+#endif
+
+}
+
+twine HelixLinkTask::LinkLibs4( const twine& tpl )
+{
+#ifdef _WIN32
+#	ifdef _X86_
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 32-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	throw AnException(0, FL, "Linking on 32-bit Windows not yet supported");
+
+#	else
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	twine win3pl = FixPhysical( tpl );
+	return 	
+		win3pl + "lib\\libeay32.lib "
+		+ win3pl + "lib\\ssleay32.lib "
+		+ win3pl + "lib\\libxml2.lib "
+		+ win3pl + "lib\\libSLib.lib "
+		+ win3pl + "lib\\zdll.lib "
+		"ws2_32.lib odbc32.lib advapi32.lib user32.lib Shlwapi.lib rpcrt4.lib ";
+
+#	endif
+#elif __APPLE__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit mac
+	// ///////////////////////////////////////////////////////////////////////////////
+	return LinkLibs1( tpl );
+
+#elif __linux__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit linux
+	// ///////////////////////////////////////////////////////////////////////////////
+	return LinkLibs1( tpl );
+
+#else
+	throw AnException(0, FL, "Unknown link environment.");
+#endif
+
+}
+
+twine HelixLinkTask::LinkLibs5()
+{
+#ifdef _WIN32
+#	ifdef _X86_
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 32-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	throw AnException(0, FL, "Linking on 32-bit Windows not yet supported");
+
+#	else
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	return 	
+		"advapi32.lib user32.lib Shlwapi.lib";
+
+#	endif
+#elif __APPLE__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit mac
+	// ///////////////////////////////////////////////////////////////////////////////
+	return ""; // Empty on purpose
+
+#elif __linux__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit linux
+	// ///////////////////////////////////////////////////////////////////////////////
+	return ""; // Empty on purpose
+
+#else
+	throw AnException(0, FL, "Unknown link environment.");
+#endif
+
+}
+
+twine HelixLinkTask::Link(const twine& bin, const twine& outLib)
+{
+#ifdef _WIN32
+#	ifdef _X86_
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 32-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	throw AnException(0, FL, "Linking on 32-bit Windows not yet supported");
+
+#	else
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	return 	
+		"link.exe -machine:x64 -subsystem:console /DLL "
+			"/OUT:" + FixPhysical( bin ) + outLib + ".dll ";
+
+#	endif
+#elif __APPLE__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit mac
+	// ///////////////////////////////////////////////////////////////////////////////
+	return "g++ -shared -o " + FixPhysical( bin ) + outLib + ".so ";
+
+#elif __linux__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit linux
+	// ///////////////////////////////////////////////////////////////////////////////
+	return "g++ -shared -o " + FixPhysical( bin ) + outLib + ".so ";
+
+#else
+	throw AnException(0, FL, "Unknown link environment.");
+#endif
+
+}
+
+twine HelixLinkTask::LinkMain(const twine& bin, const twine& outLib)
+{
+#ifdef _WIN32
+#	ifdef _X86_
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 32-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	throw AnException(0, FL, "Linking on 32-bit Windows not yet supported");
+
+#	else
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	return 	
+		"link.exe -machine:x64 -subsystem:console "
+			"/OUT:" + FixPhysical( bin ) + outLib + ".exe";
+
+#	endif
+#elif __APPLE__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit mac
+	// ///////////////////////////////////////////////////////////////////////////////
+	return "g++ -o " + FixPhysical( bin ) + outLib + " ";
+
+#elif __linux__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit linux
+	// ///////////////////////////////////////////////////////////////////////////////
+	return "g++ -o " + FixPhysical( bin ) + outLib + " ";
+
+#else
+	throw AnException(0, FL, "Unknown link environment.");
+#endif
+
+}
+
+twine HelixLinkTask::ObjList(const twine& folder)
+{
+	return FixPhysical( folder ) + "*" + ObjExt();
+}
+
+twine HelixLinkTask::ObjExt()
+{
+#ifdef _WIN32
+	return ".obj ";
+#else
+	return ".o ";
+#endif
+}
+
+twine HelixLinkTask::LibExt()
+{
+#ifdef _WIN32
+	return ".lib";
+#else
+	return ".so";
+#endif
+}
+
+twine HelixLinkTask::DLLExt()
+{
+#ifdef _WIN32
+	return ".dll";
+#else
+	return ".so";
+#endif
+}
+
+twine HelixLinkTask::BinExt()
+{
+#ifdef _WIN32
+	return ".exe";
+#else
+	return "";
+#endif
+}
+
+twine HelixLinkTask::BinLib(const twine& bin, const twine& libName)
+{
+	return FixPhysical( bin ) + libName + LibExt() + " ";
+}
+

@@ -55,6 +55,8 @@ class DLLEXPORT HelixCompileTask
 	private:
 		
 		twine FixPhysical(const twine& path);
+		twine CC(const twine& tpl);
+		twine LogicIncludes(bool fromSqldo = false);
 
 		HelixFSFolder m_folder;
 		HelixFSFile m_file;

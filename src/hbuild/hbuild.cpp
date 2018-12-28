@@ -36,6 +36,7 @@ void handleJSApiGen(bool displayBanner = true);
 void handleCS(bool displayBanner = true);
 void handleInstall(bool displayBanner = true);
 void testDep();
+void CopyCore();
 
 int main (int argc, char** argv)
 {
@@ -66,11 +67,12 @@ int main (int argc, char** argv)
 	printf("Helix Build Running for a %s platform.\n", m_platform());
 	printf("============================================================================\n");
 
-	// Load our config file and make sure it exists
-	HelixConfig::getInstance();
-
 	Timer timer;
 	try {
+		// Load our config file and make sure it exists
+		HelixConfig::getInstance();
+		CopyCore();
+
 		printf("Loading the helix filesystem");
 		timer.Start();
 		HelixFS::getInstance();
@@ -268,4 +270,24 @@ void testDep()
 			printf( "\t%s\n", file->PhysicalFileName()() );
 		}
 	}
+}
+
+void CopyCore()
+{
+	if(HelixConfig::getInstance().UseCore() == false){
+		return; // Nothing to do
+	}
+
+	printf("============================================================================\n");
+	printf("== Copy Core Binaries and Files\n");
+	printf("============================================================================\n");
+
+	// Copy over the core binaries that we will need
+	twine core = HelixConfig::getInstance().CoreFolder();
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixDaemon", "bin"));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain", "bin"));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.so", "bin"));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.so", "bin"));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.so", "bin"));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin"));
 }

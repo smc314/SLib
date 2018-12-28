@@ -53,6 +53,20 @@ class DLLEXPORT HelixLinkTask
 
 		bool RequiresLink();
 		twine LinkTarget();
+		twine LinkLibs1( const twine& tpl );
+		twine LinkLibs2( const twine& tpl );
+		twine LinkLibs3( const twine& tpl );
+		twine LinkLibs4( const twine& tpl );
+		twine LinkLibs5( );
+		twine Link( const twine& bin, const twine& outLib);
+		twine LinkMain( const twine& bin, const twine& outLib);
+		twine ObjList( const twine& folder );
+		twine BinLib( const twine& bin, const twine& libName);
+
+		static twine ObjExt();
+		static twine LibExt();
+		static twine DLLExt();
+		static twine BinExt();
 
 	private:
 

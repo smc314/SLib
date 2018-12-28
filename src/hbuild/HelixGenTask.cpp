@@ -18,6 +18,7 @@
 using namespace SLib;
 
 #include "HelixFS.h"
+#include "HelixConfig.h"
 #include "HelixGenTask.h"
 #include "HelixWorker.h"
 using namespace Helix::Build;
@@ -95,14 +96,15 @@ void HelixGenTask::Generate()
 	File::writeToFile( target, m_sqldo.GenCPPBody() );
 
 	// Generate the C# Object file
-	target = m_sqldo.CSBodyFileName();
-	File::EnsurePath( target );
-	File::writeToFile( target, m_sqldo.GenCSBody() );
-	HelixWorker::getInstance().NeedsCSRebuild( true );
+	if(HelixConfig::getInstance().SkipPdfGen() == false){	
+		target = m_sqldo.CSBodyFileName();
+		File::EnsurePath( target );
+		File::writeToFile( target, m_sqldo.GenCSBody() );
+		HelixWorker::getInstance().NeedsCSRebuild( true );
+	}
 
 	// Generate the Javascript data object file in all of the correct qd app folders
-	vector<twine> apps { "dev", "atm", "ttvx" };
-	for(auto& app : apps){
+	for(auto& app : HelixConfig::getInstance().QxApps()){
 		target = m_sqldo.JSBodyFileName(app);
 		File::EnsurePath( target );
 		File::writeToFile( target, m_sqldo.GenJSBody(app) );

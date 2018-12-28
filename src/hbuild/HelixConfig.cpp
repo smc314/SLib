@@ -58,6 +58,11 @@ twine HelixConfig::CoreFolder()
 	return ret;
 }
 
+bool HelixConfig::SkipPdfGen()
+{
+	return XmlHelpers::getBoolAttr( xmlDocGetRootElement( m_config ), "SkipPdfGen" );
+}
+
 vector<twine> HelixConfig::QxApps()
 {
 	vector<twine> ret;

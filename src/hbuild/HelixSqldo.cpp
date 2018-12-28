@@ -19,6 +19,7 @@
 using namespace SLib;
 
 #include "HelixFS.h"
+#include "HelixConfig.h"
 #include "HelixSqldo.h"
 using namespace Helix::Build;
 
@@ -145,6 +146,11 @@ const vector<HelixSqldoMatchFunction>& HelixSqldo::MatchFunctions()
 	return m_matches;
 }
 
+const vector<HelixSqldoValidateFunction>& HelixSqldo::ValidateFunctions()
+{
+	return m_validations;
+}
+
 void HelixSqldo::ReadSqldo()
 {
 	m_all_params.clear();
@@ -153,6 +159,7 @@ void HelixSqldo::ReadSqldo()
 	m_child_objects.clear();
 	m_sorts.clear();
 	m_matches.clear();
+	m_validations.clear();
 	m_parms.clear();
 
 	xmlNodePtr root = xmlDocGetRootElement( m_file->Xml() );
@@ -177,6 +184,9 @@ void HelixSqldo::ReadSqldo()
 	}
 	for(auto n : XmlHelpers::FindChildren( root, "MatchFunction" ) ){
 		m_matches.push_back( HelixSqldoMatchFunction( n ) );
+	}
+	for(auto n : XmlHelpers::FindChildren( root, "ValidateFunction" ) ){
+		m_validations.push_back( HelixSqldoValidateFunction( n ) );
 	}
 
 	// Gather up our list of unique input/output parameters
@@ -339,6 +349,7 @@ twine HelixSqldo::GenCPPHeader()
 	for(auto& method : m_methods) output.append( method.GenCPPHeader(m_class_name) );
 	for(auto& sort : m_sorts) output.append( sort.GenCPPHeader(m_class_name) );
 	for(auto& match : m_matches) output.append( match.GenCPPHeader(m_class_name) );
+	for(auto& valid : m_validations) output.append( valid.GenCPPHeader(m_class_name) );
 	output.append( loadTmpl( "CppObjHeader99.tmpl", BuildObjectParms() ) );
 	return output;
 }
@@ -350,11 +361,16 @@ twine HelixSqldo::GenCPPBody()
 	for(auto& method : m_methods) output.append( method.GenCPPBody(m_class_name) );
 	for(auto& sort : m_sorts) output.append( sort.GenCPPBody(m_class_name) );
 	for(auto& match : m_matches) output.append( match.GenCPPBody(m_class_name) );
+	for(auto& valid : m_validations) output.append( valid.GenCPPBody(m_class_name) );
 	return output;
 }
 
 twine HelixSqldo::GenCSBody()
 {
+	if(HelixConfig::getInstance().SkipPdfGen()){
+		return ""; // Bail out early. Skipping PDF Gen code
+	}
+
 	twine output;
 	output.append( loadTmpl( "C#ObjHeader.start.tmpl", BuildObjectParms() ) );
 	for(auto& method : m_methods) output.append( method.GenCSBody(m_class_name) );

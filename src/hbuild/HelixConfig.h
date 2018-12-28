@@ -41,6 +41,9 @@ class DLLEXPORT HelixConfig
 		/// Returns the core folder, if any, that we should use
 		twine CoreFolder();
 
+		/// Returns a flag indicating whether we should skip dealing with HelixPdfGen items
+		bool SkipPdfGen();
+
 		/// Returns a list of our Qx Applications
 		vector<twine> QxApps();
 

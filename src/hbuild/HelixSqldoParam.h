@@ -60,6 +60,9 @@ class DLLEXPORT HelixSqldoParam
 		bool isInput;
 		bool desc;
 		bool usecdata;
+		twine min;
+		twine max;
+		twine function;
 };
 
 }} // End Namespace stack

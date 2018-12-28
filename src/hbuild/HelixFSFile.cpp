@@ -139,17 +139,16 @@ bool HelixFSFile_Bare::NeedsRebuild()
 
 	// First check to see if we are newer than our .o file:
 	vector<twine> splits = m_file.split(".");	
-	twine dotOh( "./" + m_folder + "/" + splits[0] + ".obj" );
-	if(IsNewerThan( dotOh )){
-		DEBUG(FL, "%s is newer than %s - rebuild required", PhysicalFileName()(), dotOh() );
+	if(IsNewerThan( PhysicalDotOh() )){
+		DEBUG(FL, "%s is newer than %s - rebuild required", PhysicalFileName()(), PhysicalDotOh()() );
 		return true; // We are newer than our .o file, no need to check deps, need to build
 	}
 
 	// Walk our dependencies and see if any of them are newer than our .o file
 	// If so, then we need a rebuild.
 	for(auto file : Dependencies() ){
-		if(file->IsNewerThan( dotOh )){
-			DEBUG(FL, "Dependency %s is newer than us %s - rebuild required", file->FileName()(), dotOh() );
+		if(file->IsNewerThan( PhysicalDotOh() )){
+			DEBUG(FL, "Dependency %s is newer than us %s - rebuild required", file->FileName()(), PhysicalDotOh()() );
 			return true; // Found a dependency that is newer than us
 		}
 	}

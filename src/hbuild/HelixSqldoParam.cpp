@@ -41,6 +41,10 @@ HelixSqldoParam::HelixSqldoParam(xmlNodePtr elem)
 	desc = XmlHelpers::getBoolAttr( elem, "desc" );
 	usecdata = XmlHelpers::getBoolAttr( elem, "usecdata" );
 
+	min.getAttribute( elem, "min" );
+	max.getAttribute( elem, "max" );
+	function.getAttribute( elem, "function" );
+
 	if(type.empty()){
 		type = "twine"; // Default to twine
 	}

@@ -19,6 +19,7 @@
 using namespace SLib;
 
 #include "HelixFS.h"
+#include "HelixConfig.h"
 #include "HelixBuilder.h"
 #include "HelixWorker.h"
 #include "HelixJSApiGenTask.h"
@@ -67,7 +68,11 @@ void HelixBuilder::Build( const twine& folderPath )
 	// Main folder given
 	for(auto file : folder->Files()){
 		if(folderPath == "glob" && file->FileName() == "Jvm.cpp") continue; // Skip this one
+#ifdef _WIN32
 		if(folderPath == "server" && file->FileName() == "HelixDaemon.cpp") continue; // Skip this one
+#else
+		if(folderPath == "server" && file->FileName() == "HelixSvc.cpp") continue; // Skip this one
+#endif
 		if( (file->FileName().endsWith(".c") || file->FileName().endsWith(".cpp")) && file->NeedsRebuild( )){
 			HelixWorker::getInstance().Add( new HelixCompileTask( folder, file ) );
 			relinkRequired = true;
@@ -156,7 +161,21 @@ void HelixBuilder::CleanAllRuntime( const twine& physicalPath )
 			file.endsWith( ".lib" ) ||
 			file.endsWith( ".exp" ) ||
 			file.endsWith( ".obj" ) ||
-			file.endsWith( ".o" )
+			file.endsWith( ".o" ) ||
+			file.endsWith( ".so" ) ||
+			file == "AutoAsset" ||
+			file == "CopyCommon" ||
+			file == "CopyIcons" ||
+			file == "ExtractStrings" ||
+			file == "GenerateSqlClasses" ||
+			file == "HelixDaemon" ||
+			file == "HelixMain" ||
+			file == "LogDump" ||
+			file == "MakeMakefiles" ||
+			file == "SLogDump" ||
+			file == "SqlDoCheck" ||
+			file == "SqlShell" ||
+			file == "hbuild"
 		){
 			try {
 				File::Delete( physicalPath + "/" + file );
@@ -273,7 +292,9 @@ void HelixBuilder::GenerateSqldo(bool forceRegen)
 	}
 
 	// Update the HelixPdfGen.csproj file to include references to all data objects
-	UpdateHelixPdfGenProj( allSqldo );	
+	if(HelixConfig::getInstance().SkipPdfGen() == false){
+		UpdateHelixPdfGenProj( allSqldo );	
+	}
 
 	// Wait for all generator threads to finish
 	HelixWorker::getInstance().WaitForGenerators();
@@ -288,9 +309,9 @@ void HelixBuilder::GenerateJSApi()
 	EnEx ee(FL, "HelixBuilder::GenerateJSApi()");
 
 	HelixJSApiGenTask jsApiGen;
-	jsApiGen.Generate( "dev" );
-	jsApiGen.Generate( "atm" );
-	jsApiGen.Generate( "ttvx" );
+	for(auto app : HelixConfig::getInstance().QxApps()){
+		jsApiGen.Generate( app );
+	}
 
 }
 

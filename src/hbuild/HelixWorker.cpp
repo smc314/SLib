@@ -91,6 +91,9 @@ void HelixWorker::Add(HelixLinkTask* task)
 		return; // bail out immediately - no reason to wait on this
 	}
 
+	// Sleep for a moment to allow other threads to start and work
+	Tools::msleep( 100 );
+
 	// Wait for all compiles to finish
 	while( m_compilers_working > 0 ){
 		Tools::msleep( 100 );

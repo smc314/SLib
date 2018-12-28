@@ -1,0 +1,51 @@
+#
+# This is the linux build version of the makefile for SLib
+###############################################################
+
+CC=g++
+AR=ar
+DOC=doc++
+UNAME := $(shell uname)
+
+ifeq ($(UNAME),Linux)
+	OPENSSLDIR=/usr
+else
+	OPENSSLDIR=/usr/local/opt/openssl
+endif
+
+_CFLAGS=-g -Wall -D_REENTRANT -O2 -I/usr/include/libxml2 -I$(OPENSSLDIR)/include -I..
+
+_CPPFLAGS=-std=c++14 $(_CFLAGS)
+
+ifeq ($(UNAME),Linux)
+	CFLAGS=$(_CFLAGS) -rdynamic
+	CPPFLAGS=$(_CPPFLAGS) -rdynamic
+	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread -lresolv -lxml2 -luuid -lz 
+else
+	CFLAGS=$(_CFLAGS)
+	CPPFLAGS=$(_CPPFLAGS)
+	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread -lresolv -lxml2 -lz 
+endif
+
+%.o:	%.cpp
+	$(CC) $(CPPFLAGS) -c $< -o $@
+%.o:	%.c
+	gcc $(CFLAGS) -c $< -o $@
+
+DOTOH=
+
+HBUILD_OH=hbuild.o HelixFS.o HelixFSFolder.o HelixFSFile.o HelixBuilder.o HelixWorker.o \
+	HelixCompileTask.o HelixLinkTask.o HelixInstallTask.o HelixSqldoParam.o HelixSqldoMethod.o \
+	HelixSqldoChildVector.o HelixSqldoChildObject.o HelixSqldoSortFunction.o HelixSqldoMatchFunction.o \
+	HelixSqldo.o HelixGenTask.o HelixJSApiGenTask.o HelixConfig.o HelixSqldoValidateFunction.o
+
+all: $(HBUILD_OH)
+	$(CC) -o hbuild $(HBUILD_OH) $(LFLAGS) -L.. -lSLib 
+
+clean:
+	rm -f hbuild $(DOTOH) *.o core
+	rm -f ../../../bin/hbuild ../../../bin/*.tmpl
+
+install:
+	cp hbuild ../../../bin/
+	cp *.tmpl ../../../bin/
