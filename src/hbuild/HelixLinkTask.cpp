@@ -119,7 +119,7 @@ twine HelixLinkTask::GetCommandLine()
 		twine tp( "../../../../3rdParty/" );
 		cmd = "cd " + FixPhysical("./bin") + " && " +
 			LinkMain( "./", "HelixMain" ) +
-			FixPhysical("../server/HelixMain") + ObjExt() +
+			FixPhysical("../server/HelixMain") + ObjExt() + " " +
 			BinLib( "./", "libhelix.glob" ) +
 			LinkLibs4( tp );
 
