@@ -53,6 +53,7 @@ all: $(DOTOH) $(MINIZIP_OH) LogDump.o SLogDump.o SqlShell.o incs
 	$(CC) -o SLogDump SLogDump.o -L. -lSLib $(LFLAGS)
 	$(CC) -o SqlShell SqlShell.o -L. -lSLib $(LFLAGS)
 	cp libSLib.so ../lib
+	cd hbuild && make -f Makefile.mac all
 
 incs:
 	cp *.h Pool.cpp ../include
@@ -137,6 +138,7 @@ clean:
 	rm -f ../lib/libSLib.so
 	rm -f ../include/*.h
 	rm -f ../include/Pool.cpp
+	cd hbuild && make -f Makefile.mac clean 
 
 install:
 	-mkdir -p ../../lib
@@ -147,3 +149,4 @@ install:
 	cp LogDump ../../bin/
 	cp SLogDump ../../bin/
 	cp SqlShell ../../bin/
+	cd hbuild && make -f Makefile.mac install

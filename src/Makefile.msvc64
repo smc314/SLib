@@ -49,6 +49,7 @@ all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) SLogDump.$(OHEXT) SqlShell.$(OHEXT)
 	$(CC) $(EXECFLAGS) SqlShell.$(OHEXT) $(EXELFLAGS) sqlite3.$(OHEXT)
 	$(CP) libSLib.dll ..\lib
 	$(CP) libSLib.lib ..\lib
+	cd hbuild && nmake -f Makefile.msvc all
 
 test_twine: test_split.$(OHEXT) test_tokenize.$(OHEXT) test_string.$(OHEXT) test_twine.$(OHEXT) $(DOTOH)
 	$(LINK) $(LFLAGS) /OUT:test_twine.exe test_twine.$(OHEXT) libSLib.lib $(LLIBS)
@@ -110,6 +111,7 @@ clean:
 	$(RM) ..\include\*.h
 	$(RM) ..\include\Pool.cpp
 	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h SmtpClient.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h ZipFile.h MemBuf.h sqlite3.h sqlite3ext.h LogFile2.h
+	cd hbuild && nmake -f Makefile.msvc clean
 
 
 install:
@@ -122,6 +124,7 @@ install:
 	$(CP) LogDump.exe $(3PL)\bin
 	$(CP) SLogDump.exe $(3PL)\bin
 	$(CP) SqlShell.exe $(3PL)\bin
+	cd hbuild && nmake -f Makefile.msvc install
 
 docs:
 	docxx --html --dir ..\..\appint\doc\slib *.h
