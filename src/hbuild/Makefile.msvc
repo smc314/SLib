@@ -12,7 +12,7 @@ GCFLAGS=-c -wd4251 -Zp8 -EHsc -O2 -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN
 
 
 SSLLIBS=$(3PL)/lib/libeay32.lib $(3PL)/lib/ssleay32.lib \
-	$(3PL)/lib/libxml2.lib $(3PL)/lib/libSLib.lib
+	$(3PL)/lib/libxml2.lib ../libSLib.lib
 
 LFLAGS=-machine:x64 -subsystem:console
 LLIBS=$(SSLLIBS) $(SOCKET_LIB)
