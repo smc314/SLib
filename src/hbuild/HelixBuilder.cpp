@@ -190,6 +190,10 @@ void HelixBuilder::BuildCS()
 {
 	EnEx ee(FL, "HelixBuilder::BuildCS()");
 
+	if(HelixConfig::getInstance().SkipPdfGen() == true){
+		return; // Don't do this one
+	}
+
 	if(HelixWorker::getInstance().HasError()){
 		return; // Bail out early on any previous errors
 	}
@@ -224,6 +228,10 @@ void HelixBuilder::BuildCS()
 void HelixBuilder::CleanCS()
 {
 	EnEx ee(FL, "HelixBuilder::CleanCS()");
+
+	if(HelixConfig::getInstance().SkipPdfGen() == true){
+		return; // Don't do this one
+	}
 
 	INFO(FL, "Cleaning HelixPdfGen" );
 	twine pdfGen = "../c#/HelixPdfGen/HelixPdfGen/";
