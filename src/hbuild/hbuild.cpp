@@ -275,7 +275,9 @@ void testDep()
 void CopyCore()
 {
 	if(HelixConfig::getInstance().UseCore() == false){
-		return; // Nothing to do
+		// Just make sure that the bin folder exists
+		File::EnsurePath( "./bin" );
+		return;
 	}
 
 	printf("============================================================================\n");
