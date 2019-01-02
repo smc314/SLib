@@ -128,12 +128,12 @@ twine HelixCompileTask::GetCommandLine()
 		// Pick up any dependent folders from our config file
 		auto splits = twine(m_file->FolderName()).split("/");
 		auto& logicName = splits[ splits.size() - 2 ];
-		printf("Logic name is %s\n", logicName() );
+		//printf("Logic name is %s\n", logicName() );
 		auto deps = HelixConfig::getInstance().LogicDepends( logicName );
 		for(auto depName : deps){
 			cmd.append( " -I ../../" + depName + "/sqldo " );
 		}
-		printf("Finished adding dependencies\n");
+		//printf("Finished adding dependencies\n");
 
 		cmd.append( m_file->FileName() );
 	}
