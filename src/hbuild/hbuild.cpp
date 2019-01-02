@@ -276,7 +276,7 @@ void CopyCore()
 {
 	if(HelixConfig::getInstance().UseCore() == false){
 		// Just make sure that the bin folder exists
-		File::EnsurePath( "./bin" );
+		File::EnsurePath( "./bin/" );
 		return;
 	}
 
