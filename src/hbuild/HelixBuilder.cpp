@@ -211,7 +211,7 @@ void HelixBuilder::BuildCS()
 	if(std::system( cmd() ) != 0) throw AnException(0, FL, "C# - Build failed.");
 
 	// Make sure we have the right output path created
-	File::EnsurePath( "./HelixPdfGen/" );
+	File::EnsurePath( "./bin/HelixPdfGen/" );
 
 	// Copy the release files over into our output folder
 	for(auto& file : File::listFiles( pdfGen + "/HelixPdfGen/bin/Release" )){
@@ -219,7 +219,7 @@ void HelixBuilder::BuildCS()
 			file.endsWith( ".exe" ) ||
 			file.endsWith( ".xml" )
 		){
-			File::Copy( pdfGen + "/HelixPdfGen/bin/Release/" + file, "./HelixPdfGen/" + file );
+			File::Copy( pdfGen + "/HelixPdfGen/bin/Release/" + file, "./bin/HelixPdfGen/" + file );
 		}
 	}
 
