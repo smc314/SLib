@@ -35,6 +35,7 @@ void handleReGen(bool displayBanner = true);
 void handleJSApiGen(bool displayBanner = true);
 void handleCS(bool displayBanner = true);
 void handleInstall(bool displayBanner = true);
+void handleDeploy(bool displayBanner = true);
 void testDep();
 void CopyCore();
 
@@ -89,6 +90,7 @@ int main (int argc, char** argv)
 				else if(targ == "jsapi") handleJSApiGen();
 				else if(targ == "cs") handleCS();
 				else if(targ == "install") handleInstall();
+				else if(targ == "dep") handleDeploy();
 				else if(targ == "testdep") testDep();
 			}
 		}
@@ -253,6 +255,22 @@ void handleInstall(bool displayBanner)
 	}
 
 	for(auto install : HelixConfig::getInstance().Installs() ){
+		twine from(install, "from");
+		twine ends(install, "endsWith");
+		twine to(install, "to");
+		HelixWorker::getInstance().Add( new HelixInstallTask( from, ends, to) );
+	}
+}
+
+void handleDeploy(bool displayBanner)
+{
+	if(displayBanner){
+		printf("============================================================================\n");
+		printf("== Deploy Target\n");
+		printf("============================================================================\n");
+	}
+
+	for(auto install : HelixConfig::getInstance().Deploy() ){
 		twine from(install, "from");
 		twine ends(install, "endsWith");
 		twine to(install, "to");

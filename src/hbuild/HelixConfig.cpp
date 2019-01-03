@@ -111,3 +111,11 @@ vector<xmlNodePtr> HelixConfig::Installs()
 	if(node == nullptr) return ret;
 	return XmlHelpers::FindChildren( node, "Install" );
 }
+
+vector<xmlNodePtr> HelixConfig::Deploy()
+{
+	vector<xmlNodePtr> ret;
+	auto node = XmlHelpers::FindChild( xmlDocGetRootElement( m_config ), "Deploy" );
+	if(node == nullptr) return ret;
+	return XmlHelpers::FindChildren( node, "Install" );
+}

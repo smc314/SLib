@@ -76,16 +76,46 @@ void HelixInstallTask::Execute()
 {
 	EnEx ee(FL, "HelixInstallTask::Execute()");
 
-	for(auto& file : File::listFiles( m_source_folder )){
-		if(file.endsWith( m_file_pattern )){
-			twine sourceFileName( m_source_folder + "/" + file );
-			twine targetFileName( m_target_folder + "/" + file );
+	if(m_file_pattern.empty()){
+		CopyFolder( m_source_folder, m_target_folder );
+	} else {
+		for(auto& file : File::listFiles( m_source_folder )){
+			if(file.endsWith( m_file_pattern )){
+				twine sourceFileName( m_source_folder + "/" + file );
+				twine targetFileName( m_target_folder + "/" + file );
+				File::EnsurePath( targetFileName );
+				if(HelixFSFile_Bare::IsNewerThan( sourceFileName, targetFileName )){
+					INFO(FL, "%s is newer than %s - installing file.", sourceFileName(), targetFileName() );
+					File::Copy( sourceFileName(), targetFileName() );
+				}
+			}
+		}
+	}
+}
+
+void HelixInstallTask::CopyFolder(const twine& fromFolder, const twine& toFolder )
+{
+	EnEx ee(FL, "HelixInstallTask::CopyFolder(const twine& fromFolder, const twine& toFolder )");
+
+	try {
+		// First copy over all of the files
+		for(auto& file : File::listFiles( fromFolder ) ){
+			twine sourceFileName( fromFolder + "/" + file );
+			twine targetFileName( toFolder + "/" + file );
 			File::EnsurePath( targetFileName );
 			if(HelixFSFile_Bare::IsNewerThan( sourceFileName, targetFileName )){
 				INFO(FL, "%s is newer than %s - installing file.", sourceFileName(), targetFileName() );
 				File::Copy( sourceFileName(), targetFileName() );
 			}
 		}
+
+		// Now handle all of the child directories
+		for(auto& folder : File::listFolders( fromFolder ) ){
+			if(folder == "." || folder == "..") continue; // Skip these
+
+			CopyFolder( fromFolder + "/" + folder, toFolder + "/" + folder );
+		}
+	} catch (AnException& e){
+		WARN(FL, "Directory does not exist: %s", fromFolder() );
 	}
 }
-

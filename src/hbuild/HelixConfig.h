@@ -53,9 +53,11 @@ class DLLEXPORT HelixConfig
 		/// Returns a list of dependencies for a given logic folder
 		vector<twine> LogicDepends( const twine& logic );
 
-		/// Returns a list of 
-		// Returns the list of Install Nodes
+		/// Returns the list of Install Nodes
 		vector<xmlNodePtr> Installs();
+
+		/// Returns the list of Deploy Nodes
+		vector<xmlNodePtr> Deploy();
 
 	private:
 		/// Standard Constructor

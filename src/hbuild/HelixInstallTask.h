@@ -47,6 +47,9 @@ class DLLEXPORT HelixInstallTask
 		/// Performs the installation based on our parameters
 		void Execute();
 
+		/// Copies an entire folder from one place to another - recursively
+		void CopyFolder( const twine& fromFolder, const twine& toFolder );
+
 	private:
 		
 		twine m_source_folder;
