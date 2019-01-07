@@ -94,7 +94,7 @@ twine HelixLinkTask::GetCommandLine()
 			"HelixApi_Part1" + ObjExt() + 
 			"HelixApi_Part2" + ObjExt() +
 			LinkLibs2( tp ) +
-			BinLib( "../bin/", "libhelix.glob" );
+			BinLib( "../bin", "helix.glob" );
 	} else if(m_folder->FolderName().startsWith("logic/") && !m_folder->FolderName().endsWith("/sqldo")){
 		auto splits = twine(m_folder->FolderName()).split("/");
 		auto subFolder = splits[1];
@@ -103,13 +103,13 @@ twine HelixLinkTask::GetCommandLine()
 			Link("../../bin/", "libhelix.logic." + subFolder ) +
 			ObjList( "./" ) + ObjList( "./sqldo/" ) +
 			LinkLibs3( tp ) +
-			BinLib( "../../bin/", "libhelix.glob" ) +
-			BinLib( "../../bin/", "libhelix.client" );
+			BinLib( "../../bin", "helix.glob" ) +
+			BinLib( "../../bin", "helix.client" );
 
 		// Pick up any dependent folders from our config file
 		for(auto depName : HelixConfig::getInstance().LogicDepends( subFolder ) ){
 			cmd.append( 
-				BinLib( "../../bin/", "libhelix.logic." + depName )
+				BinLib( "../../bin", "helix.logic." + depName )
 			);
 		}
 
@@ -120,7 +120,7 @@ twine HelixLinkTask::GetCommandLine()
 		cmd = "cd " + FixPhysical("./bin") + " && " +
 			LinkMain( "./", "HelixMain" ) +
 			FixPhysical("../server/HelixMain") + ObjExt() + 
-			BinLib( "./", "libhelix.glob" ) +
+			BinLib( ".", "helix.glob" ) +
 			LinkLibs4( tp );
 
 	} else if(m_folder->FolderName() == "HelixDaemon"){
@@ -534,6 +534,10 @@ twine HelixLinkTask::BinExt()
 
 twine HelixLinkTask::BinLib(const twine& bin, const twine& libName)
 {
-	return FixPhysical( bin ) + libName + LibExt() + " ";
+#ifdef _WIN32
+	return "-L" + FixPhysical( bin ) + " lib" + libName + LibExt() + " ";
+#else
+	return "-L" + FixPhysical( bin ) + " -l" + libName + " ";
+#endif
 }
 
