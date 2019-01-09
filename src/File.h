@@ -122,6 +122,8 @@ class DLLEXPORT File
 		  */
 		size_t read(MemBuf& buffer);
 
+		void CopyPermissionsTo( const twine& targetName );
+
 
 		/// Determines if the file named exists or not.
 		static bool Exists(const twine& fileName);

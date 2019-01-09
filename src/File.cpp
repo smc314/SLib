@@ -412,6 +412,14 @@ void File::writeToFile(const twine& fileName, const MemBuf& contents)
 	}
 }
 
+void File::CopyPermissionsTo(const twine& to)
+{
+	EnEx ee("File::CopyPermissionsTo(twine& to)");
+
+	// Copy over our permissions to a different file
+	chmod( to(), m_stat.st_mode );
+}
+
 void File::Copy(const twine& from, const twine& to)
 {
 	EnEx ee("File::Copy(twine& from, twine& to)");
@@ -421,6 +429,8 @@ void File::Copy(const twine& from, const twine& to)
 	f.readContents(contents);
 	File::writeToFile( to, contents );
 
+	// Copy the file permissions as well:
+	f.CopyPermissionsTo( to );
 }
 
 void File::Move(const twine& from, const twine& to)
