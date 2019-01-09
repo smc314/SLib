@@ -417,7 +417,19 @@ void File::CopyPermissionsTo(const twine& to)
 	EnEx ee("File::CopyPermissionsTo(twine& to)");
 
 	// Copy over our permissions to a different file
+#ifndef _WIN32
 	chmod( to(), m_stat.st_mode );
+#endif
+
+	// The windows version is _chmod but it doesn't do u+g+o, and it has no concept of 
+	// the executable bit.  So it really only controls the write flag.  Read these
+	// for reference:
+	// https://stackoverflow.com/questions/592448/c-how-to-set-file-permissions-cross-platform
+	// and
+	// https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/chmod-wchmod?view=vs-2017
+	//
+	// For now, we've chosen to do nothing in this function for windows.
+
 }
 
 void File::Copy(const twine& from, const twine& to)
