@@ -27,7 +27,8 @@ class DLLEXPORT HelixInstallTask
 {
 	public:
 		/// Constructor requires a folder and a file
-		HelixInstallTask(const twine& sourceFolder, const twine& filePattern, const twine& targetFolder);
+		HelixInstallTask(const twine& sourceFolder, const twine& filePattern, const twine& targetFolder, 
+			const twine& newName);
 
 		/// Standard Copy Constructor
 		HelixInstallTask(const HelixInstallTask& c);
@@ -55,6 +56,7 @@ class DLLEXPORT HelixInstallTask
 		twine m_source_folder;
 		twine m_file_pattern;
 		twine m_target_folder;
+		twine m_new_name;
 
 };
 

@@ -23,15 +23,18 @@ using namespace SLib;
 using namespace Helix::Build;
 
 
-HelixInstallTask::HelixInstallTask(const twine& sourceFolder, const twine& filePattern, const twine& targetFolder) 
-	: m_source_folder( sourceFolder), m_file_pattern( filePattern ), m_target_folder( targetFolder )
+HelixInstallTask::HelixInstallTask(const twine& sourceFolder, const twine& filePattern, const twine& targetFolder,
+		const twine& newName) 
+	: m_source_folder( sourceFolder), m_file_pattern( filePattern ), m_target_folder( targetFolder ),
+	m_new_name( newName )
 {
 	EnEx ee(FL, "HelixInstallTask::HelixInstallTask()");
 
 }
 
 HelixInstallTask::HelixInstallTask(const HelixInstallTask& c) :
-	m_source_folder( c.m_source_folder ), m_file_pattern( c.m_file_pattern), m_target_folder( c.m_target_folder)
+	m_source_folder( c.m_source_folder ), m_file_pattern( c.m_file_pattern), m_target_folder( c.m_target_folder),
+	m_new_name( c.m_new_name)
 {
 	EnEx ee(FL, "HelixInstallTask::HelixInstallTask(const HelixInstallTask& c)");
 
@@ -44,12 +47,14 @@ HelixInstallTask& HelixInstallTask::operator=(const HelixInstallTask& c)
 	m_source_folder = c.m_source_folder;
 	m_file_pattern = c.m_file_pattern;
 	m_target_folder = c.m_target_folder;
+	m_new_name = c.m_new_name;
 
 	return *this;
 }
 
 HelixInstallTask::HelixInstallTask(const HelixInstallTask&& c) :
-	m_source_folder( c.m_source_folder ), m_file_pattern( c.m_file_pattern), m_target_folder( c.m_target_folder)
+	m_source_folder( c.m_source_folder ), m_file_pattern( c.m_file_pattern), m_target_folder( c.m_target_folder),
+	m_new_name( c.m_new_name)
 {
 	EnEx ee(FL, "HelixInstallTask::HelixInstallTask(const HelixInstallTask&& c)");
 
@@ -62,6 +67,7 @@ HelixInstallTask& HelixInstallTask::operator=(const HelixInstallTask&& c)
 	m_source_folder = std::move(c.m_source_folder);
 	m_file_pattern = std::move(c.m_file_pattern);
 	m_target_folder = std::move(c.m_target_folder);
+	m_new_name = std::move(c.m_new_name);
 
 	return *this;
 }
@@ -82,7 +88,12 @@ void HelixInstallTask::Execute()
 		for(auto& file : File::listFiles( m_source_folder )){
 			if(file.endsWith( m_file_pattern )){
 				twine sourceFileName( m_source_folder + "/" + file );
-				twine targetFileName( m_target_folder + "/" + file );
+				twine targetFileName;
+				if(m_new_name.empty()){
+					targetFileName = m_target_folder + "/" + file;
+				} else {
+					targetFileName = m_target_folder + "/" + m_new_name;
+				}
 				File::EnsurePath( targetFileName );
 				if(HelixFSFile_Bare::IsNewerThan( sourceFileName, targetFileName )){
 					INFO(FL, "%s is newer than %s - installing file.", sourceFileName(), targetFileName() );

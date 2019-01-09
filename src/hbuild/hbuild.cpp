@@ -258,7 +258,8 @@ void handleInstall(bool displayBanner)
 		twine from(install, "from");
 		twine ends(install, "endsWith");
 		twine to(install, "to");
-		HelixWorker::getInstance().Add( new HelixInstallTask( from, ends, to) );
+		twine newName(install, "newName");
+		HelixWorker::getInstance().Add( new HelixInstallTask( from, ends, to, newName ) );
 	}
 }
 
@@ -274,7 +275,8 @@ void handleDeploy(bool displayBanner)
 		twine from(install, "from");
 		twine ends(install, "endsWith");
 		twine to(install, "to");
-		HelixWorker::getInstance().Add( new HelixInstallTask( from, ends, to) );
+		twine newName(install, "newName");
+		HelixWorker::getInstance().Add( new HelixInstallTask( from, ends, to, newName) );
 	}
 }
 
@@ -304,10 +306,10 @@ void CopyCore()
 
 	// Copy over the core binaries that we will need
 	twine core = HelixConfig::getInstance().CoreFolder();
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixDaemon", "bin"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain", "bin"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.so", "bin"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.so", "bin"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.so", "bin"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin"));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixDaemon", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.so", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.so", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.so", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin", ""));
 }
