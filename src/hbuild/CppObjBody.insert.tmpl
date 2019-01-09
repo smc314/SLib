@@ -42,7 +42,12 @@ intptr_t ${doName}::${methodName}(OdbcObj& odbc, twine& stmt, bool useInputs, ${
 		throw AnException(0, FL, "OdbcObj passed into ${doName}::${methodName} is not connected.");
 	}
 
-	twine fullStmt = stmt + ";\r\nselect scope_identity() as Id;";
+	twine fullStmt;
+	if(odbc.IsPostgreSQL()){
+		fullStmt = stmt + " RETURNING Id;";
+	} else {
+		fullStmt = stmt + ";\r\nselect scope_identity() as Id;";
+	}
 
 	if(!suppressTrace){
 		SQLTRACE(UFL, "Using SQL: %s", fullStmt() );
