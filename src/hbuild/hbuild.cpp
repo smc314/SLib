@@ -23,6 +23,7 @@ using namespace SLib;
 #include "HelixFS.h"
 #include "HelixBuilder.h"
 #include "HelixWorker.h"
+#include "HelixAutoAsset.h"
 using namespace Helix::Build;
 
 twine m_platform;
@@ -36,6 +37,7 @@ void handleJSApiGen(bool displayBanner = true);
 void handleCS(bool displayBanner = true);
 void handleInstall(bool displayBanner = true);
 void handleDeploy(bool displayBanner = true);
+void handleAsset(bool displayBanner = true);
 void testDep();
 void CopyCore();
 
@@ -92,6 +94,7 @@ int main (int argc, char** argv)
 				else if(targ == "install") handleInstall();
 				else if(targ == "dep") handleDeploy();
 				else if(targ == "testdep") testDep();
+				else if(targ == "asset") handleAsset();
 			}
 		}
 	
@@ -153,6 +156,7 @@ void handleAll()
 		builder.Build( "HelixDaemon" );
 	}
 
+	handleAsset(false);
 	handleJSApiGen(false);
 
 	if(HelixWorker::getInstance().NeedsCSRebuild()){
@@ -220,6 +224,18 @@ void handleReGen(bool displayBanner)
 	HelixBuilder builder;	
 	builder.GenerateSqldo(true);
 	HelixFS::getInstance().Load(); // Re-load the file system because GenerateSqldo creates files
+}
+
+void handleAsset(bool displayBanner)
+{
+	if(displayBanner){
+		printf("============================================================================\n");
+		printf("== Auto-Asset Target\n");
+		printf("============================================================================\n");
+	}
+
+	HelixAutoAsset asset;	
+	asset.Generate();
 }
 
 void handleJSApiGen(bool displayBanner)
