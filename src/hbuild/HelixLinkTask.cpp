@@ -99,17 +99,18 @@ twine HelixLinkTask::GetCommandLine()
 		auto splits = twine(m_folder->FolderName()).split("/");
 		auto subFolder = splits[1];
 		twine tp( "../../../../../3rdParty/" );
-		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && " +
-			Link("../../bin/", "libhelix.logic." + subFolder ) +
-			ObjList( "./" ) + ObjList( "./sqldo/" ) +
+		cmd = "cd bin && " + 
+			Link("./", "libhelix.logic." + subFolder ) +
+			ObjList( "../" + m_folder->FolderName() + "/" ) + 
+			ObjList( "../" + m_folder->FolderName() + "/sqldo/" ) +
 			LinkLibs3( tp ) +
-			BinLib( "../../bin", "helix.glob" ) +
-			BinLib( "../../bin", "helix.client" );
+			BinLib( ".", "helix.glob" ) +
+			BinLib( ".", "helix.client" );
 
 		// Pick up any dependent folders from our config file
 		for(auto depName : HelixConfig::getInstance().LogicDepends( subFolder ) ){
 			cmd.append( 
-				BinLib( "../../bin", "helix.logic." + depName )
+				BinLib( ".", "helix.logic." + depName )
 			);
 		}
 

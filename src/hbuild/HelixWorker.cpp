@@ -104,6 +104,7 @@ void HelixWorker::Add(HelixLinkTask* task)
 
 	INFO(FL, "Linking Folder: %s", task->Folder()->FolderName()() );
 	if(!cmd.empty()){
+		DEBUG(FL, "Link Command:\n %s", cmd() );
 		int ret = std::system( cmd() );
 		if(ret != 0){
 			throw AnException(0, FL, "Link task failed!\nCommand is:\n%s", cmd() );
