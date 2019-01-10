@@ -98,7 +98,7 @@ twine HelixLinkTask::GetCommandLine()
 	} else if(m_folder->FolderName().startsWith("logic/") && !m_folder->FolderName().endsWith("/sqldo")){
 		auto splits = twine(m_folder->FolderName()).split("/");
 		auto subFolder = splits[1];
-		twine tp( "../../../../../3rdParty/" );
+		twine tp( "../../../../3rdParty/" );
 		cmd = "cd bin && " + 
 			Link("./", "libhelix.logic." + subFolder ) +
 			ObjList( "../" + m_folder->FolderName() + "/" ) + 
