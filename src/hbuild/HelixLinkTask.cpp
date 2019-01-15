@@ -536,7 +536,7 @@ twine HelixLinkTask::BinExt()
 twine HelixLinkTask::BinLib(const twine& bin, const twine& libName)
 {
 #ifdef _WIN32
-	return "-L" + FixPhysical( bin ) + " lib" + libName + LibExt() + " ";
+	return FixPhysical( bin ) + "\\lib" + libName + LibExt() + " ";
 #else
 	return "-L" + FixPhysical( bin ) + " -l" + libName + " ";
 #endif
