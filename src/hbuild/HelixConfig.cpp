@@ -70,6 +70,19 @@ vector<twine> HelixConfig::QxApps()
 	if(apps == nullptr) return ret;
 	for(auto app : XmlHelpers::FindChildren( apps, "App" )){
 		twine appName( app, "name" );
+		if(XmlHelpers::getBoolAttr( app, "noApi" ) == true) continue; // Skip these
+		ret.push_back( appName );
+	}
+	return ret;
+}
+
+vector<twine> HelixConfig::QxAppsAll()
+{
+	vector<twine> ret;
+	auto apps = XmlHelpers::FindChild( xmlDocGetRootElement( m_config ), "QxApps" );
+	if(apps == nullptr) return ret;
+	for(auto app : XmlHelpers::FindChildren( apps, "App" )){
+		twine appName( app, "name" );
 		ret.push_back( appName );
 	}
 	return ret;

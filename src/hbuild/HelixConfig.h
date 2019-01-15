@@ -44,8 +44,11 @@ class DLLEXPORT HelixConfig
 		/// Returns a flag indicating whether we should skip dealing with HelixPdfGen items
 		bool SkipPdfGen();
 
-		/// Returns a list of our Qx Applications
+		/// Returns a list of our Qx Applications that do not have noApi=true
 		vector<twine> QxApps();
+
+		/// Returns a list of all of our Qx Applications
+		vector<twine> QxAppsAll();
 
 		/// Returns a list of our Logic folders
 		vector<twine> Logics();

@@ -25,7 +25,7 @@ HBUILD_OH=hbuild.obj HelixFS.obj HelixFSFolder.obj HelixFSFile.obj HelixBuilder.
 	HelixCompileTask.obj HelixLinkTask.obj HelixInstallTask.obj HelixSqldoParam.obj HelixSqldoMethod.obj \
 	HelixSqldoChildVector.obj HelixSqldoChildObject.obj HelixSqldoSortFunction.obj HelixSqldoMatchFunction.obj \
 	HelixSqldo.obj HelixGenTask.obj HelixJSApiGenTask.obj HelixConfig.obj HelixSqldoValidateFunction.obj \
-	HelixAutoAsset.obj
+	HelixAutoAsset.obj HelixJSGenTask.obj
 
 .cpp.obj:
 	$(CC) $(CFLAGS) $<

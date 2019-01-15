@@ -24,6 +24,7 @@ using namespace SLib;
 #include "HelixBuilder.h"
 #include "HelixWorker.h"
 #include "HelixAutoAsset.h"
+#include "HelixJSGenTask.h"
 using namespace Helix::Build;
 
 twine m_platform;
@@ -34,6 +35,7 @@ void handleClean();
 void handleGen(bool displayBanner = true);
 void handleReGen(bool displayBanner = true);
 void handleJSApiGen(bool displayBanner = true);
+void handleJSGen(bool displayBanner = true);
 void handleCS(bool displayBanner = true);
 void handleInstall(bool displayBanner = true);
 void handleDeploy(bool displayBanner = true);
@@ -90,6 +92,7 @@ int main (int argc, char** argv)
 				else if(targ == "gen") handleGen();
 				else if(targ == "regen") handleReGen();
 				else if(targ == "jsapi") handleJSApiGen();
+				else if(targ == "jsgen") handleJSGen();
 				else if(targ == "cs") handleCS();
 				else if(targ == "install") handleInstall();
 				else if(targ == "dep") handleDeploy();
@@ -248,6 +251,20 @@ void handleJSApiGen(bool displayBanner)
 
 	HelixBuilder builder;	
 	builder.GenerateJSApi();
+}
+
+void handleJSGen(bool displayBanner)
+{
+	if(displayBanner){
+		printf("============================================================================\n");
+		printf("== JS Gen Target\n");
+		printf("============================================================================\n");
+	}
+
+	HelixJSGenTask jsgen;	
+	for(auto app : HelixConfig::getInstance().QxAppsAll()){
+		jsgen.Generate( app );
+	}
 }
 
 void handleCS(bool displayBanner)
