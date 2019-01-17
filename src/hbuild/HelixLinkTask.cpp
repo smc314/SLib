@@ -186,7 +186,7 @@ bool HelixLinkTask::RequiresLink()
 
 	// Special case for glob - if any of the obj files in glob, logic/util, logic/admin are newer than our link
 	// target, then we need to re-link glob because it combines all of them
-	if(m_folder->FolderName() == "glob"){
+	if(m_folder->FolderName().endsWith("glob") ){
 		twine globLinkTarget( LinkTarget() );
 		HelixFSFolder logicUtil = HelixFS::getInstance().FindPath( "logic/util" );
 		if(logicUtil){
