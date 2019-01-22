@@ -164,7 +164,7 @@ void HelixExtractStrings::HandleLayoutNode( xmlNodePtr node )
 		// No static labels
 	} else if(strcmp( (const char*)(node->name), "GroupBox" ) == 0){
 		twine legend( node, "legend" ); OutputStaticLabel( legend );
-	//} else if(strcmp( (const char*)(node->name), "HandsOnTable" ) == 0){
+	} else if(strcmp( (const char*)(node->name), "HandsOnTable" ) == 0){
 		// No static labels
 	} else if(strcmp( (const char*)(node->name), "HorizontalBoxLayout" ) == 0){
 		// No static labels
@@ -175,6 +175,8 @@ void HelixExtractStrings::HandleLayoutNode( xmlNodePtr node )
 	} else if(strcmp( (const char*)(node->name), "HorizontalSplitPaneRight" ) == 0){
 		// No static labels
 	} else if(strcmp( (const char*)(node->name), "HtmlEmbed" ) == 0){
+		// No static labels
+	} else if(strcmp( (const char*)(node->name), "Image" ) == 0){
 		// No static labels
 	} else if(strcmp( (const char*)(node->name), "IFrame" ) == 0){
 		// No static labels
@@ -202,6 +204,17 @@ void HelixExtractStrings::HandleLayoutNode( xmlNodePtr node )
 		twine tooltip2( node, "tooltip2" ); OutputStaticLabel( tooltip2 );
 		twine tooltip3( node, "tooltip3" ); OutputStaticLabel( tooltip3 );
 		twine tooltip4( node, "tooltip4" ); OutputStaticLabel( tooltip4 );
+	} else if(strcmp( (const char*)(node->name), "QuintField" ) == 0){
+		twine label1( node, "label1" ); OutputStaticLabel( label1 );
+		twine label2( node, "label2" ); OutputStaticLabel( label2 );
+		twine label3( node, "label3" ); OutputStaticLabel( label3 );
+		twine label4( node, "label4" ); OutputStaticLabel( label4 );
+		twine label5( node, "label5" ); OutputStaticLabel( label5 );
+		twine tooltip1( node, "tooltip1" ); OutputStaticLabel( tooltip1 );
+		twine tooltip2( node, "tooltip2" ); OutputStaticLabel( tooltip2 );
+		twine tooltip3( node, "tooltip3" ); OutputStaticLabel( tooltip3 );
+		twine tooltip4( node, "tooltip4" ); OutputStaticLabel( tooltip4 );
+		twine tooltip5( node, "tooltip5" ); OutputStaticLabel( tooltip5 );
 	} else if(strcmp( (const char*)(node->name), "RadioGroup2" ) == 0){
 		twine label1( node, "label1" ); OutputStaticLabel( label1 );
 		twine label2( node, "label2" ); OutputStaticLabel( label2 );
@@ -214,12 +227,29 @@ void HelixExtractStrings::HandleLayoutNode( xmlNodePtr node )
 		twine label2( node, "label2" ); OutputStaticLabel( label2 );
 		twine label3( node, "label3" ); OutputStaticLabel( label3 );
 		twine label4( node, "label4" ); OutputStaticLabel( label4 );
+	} else if(strcmp( (const char*)(node->name), "RadioGroupHorizontal4" ) == 0){
+		twine label1( node, "label1" ); OutputStaticLabel( label1 );
+		twine label2( node, "label2" ); OutputStaticLabel( label2 );
+		twine label3( node, "label3" ); OutputStaticLabel( label3 );
+		twine label4( node, "label4" ); OutputStaticLabel( label4 );
 	} else if(strcmp( (const char*)(node->name), "RadioGroup5" ) == 0){
 		twine label1( node, "label1" ); OutputStaticLabel( label1 );
 		twine label2( node, "label2" ); OutputStaticLabel( label2 );
 		twine label3( node, "label3" ); OutputStaticLabel( label3 );
 		twine label4( node, "label4" ); OutputStaticLabel( label4 );
+		twine label5( node, "label5" ); OutputStaticLabel( label5 );
 		twine labelPrefix( node, "labelPrefix" ); OutputStaticLabel( labelPrefix );
+	} else if(strcmp( (const char*)(node->name), "RadioGroup6" ) == 0){
+		twine label1( node, "label1" ); OutputStaticLabel( label1 );
+		twine label2( node, "label2" ); OutputStaticLabel( label2 );
+		twine label3( node, "label3" ); OutputStaticLabel( label3 );
+		twine label4( node, "label4" ); OutputStaticLabel( label4 );
+		twine label5( node, "label5" ); OutputStaticLabel( label5 );
+		twine label6( node, "label6" ); OutputStaticLabel( label6 );
+	} else if(strcmp( (const char*)(node->name), "RadioGroupBoxGroup" ) == 0){
+		// No static labels
+	} else if(strcmp( (const char*)(node->name), "Scroll" ) == 0){
+		// No static labels
 	} else if(strcmp( (const char*)(node->name), "SingleCheck" ) == 0){
 		twine label1( node, "label1" ); OutputStaticLabel( label1 );
 	} else if(strcmp( (const char*)(node->name), "Spacer" ) == 0){
@@ -235,6 +265,10 @@ void HelixExtractStrings::HandleLayoutNode( xmlNodePtr node )
 		// No static labels
 	} else if(strcmp( (const char*)(node->name), "TreeVirtual" ) == 0){
 		// No static labels
+	} else if(strcmp( (const char*)(node->name), "TripleCheck" ) == 0){
+		twine label1( node, "label1" ); OutputStaticLabel( label1 );
+		twine label2( node, "label2" ); OutputStaticLabel( label2 );
+		twine label3( node, "label3" ); OutputStaticLabel( label3 );
 	} else if(strcmp( (const char*)(node->name), "TripleField" ) == 0){
 		twine label1( node, "label1" ); OutputStaticLabel( label1 );
 		twine label2( node, "label2" ); OutputStaticLabel( label2 );
