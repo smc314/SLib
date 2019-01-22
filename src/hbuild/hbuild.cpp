@@ -24,6 +24,7 @@ using namespace SLib;
 #include "HelixBuilder.h"
 #include "HelixWorker.h"
 #include "HelixAutoAsset.h"
+#include "HelixExtractStrings.h"
 #include "HelixJSGenTask.h"
 using namespace Helix::Build;
 
@@ -40,6 +41,7 @@ void handleCS(bool displayBanner = true);
 void handleInstall(bool displayBanner = true);
 void handleDeploy(bool displayBanner = true);
 void handleAsset(bool displayBanner = true);
+void handleStrings(bool displayBanner = true);
 void testDep();
 void CopyCore();
 
@@ -98,6 +100,7 @@ int main (int argc, char** argv)
 				else if(targ == "dep") handleDeploy();
 				else if(targ == "testdep") testDep();
 				else if(targ == "asset") handleAsset();
+				else if(targ == "strings") handleStrings();
 			}
 		}
 	
@@ -160,6 +163,7 @@ void handleAll()
 	}
 
 	handleAsset(false);
+	handleStrings(false);
 	handleJSApiGen(false);
 
 	if(HelixWorker::getInstance().NeedsCSRebuild()){
@@ -239,6 +243,18 @@ void handleAsset(bool displayBanner)
 
 	HelixAutoAsset asset;	
 	asset.Generate();
+}
+
+void handleStrings(bool displayBanner)
+{
+	if(displayBanner){
+		printf("============================================================================\n");
+		printf("== Extract Strings Target\n");
+		printf("============================================================================\n");
+	}
+
+	HelixExtractStrings strings;	
+	strings.Generate();
 }
 
 void handleJSApiGen(bool displayBanner)
