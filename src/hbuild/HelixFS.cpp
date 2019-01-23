@@ -56,8 +56,8 @@ void HelixFS::Load()
 	auto root = std::make_shared<HelixFSFolder_Bare>( "root" ); root->Load(); m_folders.push_back( root );
 	if(HelixConfig::getInstance().UseCore() == false){
 		// Load these folders only when not using a core project helper
-		auto build = std::make_shared<HelixFSFolder_Bare>( "build" ); 
-		build->Load(); m_folders.push_back( build );
+		//auto build = std::make_shared<HelixFSFolder_Bare>( "build" ); 
+		//build->Load(); m_folders.push_back( build );
 		auto client = std::make_shared<HelixFSFolder_Bare>( "client" ); 
 		client->Load(); m_folders.push_back( client );
 		auto glob = std::make_shared<HelixFSFolder_Bare>( "glob" ); 
