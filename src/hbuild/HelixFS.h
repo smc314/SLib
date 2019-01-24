@@ -56,6 +56,9 @@ class DLLEXPORT HelixFS
 		// Converts forward to backslash if necessary based on current platform
 		static twine FixPhysical( const twine& path );
 
+		// Returns our repository name - based on our current folder path
+		static twine OurRepo();
+
 		// Returns our cache 
 		xmlDocPtr GetCache();
 

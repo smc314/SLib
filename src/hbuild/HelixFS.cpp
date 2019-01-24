@@ -66,6 +66,13 @@ void HelixFS::Load()
 		server->Load(); m_folders.push_back( server );
 	}
 	auto logic = std::make_shared<HelixFSFolder_Bare>( "logic" ); logic->Load(); m_folders.push_back( logic );
+
+	// Also load the logic folder for all external repos that we reference
+	for(auto& repoName : HelixConfig::getInstance().LogicRepos() ){
+		auto external_logic = std::make_shared<HelixFSFolder_Bare>( "../../../" + repoName + "/server/c/logic" );
+		external_logic->Load();
+		m_folders.push_back( external_logic );
+	}
 }
 
 HelixFSFile HelixFS::FindFile(const twine& fileName)
@@ -133,14 +140,40 @@ HelixFSFolder HelixFS::FindFolder(const twine& folderName)
 
 HelixFSFolder HelixFS::FindPath(const twine& folderPath)
 {
+	EnEx ee(FL, "HelixFS::FindPath(const twine& folderPath)");
+
 	twine path( folderPath );
+
+	// See which of our top level folders best matches the given path
+	HelixFSFolder topFolder = nullptr;
+	for(auto folder : m_folders){
+		if(path.startsWith( folder->FolderName() )){
+			topFolder = folder;
+			break;
+		}
+	}
+	if(topFolder == nullptr){
+		return nullptr;
+	}
+
+	if(path.length() == topFolder->FolderName().length()){
+		// Exact match, just return topFolder
+		return topFolder;
+	}
+
+	// Now look for the rest of the path from that top folder - minus the prefix that already matched
+	path = path.substr( topFolder->FolderName().length() );
+	if(path.startsWith( "/" )){
+		path = path.substr( 1 ); // remove the leading slash
+	}
+
 	vector<twine> pathSplits = path.split("/");
 	if(pathSplits.size() == 0){
 		return nullptr;
 	}
 
-	// Find the top level folder first:
-	HelixFSFolder currentFolder = FindFolder( pathSplits[0] );
+	// Start with the top level folder first:
+	HelixFSFolder currentFolder = topFolder->FindFolder( pathSplits[0] );
 	if(currentFolder == nullptr) return nullptr;
 
 	for(size_t i = 1; i < pathSplits.size(); i++){
@@ -182,3 +215,17 @@ void HelixFS::SaveCache()
 	xmlSaveFile( "hbuild.cache", GetCache() );
 }
 
+twine HelixFS::OurRepo()
+{
+	twine pwd = File::Pwd();
+#ifdef _WIN32
+	pwd.replace( '\\', '/' ); // Normalize all path separators to forward-slash
+#endif
+
+	vector<twine> splits = pwd.split( "/" );
+	// We live in the folder blah/blah/blah/reponame/server/c folder  We want size - 3 as the reponame
+	if(splits.size() < 3){
+		throw AnException(0, FL, "Cannot determine our repo - path must have at least 3 components: %s", pwd() );
+	}
+	return splits[ splits.size() - 3 ];
+}

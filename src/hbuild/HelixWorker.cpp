@@ -88,6 +88,12 @@ void HelixWorker::Add(HelixLinkTask* task)
 	dptr<HelixLinkTask> t = task;
 	twine cmd( task->GetCommandLine() );
 	if(cmd.empty()){
+		if(task->Folder()->FolderName() != "logic/util" &&
+			task->Folder()->FolderName() != "logic/admin" &&
+			task->Folder()->FolderName() != "server"
+		){
+			WARN(FL, "Link Command is empty for: %s", task->Folder()->FolderName()() );
+		}
 		return; // bail out immediately - no reason to wait on this
 	}
 
@@ -130,6 +136,9 @@ void HelixWorker::Add(HelixGenTask* task)
 	EnEx ee(FL, "HelixWorker::Add(HelixGenTask* task)");
 
 	m_gen_queue.push( task );
+
+	// Sleep for a moment to allow other threads to start and work
+	Tools::msleep( 100 );
 }
 
 void HelixWorker::WaitForGenerators()

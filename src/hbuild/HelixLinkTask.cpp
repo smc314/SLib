@@ -95,9 +95,9 @@ twine HelixLinkTask::GetCommandLine()
 			"HelixApi_Part2" + ObjExt() +
 			LinkLibs2( tp ) +
 			BinLib( "../bin", "helix.glob" );
-	} else if(m_folder->FolderName().startsWith("logic/") && !m_folder->FolderName().endsWith("/sqldo")){
+	} else if(m_folder->FolderName().find("logic/") != TWINE_NOT_FOUND && !m_folder->FolderName().endsWith("/sqldo")){
 		auto splits = twine(m_folder->FolderName()).split("/");
-		auto subFolder = splits[1];
+		auto subFolder = splits[ splits.size() - 1];
 		twine tp( "../../../../3rdParty/" );
 		cmd = "cd bin && " + 
 			Link("./", "libhelix.logic." + subFolder ) +
@@ -114,7 +114,7 @@ twine HelixLinkTask::GetCommandLine()
 			);
 		}
 
-	} else if(m_folder->FolderName().startsWith("logic/") && m_folder->FolderName().endsWith("/sqldo")){
+	} else if(m_folder->FolderName().find("logic/") != TWINE_NOT_FOUND && m_folder->FolderName().endsWith("/sqldo")){
 		// Nothing to do
 	} else if(m_folder->FolderName() == "HelixMain"){
 		twine tp( "../../../../3rdParty/" );
@@ -158,11 +158,11 @@ twine HelixLinkTask::LinkTarget()
 		return ""; // no library to link
 	} else if(m_folder->FolderName() == "client"){
 		return "./bin/libhelix.client" + DLLExt();
-	} else if(m_folder->FolderName().startsWith("logic/") && !m_folder->FolderName().endsWith("/sqldo")){
+	} else if(m_folder->FolderName().find("logic/") != TWINE_NOT_FOUND && !m_folder->FolderName().endsWith("/sqldo")){
 		vector<twine> splits = twine(m_folder->FolderName()).split("/");
-		twine subFolder = splits[1];
+		twine subFolder = splits[ splits.size() - 1 ];
 		return "./bin/libhelix.logic." + subFolder + DLLExt();
-	} else if(m_folder->FolderName().startsWith("logic/") && m_folder->FolderName().endsWith("/sqldo")){
+	} else if(m_folder->FolderName().find("logic/") != TWINE_NOT_FOUND && m_folder->FolderName().endsWith("/sqldo")){
 		return ""; // no library to link
 	} else if(m_folder->FolderName() == "HelixMain"){
 		return "./bin/HelixMain" + BinExt();

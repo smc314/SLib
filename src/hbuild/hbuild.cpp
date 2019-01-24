@@ -153,7 +153,14 @@ void handleAll()
 
 	// Use the config file to tell us which logics to build, and in what order
 	for(auto& logic : HelixConfig::getInstance().Logics() ){
-		builder.Build( "logic/" + logic );
+		twine repo = HelixConfig::getInstance().LogicRepo( logic );
+		if(repo.empty()){
+			// Normal local logic folder
+			builder.Build( "logic/" + logic );
+		} else {
+			// Logic folder from another repo - adjust the path
+			builder.Build( "../../../" + repo + "/server/c/logic/" + logic );
+		}
 	}
 
 	if(!HelixConfig::getInstance().UseCore()){
@@ -194,7 +201,14 @@ void handleClean()
 
 	// Use the config file to tell us which logics to build, and in what order
 	for(auto& logic : HelixConfig::getInstance().Logics() ){
-		builder.Clean( "logic/" + logic);
+		twine repo = HelixConfig::getInstance().LogicRepo( logic );
+		if(repo.empty()){
+			// Normal local logic folder
+			builder.Clean( "logic/" + logic);
+		} else {
+			// Logic folder from another repo - adjust the path
+			builder.Clean( "../../../" + repo + "/server/c/logic/" + logic );
+		}
 	}
 
 	if(!HelixConfig::getInstance().UseCore()){

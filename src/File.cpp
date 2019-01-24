@@ -8,6 +8,7 @@ using namespace SLib;
 #else
 #include <dirent.h>
 #endif
+#include <errno.h>
 
 File::File()
 {
@@ -549,4 +550,54 @@ void File::RmDir(const twine& dirName)
 	rmdir( dirName() );
 #endif
 
+}
+
+twine File::PathCombine(const twine& prefix, const twine& suffix)
+{
+	EnEx ee("File::PathCombine(const twine& prefix, const twine& suffix)");
+
+	twine ret(prefix);
+	if(!ret.endsWith("/") && !ret.endsWith("\\")){
+		ret.append("/");
+	}
+	if(suffix.startsWith("/") || suffix.startsWith("\\")){
+		if(suffix.length() > 1){
+			ret.append( suffix.substr(1) );
+		} else {
+			// nothing to do
+		}
+	} else {
+		ret.append( suffix );
+	}
+	return ret;
+}
+
+twine File::Pwd()
+{
+	EnEx ee("File::Pwd()");
+
+	twine ret;
+	ret.reserve( 4096 );
+	char* checkptr;
+#ifdef _WIN32
+	checkptr = _getcwd( ret.data(), (int)ret.size() );
+#else
+	checkptr = getcwd( ret.data(), ret.size() );
+#endif
+	if(checkptr == NULL){
+		if(errno == EINVAL){
+			throw AnException(0, FL, "Error getting cwd - size is zero");
+		} else if(errno == ENOENT){
+			throw AnException(0, FL, "Error getting cwd - a component of the pathname no longer exists.");
+		} else if(errno == ENOMEM){
+			throw AnException(0, FL, "Error getting cwd - insufficient memory to store the pathname.");
+		} else if(errno == ERANGE){
+			throw AnException(0, FL, "Error getting cwd - 4096 is not large enough to store the pathname.");
+		} else {
+			throw AnException(0, FL, "Error getting cwd - unknown errno");
+		}
+	}
+
+	ret.check_size();
+	return ret;
 }

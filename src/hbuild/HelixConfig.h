@@ -53,6 +53,12 @@ class DLLEXPORT HelixConfig
 		/// Returns a list of our Logic folders
 		vector<twine> Logics();
 
+		/// Returns a list of all external repo's that we need to reference
+		vector<twine> LogicRepos();
+
+		/// Returns a repository name or blank for the given logic name
+		twine LogicRepo( const twine& logic );
+
 		/// Returns a list of dependencies for a given logic folder
 		vector<twine> LogicDepends( const twine& logic );
 

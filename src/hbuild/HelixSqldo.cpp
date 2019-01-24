@@ -90,12 +90,26 @@ twine HelixSqldo::LogicFolder()
 
 twine HelixSqldo::CPPHeaderFileName()
 {
-	return "./" + m_package_name + "/sqldo/" + m_class_name + ".h";
+	twine logicRepo( HelixConfig::getInstance().LogicRepo( LogicFolder() ) );
+	if(logicRepo.empty()){
+		// Regular local logic folder
+		return "./" + m_package_name + "/sqldo/" + m_class_name + ".h";
+	} else {
+		// Logic folder lives in another repository
+		return "../../../" + logicRepo + "/server/c/" + m_package_name + "/sqldo/" + m_class_name + ".h";
+	}
 }
 
 twine HelixSqldo::CPPBodyFileName()
 {
-	return "./" + m_package_name + "/sqldo/" + m_class_name + ".cpp";
+	twine logicRepo( HelixConfig::getInstance().LogicRepo( LogicFolder() ) );
+	if(logicRepo.empty()){
+		// Regular local logic folder
+		return "./" + m_package_name + "/sqldo/" + m_class_name + ".cpp";
+	} else {
+		// Logic folder lives in another repository
+		return "../../../" + logicRepo + "/server/c/" + m_package_name + "/sqldo/" + m_class_name + ".cpp";
+	}
 }
 
 twine HelixSqldo::CSBodyFileName()

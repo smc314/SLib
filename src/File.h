@@ -157,6 +157,12 @@ class DLLEXPORT File
 		/// Recursively deletes the given directory
 		static void RmDir(const twine& dirName);
 
+		/// Combine file paths with each other
+		static twine PathCombine( const twine& prefix, const twine& suffix );
+
+		/// Use this to determine the current working directory
+		static twine Pwd();
+
 	protected:
 
 		void closeFile();

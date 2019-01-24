@@ -13,6 +13,7 @@
 #include <Log.h>
 #include <XmlHelpers.h>
 #include <Timer.h>
+#include <suvector.h>
 using namespace SLib;
 
 #include "HelixConfig.h"
@@ -98,6 +99,32 @@ vector<twine> HelixConfig::Logics()
 		ret.push_back( lName );
 	}
 	return ret;
+}
+
+vector<twine> HelixConfig::LogicRepos()
+{
+	suvector<twine> ret;
+	auto node = XmlHelpers::FindChild( xmlDocGetRootElement( m_config ), "Logics" );
+	if(node == nullptr) return ret;
+	for(auto l : XmlHelpers::FindChildren( node, "Logic" )){
+		twine repo( l, "repo" );
+		if(repo.empty() == false){
+			ret.push_back( repo );
+		}
+	}
+	return ret;
+}
+
+twine HelixConfig::LogicRepo( const twine& logic )
+{
+	auto node = XmlHelpers::FindChild( xmlDocGetRootElement( m_config ), "Logics" );
+	if(node == nullptr) return "";
+	auto child = XmlHelpers::FindChildWithAttribute( node, "Logic", "name", logic() );
+	if(child == nullptr){ // No Logic with this name
+		return "";
+	}
+	twine repo( child, "repo" );
+	return repo;
 }
 
 vector<twine> HelixConfig::LogicDepends(const twine& logic)

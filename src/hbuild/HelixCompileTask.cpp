@@ -111,27 +111,29 @@ twine HelixCompileTask::GetCommandLine()
 			"-I../glob -I../logic/admin -I../logic/admin/sqldo -I../logic/util -I../logic/util/sqldo "
 		);
 		cmd.append( m_file->FileName() );
-	} else if(m_file->FolderName().startsWith("logic/") && !m_file->FolderName().endsWith("/sqldo")){
-		cmd.append(CC(tpl5) + "-I sqldo " + LogicIncludes());
-
-		// Pick up any dependent folders from our config file
+	} else if(m_file->FolderName().find("logic/") != TWINE_NOT_FOUND && !m_file->FolderName().endsWith("/sqldo")){
 		auto splits = twine(m_file->FolderName()).split("/");
 		auto& logicName = splits[ splits.size() - 1 ];
+
+		cmd.append(CC(tpl5) + "-I sqldo " + LogicIncludes(logicName));
+
+		// Pick up any dependent folders from our config file
 		for(auto& depName : HelixConfig::getInstance().LogicDepends( logicName ) ){
-			cmd.append( "-I ../" + depName + " -I ../" + depName + "/sqldo " );
+			cmd.append( DependentInclude( logicName, depName, false ) );
 		}
 
 		cmd.append( m_file->FileName() );
-	} else if(m_file->FolderName().startsWith("logic/") && m_file->FolderName().endsWith("/sqldo")){
-		cmd.append(CC(tpl6) + LogicIncludes(true));
-
-		// Pick up any dependent folders from our config file
+	} else if(m_file->FolderName().find("logic/") != TWINE_NOT_FOUND && m_file->FolderName().endsWith("/sqldo")){
 		auto splits = twine(m_file->FolderName()).split("/");
 		auto& logicName = splits[ splits.size() - 2 ];
 		//printf("Logic name is %s\n", logicName() );
+
+		cmd.append(CC(tpl6) + LogicIncludes(logicName, true));
+
+		// Pick up any dependent folders from our config file
 		auto deps = HelixConfig::getInstance().LogicDepends( logicName );
 		for(auto depName : deps){
-			cmd.append( " -I ../../" + depName + "/sqldo " );
+			cmd.append( DependentInclude( logicName, depName, true ) );
 		}
 		//printf("Finished adding dependencies\n");
 
@@ -182,37 +184,72 @@ twine HelixCompileTask::CC(const twine& tpl)
 #endif
 }
 
-twine HelixCompileTask::LogicIncludes(bool fromSqldo)
+twine HelixCompileTask::LogicIncludes(const twine& logicName, bool fromSqldo)
 {
-	if(HelixConfig::getInstance().UseCore()){
-		twine coreFolder = HelixConfig::getInstance().CoreFolder();
+	HelixConfig& conf = HelixConfig::getInstance();
+	twine prefix;
+	if(conf.UseCore()){
+		twine coreFolder = conf.CoreFolder();
 		if(fromSqldo){
-			return "-I../../../" + coreFolder + "/server/c/glob "
-				"-I../../../" + coreFolder + "/server/c/client "
-				"-I../../../" + coreFolder + "/server/c/logic/util "
-				"-I../../../" + coreFolder + "/server/c/logic/util/sqldo "
-				"-I../../../" + coreFolder + "/server/c/logic/admin "
-				"-I../../../" + coreFolder + "/server/c/logic/admin/sqldo ";
+			prefix = "-I../../../" + coreFolder + "/server/c";
 		} else {
-			return "-I../../" + coreFolder + "/server/c/glob "
-				"-I../../" + coreFolder + "/server/c/client "
-				"-I../../" + coreFolder + "/server/c/logic/util "
-				"-I../../" + coreFolder + "/server/c/logic/util/sqldo "
-				"-I../../" + coreFolder + "/server/c/logic/admin "
-				"-I../../" + coreFolder + "/server/c/logic/admin/sqldo ";
+			prefix = "-I../../" + coreFolder + "/server/c";
 		}
 	} else {
-		if(fromSqldo){
-			return "-I../../../glob "
-				"-I../../../client "
-				"-I../../util -I../../util/sqldo "
-				"-I../../admin -I../../admin/sqldo ";
-		} else {
-			return "-I../../glob "
-				"-I../../client "
-				"-I../util -I../util/sqldo "
-				"-I../admin -I../admin/sqldo ";
+		auto logicRepo = conf.LogicRepo( logicName );
+		if(logicRepo.empty()){ // Just a normal local logic folder
+			if(fromSqldo){
+				prefix = "-I../../..";
+			} else {
+				prefix = "-I../..";
+			}
+		} else { // This is a remote logic folder, the paths get more complex
+			auto ourRepo = HelixFS::OurRepo();
+			if(fromSqldo){
+				// The compile is targeting a folder that looks like this:
+				// repo-name/server/c/logic/logic_name/sqldo
+				//
+				// We need to back out of all of that and reference our repo for glob, client, etc
+				prefix = "-I../../../../../../" + ourRepo + "/server/c";
+			} else {
+				// The compile is targeting a folder that looks like this:
+				// repo-name/server/c/logic/logic_name
+				//
+				// We need to back out of all of that and reference our repo for glob, client, etc
+				prefix = "-I../../../../../" + ourRepo + "/server/c";
+			}
 		}
 	}
 
+	return prefix + "/glob " +
+		prefix + "/client " +
+		prefix + "/logic/util " + prefix + "/logic/util/sqldo " +
+		prefix + "/logic/admin " + prefix + "/logic/admin/sqldo ";
+
+}
+
+twine HelixCompileTask::DependentInclude(const twine& ourLogic, const twine& depLogic, bool fromSqldo)
+{
+	HelixConfig& conf = HelixConfig::getInstance();
+	twine prefix;
+
+	auto depRepo = conf.LogicRepo( depLogic ); // What repo are they in?
+	if(depRepo.empty()){
+		// they are in the same repo as we are - easy path to configure
+		if(fromSqldo){
+			prefix = "-I../../" + depLogic;
+		} else {
+			prefix = "-I../" + depLogic;
+		}
+	} else {
+		// they are in a different repository - path gets more complex
+		if(fromSqldo){
+			prefix = "-I../../../../../../" + depRepo + "/server/c/logic/" + depLogic;
+		} else {
+			prefix = "-I../../../../../" + depRepo + "/server/c/logic/" + depLogic;
+		}
+	}
+
+	// Include the dependent logic folder and the dependent logic sqldo folder
+	return prefix + " " + prefix + "/sqldo";
 }

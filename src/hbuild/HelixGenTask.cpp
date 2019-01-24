@@ -87,17 +87,20 @@ void HelixGenTask::Generate()
 
 	// Generate the C++ Header file
 	twine target = m_sqldo.CPPHeaderFileName();
+	DEBUG(FL, "Writing CPP Header to: %s", target() );
 	File::EnsurePath( target );
 	File::writeToFile( target, m_sqldo.GenCPPHeader() );
 
 	// Generate the C++ Body File
 	target = m_sqldo.CPPBodyFileName();
+	DEBUG(FL, "Writing CPP Body to: %s", target() );
 	File::EnsurePath( target );
 	File::writeToFile( target, m_sqldo.GenCPPBody() );
 
 	// Generate the C# Object file
 	if(HelixConfig::getInstance().SkipPdfGen() == false){	
 		target = m_sqldo.CSBodyFileName();
+		DEBUG(FL, "Writing CS Body to: %s", target() );
 		File::EnsurePath( target );
 		File::writeToFile( target, m_sqldo.GenCSBody() );
 		HelixWorker::getInstance().NeedsCSRebuild( true );
@@ -106,19 +109,10 @@ void HelixGenTask::Generate()
 	// Generate the Javascript data object file in all of the correct qd app folders
 	for(auto& app : HelixConfig::getInstance().QxApps()){
 		target = m_sqldo.JSBodyFileName(app);
+		DEBUG(FL, "Writing JS Body to: %s", target() );
 		File::EnsurePath( target );
 		File::writeToFile( target, m_sqldo.GenJSBody(app) );
 	}
-	
-	// Not Us - Notes - Create ApiTests2.xml
-	
-	// Not Us - Notes - Create Api Test 1, 2, 3 xml files
-	
-	// Not Us - Notes - HelixApi.h
-	
-	// Not Us - Notes - HelixApi_Part2.cpp
-	
-	// Not Us - Notes - Api.js
 	
 }
 
