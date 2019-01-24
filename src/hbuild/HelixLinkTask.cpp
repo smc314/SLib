@@ -199,9 +199,9 @@ bool HelixLinkTask::RequiresLink()
 			}
 		}
 		HelixFSFolder logicAdmin = HelixFS::getInstance().FindPath( "logic/admin" );
-		if(logicUtil){
+		if(logicAdmin){
 			vector<HelixFSFile> cppFiles;
-			logicUtil->FindFilesByType(".cpp", cppFiles);
+			logicAdmin->FindFilesByType(".cpp", cppFiles);
 			for(auto file : cppFiles){
 				if(HelixFSFile_Bare::IsNewerThan( file->PhysicalDotOh(), globLinkTarget )){
 					return true; // Found a .o that is newer than our link target.  Re-link required
