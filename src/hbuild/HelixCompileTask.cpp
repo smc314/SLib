@@ -251,5 +251,5 @@ twine HelixCompileTask::DependentInclude(const twine& ourLogic, const twine& dep
 	}
 
 	// Include the dependent logic folder and the dependent logic sqldo folder
-	return prefix + " " + prefix + "/sqldo";
+	return prefix + " " + prefix + "/sqldo ";
 }
