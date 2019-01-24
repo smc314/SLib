@@ -44,6 +44,20 @@ HelixFSFile_Bare::~HelixFSFile_Bare()
 
 }
 
+void HelixFSFile_Bare::Reload()
+{
+	try {
+		File tmp( PhysicalFileName() );
+		m_file_last_modified = tmp.lastModified();
+		m_file_size = tmp.size();
+	} catch(AnException& e){
+		// Means the file doesn't exist
+		m_file_last_modified.SetMinValue();
+		m_file_size = 0;
+	}
+	m_lines.clear();
+}
+
 const twine& HelixFSFile_Bare::FileName() const
 {
 	return m_file;

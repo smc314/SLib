@@ -79,6 +79,9 @@ void HelixWorker::Add(HelixCompileTask* task)
 	EnEx ee(FL, "HelixWorker::Add(HelixCompileTask* task)");
 
 	m_compile_queue.push( task );
+
+	// Sleep for a moment to allow other threads to start and work
+	Tools::msleep( 100 );
 }
 
 void HelixWorker::Add(HelixLinkTask* task)
@@ -101,9 +104,7 @@ void HelixWorker::Add(HelixLinkTask* task)
 	Tools::msleep( 100 );
 
 	// Wait for all compiles to finish
-	while( m_compilers_working > 0 ){
-		Tools::msleep( 100 );
-	}
+	WaitForCompilers();
 	if(m_compiler_errors > 0){
 		return; // Skip the link step
 	}
@@ -146,6 +147,15 @@ void HelixWorker::WaitForGenerators()
 	EnEx ee(FL, "HelixWorker::WaitForGenerators()");
 
 	while( m_generators_working > 0 ){
+		Tools::msleep( 100 );
+	}
+}
+
+void HelixWorker::WaitForCompilers()
+{
+	EnEx ee(FL, "HelixWorker::WaitForCompilers()");
+
+	while( m_compilers_working > 0 ){
 		Tools::msleep( 100 );
 	}
 }
@@ -249,6 +259,15 @@ void HelixWorker::CompileThread()
 				break;
 			}
 		}
+
+		// Find our .obj file and reload it so we have the new size and last modified information
+		HelixFSFile dotOh = task->Folder()->FindFile( task->File()->DotOh() );
+		if(dotOh != nullptr){
+			dotOh->Reload();
+		} else {
+			WARN(FL, "Couldn't find the dotoh in parent folder: %s", task->File()->DotOh()() );
+		}
+
 		hw.CompileFinish();
 	}
 }

@@ -49,6 +49,8 @@ class DLLEXPORT HelixFSFile_Bare
 		/// Standard Destructor
 		virtual ~HelixFSFile_Bare();
 
+		void Reload();
+
 		const twine& FileName() const;
 		const twine& FolderName() const;
 		twine LastFolderName();

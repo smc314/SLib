@@ -20,6 +20,7 @@ using namespace SLib;
 #include "HelixConfig.h"
 #include "HelixFS.h"
 #include "HelixLinkTask.h"
+#include "HelixWorker.h"
 using namespace Helix::Build;
 
 
@@ -187,6 +188,7 @@ bool HelixLinkTask::RequiresLink()
 	// Special case for glob - if any of the obj files in glob, logic/util, logic/admin are newer than our link
 	// target, then we need to re-link glob because it combines all of them
 	if(m_folder->FolderName().endsWith("glob") ){
+		HelixWorker::getInstance().WaitForCompilers();
 		twine globLinkTarget( LinkTarget() );
 		HelixFSFolder logicUtil = HelixFS::getInstance().FindPath( "logic/util" );
 		if(logicUtil){

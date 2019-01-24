@@ -249,6 +249,9 @@ void handleReGen(bool displayBanner)
 
 void handleAsset(bool displayBanner)
 {
+	if(HelixWorker::getInstance().HasError()){
+		return;
+	}
 	if(displayBanner){
 		printf("============================================================================\n");
 		printf("== Auto-Asset Target\n");
@@ -261,6 +264,9 @@ void handleAsset(bool displayBanner)
 
 void handleStrings(bool displayBanner)
 {
+	if(HelixWorker::getInstance().HasError()){
+		return;
+	}
 	if(displayBanner){
 		printf("============================================================================\n");
 		printf("== Extract Strings Target\n");
@@ -273,6 +279,9 @@ void handleStrings(bool displayBanner)
 
 void handleJSApiGen(bool displayBanner)
 {
+	if(HelixWorker::getInstance().HasError()){
+		return;
+	}
 	if(displayBanner){
 		printf("============================================================================\n");
 		printf("== JS API Gen Target\n");
@@ -285,6 +294,9 @@ void handleJSApiGen(bool displayBanner)
 
 void handleJSGen(bool displayBanner)
 {
+	if(HelixWorker::getInstance().HasError()){
+		return;
+	}
 	if(displayBanner){
 		printf("============================================================================\n");
 		printf("== JS Gen Target\n");
@@ -299,6 +311,9 @@ void handleJSGen(bool displayBanner)
 
 void handleCS(bool displayBanner)
 {
+	if(HelixWorker::getInstance().HasError()){
+		return;
+	}
 	if(displayBanner){
 		printf("============================================================================\n");
 		printf("== CS Target\n");
@@ -311,6 +326,9 @@ void handleCS(bool displayBanner)
 
 void handleInstall(bool displayBanner)
 {
+	if(HelixWorker::getInstance().HasError()){
+		return;
+	}
 	if(displayBanner){
 		printf("============================================================================\n");
 		printf("== Install Target\n");
@@ -328,6 +346,9 @@ void handleInstall(bool displayBanner)
 
 void handleDeploy(bool displayBanner)
 {
+	if(HelixWorker::getInstance().HasError()){
+		return;
+	}
 	if(displayBanner){
 		printf("============================================================================\n");
 		printf("== Deploy Target\n");

@@ -54,6 +54,7 @@ class DLLEXPORT HelixWorker
 		// Adds a Generate task to the list of things we need to do - we take ownership and will handle deleting it
 		void Add( HelixGenTask* task );
 		void WaitForGenerators();
+		void WaitForCompilers();
 
 		BlockingQueue<HelixCompileTask*>& CompileQueue();
 		BlockingQueue<HelixGenTask*>& GenQueue();

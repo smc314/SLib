@@ -45,7 +45,8 @@ void HelixFSFolder_Bare::Load()
 			file.endsWith( ".xml" ) ||
 			file.endsWith( ".sql" ) ||
 			file.endsWith( ".jpg" ) ||
-			file.endsWith( ".obj" )
+			file.endsWith( ".obj" ) ||
+			file.endsWith( ".o" )
 		){
 			auto fsFile = std::make_shared<HelixFSFile_Bare>( m_name, file );
 			m_files.push_back( fsFile );
