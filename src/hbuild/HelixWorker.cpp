@@ -265,7 +265,7 @@ void HelixWorker::CompileThread()
 		if(dotOh != nullptr){
 			dotOh->Reload();
 		} else {
-			WARN(FL, "Couldn't find the dotoh in parent folder: %s", task->File()->DotOh()() );
+			DEBUG(FL, "Couldn't find the dotoh in parent folder: %s", task->File()->DotOh()() );
 		}
 
 		hw.CompileFinish();
