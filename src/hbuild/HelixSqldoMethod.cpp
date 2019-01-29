@@ -96,8 +96,10 @@ map<twine, twine>& HelixSqldoMethod::BuildStatementParms(const twine& className)
 	m_parms[ "CSSqlReplaceObjParms" ] = csSqlReplaceObjParms;
 	m_parms[ "InputDOParms" ] = inputDOParms;
 	if(inputs.size() != 0){
+		m_parms[ "CPPInputParmsIdx" ] = "\tsize_t idx = 0;";
 		m_parms[ "CSInputParmsIdx" ] = "\t\t\tint idx = 0;";
 	} else {
+		m_parms[ "CPPInputParmsIdx" ] = "\t// No input parms, so no need for idx;";
 		m_parms[ "CSInputParmsIdx" ] = "\t\t\t// No input parms, so no need for idx;";
 	}
 	

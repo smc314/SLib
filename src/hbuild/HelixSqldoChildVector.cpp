@@ -102,7 +102,7 @@ twine HelixSqldoChildVector::CPPJsonGet()
 
 twine HelixSqldoChildVector::CPPJsonSet() 
 {
-	return "\tcJSON* " + name + "_array = " + type + "::createJSONArray( child, \"" + name + "\", " + name + ".get() );\n"
+	return "\t" + type + "::createJSONArray( child, \"" + name + "\", " + name + ".get() );\n"
 	;
 }
 

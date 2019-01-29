@@ -90,11 +90,11 @@ twine HelixSqldoParam::CPPParm() const
 	else if(type == "long") return ", long " + name;
 	else if(type == "float") return ", float " + name;
 	else if(type == "bool") return ", bool " + name;
-	else if(type == "cdata") return ", twine& " + name;
-	else if(type == "base64") return ", twine& " + name;
-	else if(type == "bin") return ", MemBuf& " + name;
+	else if(type == "cdata") return ", const twine& " + name;
+	else if(type == "base64") return ", const twine& " + name;
+	else if(type == "bin") return ", const MemBuf& " + name;
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") return ", const Date& " + name;
-	else return ", " + type + "& " + name;
+	else return ", const " + type + "& " + name;
 }
 
 twine HelixSqldoParam::CPPInit() const

@@ -87,7 +87,7 @@ twine ${doName}::${methodName}_prepSQL(IOConn& ioc, ${doName}& obj )
 {
 	EnEx ee(FL, "${doName}::${methodName}_prepSQL()");
 
-	size_t idx = 0;
+${CPPInputParmsIdx}
 	twine stmt = ${doName}::${methodName}_getSQL();
 
 ${SqlReplaceObjParms}
@@ -109,7 +109,7 @@ twine ${doName}::${methodName}_prepSQL(OdbcObj& odbc, ${doName}& obj )
 {
 	EnEx ee(FL, "${doName}::${methodName}_prepSQL()");
 
-	size_t idx = 0;
+${CPPInputParmsIdx}
 	twine stmt = ${doName}::${methodName}_getSQL();
 
 ${SqlReplaceObjParms}
