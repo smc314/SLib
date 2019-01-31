@@ -89,6 +89,7 @@ twine ${doName}::${methodName}_prepSQL(IOConn& ioc, ${doName}& obj )
 
 ${CPPInputParmsIdx}
 	twine stmt = ${doName}::${methodName}_getSQL();
+	ioc.getDBConnection()->RewriteSqlForCurrent( stmt ); // Must happen before replacing parms
 
 ${SqlReplaceObjParms}
 
@@ -111,6 +112,7 @@ twine ${doName}::${methodName}_prepSQL(OdbcObj& odbc, ${doName}& obj )
 
 ${CPPInputParmsIdx}
 	twine stmt = ${doName}::${methodName}_getSQL();
+	odbc.RewriteSqlForCurrent( stmt ); // Must happen before replacing parms
 
 ${SqlReplaceObjParms}
 

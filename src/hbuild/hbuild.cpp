@@ -44,6 +44,7 @@ void handleAsset(bool displayBanner = true);
 void handleStrings(bool displayBanner = true);
 void testDep();
 void CopyCore();
+void describe();
 
 int main (int argc, char** argv)
 {
@@ -101,6 +102,9 @@ int main (int argc, char** argv)
 				else if(targ == "testdep") testDep();
 				else if(targ == "asset") handleAsset();
 				else if(targ == "strings") handleStrings();
+				else if(targ == "?") describe();
+				else if(targ == "help") describe();
+				else if(targ == "-?") describe();
 			}
 		}
 	
@@ -131,6 +135,27 @@ int main (int argc, char** argv)
 	} else {
 		return 0; // No error
 	}
+}
+
+void describe()
+{
+	printf("============================================================================\n");
+	printf("== HBuild Options\n");
+	printf("============================================================================\n");
+	printf("== clean - cleans the build target\n");
+	printf("== all - does everything except dep\n");
+	printf("== gen - Generates the C++, JS, and C# from .sql.xml files as required\n");
+	printf("== regen - Forces a regeneration of the C++, JS, and C# from all .sql.xml\n");
+	printf("== jsapi - Generates the Api.js file in each of our QX projects\n");
+	printf("== jsgen - runs generate.py for all QX projects (build and source-hybrid)\n");
+	printf("== cs - recompiles the C# HelixPdfGen project if present\n");
+	printf("== install - Runs the install lines from the hbuild.xml file\n");
+	printf("== dep - Runs the Deploy section from the hbuild.xml file\n");
+	printf("== asset - Runs the auto-asset function against all QX projects\n");
+	printf("== strings - Runs the extract-strings process to build translation files\n");
+	printf("\n");
+	printf("== If no target is specified, the 'all' target is invoked.\n");
+	printf("\n");
 }
 
 void handleAll()
