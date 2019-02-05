@@ -64,7 +64,23 @@ void HelixFS::Load()
 		glob->Load(); m_folders.push_back( glob );
 		auto server = std::make_shared<HelixFSFolder_Bare>( "server" ); 
 		server->Load(); m_folders.push_back( server );
+	} else {
+		// Load client, glob, server, logic/util, logic/admin from core because we need to do dependency
+		// checking and c# code generation from them
+		auto coreFolder = HelixConfig::getInstance().CoreFolder();
+		auto client = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/client" ); 
+		client->Load(); m_folders.push_back( client );
+		auto glob = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/glob" ); 
+		glob->Load(); m_folders.push_back( glob );
+		auto server = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/server" ); 
+		server->Load(); m_folders.push_back( server );
+		auto admin = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/logic/admin" ); 
+		admin->Load(); m_folders.push_back( admin );
+		auto util = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/logic/util" ); 
+		util->Load(); m_folders.push_back( util );
 	}
+
+	// Load our own local logic folder
 	auto logic = std::make_shared<HelixFSFolder_Bare>( "logic" ); logic->Load(); m_folders.push_back( logic );
 
 	// Also load the logic folder for all external repos that we reference

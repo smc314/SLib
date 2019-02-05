@@ -85,21 +85,33 @@ void HelixGenTask::Generate()
 		throw AnException(0, FL, "Sanity check on %s failed.", m_file->PhysicalFileName()() );
 	}
 
+	bool useCore = HelixConfig::getInstance().UseCore();
+	bool fromCore = false;
+	if(useCore){
+		// Check to see if this file comes from the core folders, but only when we're using core
+		auto coreFolder = HelixConfig::getInstance().CoreFolder();
+		fromCore = m_file->PhysicalFileName().startsWith( coreFolder );
+	}
+
 	// Generate the C++ Header file
-	twine target = m_sqldo.CPPHeaderFileName();
-	DEBUG(FL, "Writing CPP Header to: %s", target() );
-	File::EnsurePath( target );
-	File::writeToFile( target, m_sqldo.GenCPPHeader() );
+	if(!fromCore){
+		twine target = m_sqldo.CPPHeaderFileName();
+		DEBUG(FL, "Writing CPP Header to: %s", target() );
+		File::EnsurePath( target );
+		File::writeToFile( target, m_sqldo.GenCPPHeader() );
+	}
 
 	// Generate the C++ Body File
-	target = m_sqldo.CPPBodyFileName();
-	DEBUG(FL, "Writing CPP Body to: %s", target() );
-	File::EnsurePath( target );
-	File::writeToFile( target, m_sqldo.GenCPPBody() );
+	if(!fromCore){
+		twine target = m_sqldo.CPPBodyFileName();
+		DEBUG(FL, "Writing CPP Body to: %s", target() );
+		File::EnsurePath( target );
+		File::writeToFile( target, m_sqldo.GenCPPBody() );
+	}
 
-	// Generate the C# Object file
+	// Generate the C# Object file - also generate everything from Core into our local C# project
 	if(HelixConfig::getInstance().SkipPdfGen() == false){	
-		target = m_sqldo.CSBodyFileName();
+		twine target = m_sqldo.CSBodyFileName();
 		DEBUG(FL, "Writing CS Body to: %s", target() );
 		File::EnsurePath( target );
 		File::writeToFile( target, m_sqldo.GenCSBody() );
@@ -107,12 +119,13 @@ void HelixGenTask::Generate()
 	}
 
 	// Generate the Javascript data object file in all of the correct qd app folders
-	for(auto& app : HelixConfig::getInstance().QxApps()){
-		target = m_sqldo.JSBodyFileName(app);
-		DEBUG(FL, "Writing JS Body to: %s", target() );
-		File::EnsurePath( target );
-		File::writeToFile( target, m_sqldo.GenJSBody(app) );
-	}
-	
+	if(!fromCore){
+		for(auto& app : HelixConfig::getInstance().QxApps()){
+			twine target = m_sqldo.JSBodyFileName(app);
+			DEBUG(FL, "Writing JS Body to: %s", target() );
+			File::EnsurePath( target );
+			File::writeToFile( target, m_sqldo.GenJSBody(app) );
+		}
+	}	
 }
 
