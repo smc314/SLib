@@ -109,14 +109,6 @@ int main (int argc, char** argv)
 		}
 	
 		HelixWorker::getInstance().Finish();
-		printf("============================================================================\n");
-		if(HelixWorker::getInstance().HasError()){
-			printf("== hbuild complete - with errors\n");
-		} else {
-			printf("== hbuild complete.\n");
-		}
-		printf("============================================================================\n");
-
 		HelixFS::getInstance().SaveCache();
 
 		/* Use this for profiling what's going on and what's taking up the time
@@ -128,11 +120,21 @@ int main (int argc, char** argv)
 	} catch(AnException& e){
 		printf("%s\n", e.Msg());
 		printf("%s\n", e.Stack());
+		printf("============================================================================\n");
+		printf("== hbuild complete - with errors\n");
+		printf("============================================================================\n");
+		return 1; // Errors
 	}
 
 	if(HelixWorker::getInstance().HasError()){
+		printf("============================================================================\n");
+		printf("== hbuild complete - with errors\n");
+		printf("============================================================================\n");
 		return 1; // Errors
 	} else {
+		printf("============================================================================\n");
+		printf("== hbuild complete.\n");
+		printf("============================================================================\n");
 		return 0; // No error
 	}
 }
