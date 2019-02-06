@@ -59,6 +59,7 @@ class DLLEXPORT HelixFSFolder_Bare
 		const twine& FolderName() const;
 		const twine& LastName() const;
 		twine PhysicalFolderName() const;
+		bool FromCore() const;
 
 		vector<HelixFSFolder>& SubFolders();
 		vector<HelixFSFile>& Files();

@@ -19,6 +19,7 @@ using namespace SLib;
 
 #include "HelixFS.h"
 #include "HelixFSFile.h"
+#include "HelixConfig.h"
 using namespace Helix::Build;
 
 
@@ -110,6 +111,20 @@ const twine& HelixFSFile_Bare::PhysicalDotOh() const
 		}
 	}
 	return m_physical_dotoh;
+}
+
+bool HelixFSFile_Bare::FromCore() const
+{
+	bool useCore = HelixConfig::getInstance().UseCore();
+	if(!useCore){
+		return false; // Not using core, so never comes from core
+	}
+	auto coreFolder = HelixConfig::getInstance().CoreFolder();
+	if(m_folder.startsWith( coreFolder )){
+		return true;
+	} else {
+		return false;
+	}
 }
 
 const vector<twine>& HelixFSFile_Bare::Lines()

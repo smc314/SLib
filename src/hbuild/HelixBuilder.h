@@ -50,9 +50,11 @@ class DLLEXPORT HelixBuilder
 
 		/// Use this to Build our C# folder
 		void BuildCS();
+		void BuildCSTest();
 
 		/// Use this to Clean our C# folder
 		void CleanCS();
+		void CleanCSTest();
 
 		/// Use this to Generate the data objects from sql.xml files if necessary
 		void GenerateSqldo(bool forceRegen = false);

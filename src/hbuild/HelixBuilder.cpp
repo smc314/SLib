@@ -117,6 +117,10 @@ void HelixBuilder::Clean( const twine& folderPath )
 		WARN(FL, "Unknown target build path: %s", folderPath() );
 		return;
 	}
+	if(folder->FromCore()){
+		// Don't clean this location - it's from core
+		return;
+	}
 
 	INFO(FL, "Cleaning path: %s", folderPath() );
 
@@ -222,7 +226,6 @@ void HelixBuilder::BuildCS()
 			File::Copy( pdfGen + "/HelixPdfGen/bin/Release/" + file, "./bin/HelixPdfGen/" + file );
 		}
 	}
-
 }
 
 void HelixBuilder::CleanCS()
@@ -246,11 +249,52 @@ void HelixBuilder::CleanCS()
 		for(auto& file : File::listFiles( pdfGen + "DO/" + folder )){
 			if(file.endsWith( ".cs" )){
 				twine rmTarget( pdfGen + "DO/" + folder + "/" + file );
-				INFO(FL, "Removing file: %s", rmTarget() );
+				DEBUG(FL, "Removing file: %s", rmTarget() );
 				File::Delete( rmTarget );
 			}
 		}
 	}
+}
+
+void HelixBuilder::BuildCSTest()
+{
+	EnEx ee(FL, "HelixBuilder::BuildCSTest()");
+
+	if(HelixConfig::getInstance().SkipPdfGen() == true){
+		return; // Don't do this one
+	}
+
+	if(HelixWorker::getInstance().HasError()){
+		return; // Bail out early on any previous errors
+	}
+
+	INFO(FL, "Building Helix.Test" );
+	twine testRoot = "..\\..\\test\\Helix.Test";
+
+	twine cmd;
+	// Run the restore of all NuGet packages
+	cmd = "cd " + testRoot + " && c:\\software\\NuGet.exe restore Helix.Test.sln";
+	if(std::system( cmd() ) != 0) throw AnException(0, FL, "C# - Helix.Test NuGet restore failed.");
+
+	// Run the build of the project
+	cmd = "cd " + testRoot + " && msbuild Helix.Test.sln /p:Configuration=Release /p:Platform=\"Any CPU\" /t:Rebuild";
+	if(std::system( cmd() ) != 0) throw AnException(0, FL, "C# - Helix.Test Build failed.");
+}
+
+void HelixBuilder::CleanCSTest()
+{
+	EnEx ee(FL, "HelixBuilder::CleanCSTest()");
+
+	if(HelixConfig::getInstance().SkipPdfGen() == true){
+		return; // Don't do this one
+	}
+
+	INFO(FL, "Cleaning Helix.Test" );
+	twine testRoot = "../../test/Helix.Test/Helix.Test/";
+
+	// Several folders that we want to remove from the C# project:
+	File::RmDir( testRoot + "bin/" );
+	File::RmDir( testRoot + "obj/" );
 }
 
 void HelixBuilder::GenerateSqldo(bool forceRegen)
@@ -392,11 +436,15 @@ void HelixBuilder::CleanSqldo()
 			currentFolderName = file->FolderName();
 		}
 
+		if( file->FromCore() ){
+			continue; // Don't clean sqldo files from core
+		}
+
 		// What's the data object being generated?  Usually matches the name of the .sql.xml file, but double-check
 		twine doName( file->DataObjectName() );
 		
 		// Remove the h and cpp file
-		DEBUG(FL, "Removing Generated SqlDo File: %s.h and %s.cpp", doName(), doName() );
+		INFO(FL, "Removing Generated SqlDo File: %s.h and %s.cpp %s", doName(), doName(), file->PhysicalFileName()() );
 		currentSqldoFolder->DeleteFile( doName + ".h" );
 		currentSqldoFolder->DeleteFile( doName + ".cpp" );
 	}

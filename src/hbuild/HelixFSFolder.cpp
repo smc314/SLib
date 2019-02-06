@@ -16,6 +16,7 @@
 using namespace SLib;
 
 #include "HelixFSFolder.h"
+#include "HelixConfig.h"
 using namespace Helix::Build;
 
 
@@ -77,6 +78,20 @@ twine HelixFSFolder_Bare::PhysicalFolderName() const
 		return "./";
 	} else {
 		return "./" + m_name;
+	}
+}
+
+bool HelixFSFolder_Bare::FromCore() const
+{
+	bool useCore = HelixConfig::getInstance().UseCore();
+	if(!useCore){
+		return false; // Not using core, so never comes from core
+	}
+	auto coreFolder = HelixConfig::getInstance().CoreFolder();
+	if(m_name.startsWith( coreFolder )){
+		return true;
+	} else {
+		return false;
 	}
 }
 

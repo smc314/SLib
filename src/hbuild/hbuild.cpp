@@ -241,11 +241,12 @@ void handleClean()
 	if(!HelixConfig::getInstance().UseCore()){
 		// Only build these if we're not using a core folder
 		builder.Clean( "client" );
-		builder.Clean( "HelixMain" );
 		builder.Clean( "HelixDaemon" );
 	}
+	builder.Clean( "HelixMain" ); // Clean's out the bin folder for core and non-core projects
 
 	builder.CleanCS();
+	builder.CleanCSTest();
 }
 
 void handleGen(bool displayBanner)
@@ -349,6 +350,7 @@ void handleCS(bool displayBanner)
 
 	HelixBuilder builder;	
 	builder.BuildCS();
+	builder.BuildCSTest();
 }
 
 void handleInstall(bool displayBanner)

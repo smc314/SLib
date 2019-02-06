@@ -56,6 +56,7 @@ class DLLEXPORT HelixFSFile_Bare
 		twine LastFolderName();
 		const twine& PhysicalFileName() const;
 		const twine& PhysicalDotOh() const;
+		bool FromCore() const;
 
 		xmlDocPtr Xml();
 		const vector<twine>& Lines();
