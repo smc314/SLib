@@ -158,35 +158,39 @@ void HelixBuilder::CleanAllRuntime( const twine& physicalPath )
 {
 	EnEx ee(FL, "HelixBuilder::CleanAllRuntime( const twine& physicalPath )");
 
-	auto files = File::listFiles( physicalPath );
-	for(auto const& file : files){
-		if(file.endsWith( ".exe" ) ||
-			file.endsWith( ".dll" ) ||
-			file.endsWith( ".lib" ) ||
-			file.endsWith( ".exp" ) ||
-			file.endsWith( ".obj" ) ||
-			file.endsWith( ".o" ) ||
-			file.endsWith( ".so" ) ||
-			file == "AutoAsset" ||
-			file == "CopyCommon" ||
-			file == "CopyIcons" ||
-			file == "ExtractStrings" ||
-			file == "GenerateSqlClasses" ||
-			file == "HelixDaemon" ||
-			file == "HelixMain" ||
-			file == "LogDump" ||
-			file == "MakeMakefiles" ||
-			file == "SLogDump" ||
-			file == "SqlDoCheck" ||
-			file == "SqlShell" ||
-			file == "hbuild"
-		){
-			try {
-				File::Delete( physicalPath + "/" + file );
-			} catch (AnException& ){
-				// Ignore this
+	try {
+		auto files = File::listFiles( physicalPath );
+		for(auto const& file : files){
+			if(file.endsWith( ".exe" ) ||
+				file.endsWith( ".dll" ) ||
+				file.endsWith( ".lib" ) ||
+				file.endsWith( ".exp" ) ||
+				file.endsWith( ".obj" ) ||
+				file.endsWith( ".o" ) ||
+				file.endsWith( ".so" ) ||
+				file == "AutoAsset" ||
+				file == "CopyCommon" ||
+				file == "CopyIcons" ||
+				file == "ExtractStrings" ||
+				file == "GenerateSqlClasses" ||
+				file == "HelixDaemon" ||
+				file == "HelixMain" ||
+				file == "LogDump" ||
+				file == "MakeMakefiles" ||
+				file == "SLogDump" ||
+				file == "SqlDoCheck" ||
+				file == "SqlShell" ||
+				file == "hbuild"
+			){
+				try {
+					File::Delete( physicalPath + "/" + file );
+				} catch (AnException& ){
+					// Ignore this
+				}
 			}
 		}
+	} catch (AnException&){
+		// Ignore this - means the directory was not found
 	}
 }
 
