@@ -373,6 +373,7 @@ void HelixBuilder::UpdateHelixPdfGenProj(vector<HelixFSFile>& allSqldo)
 
 	bool modified = false;
 	twine csprojName; csprojName = "../c#/HelixPdfGen/HelixPdfGen/HelixPdfGen.csproj";
+	xmlKeepBlanksDefault(0);
 	sptr<xmlDoc, xmlFreeDoc> csproj = xmlParseFile( csprojName() );
 	if(csproj == nullptr){
 		throw AnException(0, FL, "Error opening HelixPdfGen.csproj for update");
@@ -383,24 +384,29 @@ void HelixBuilder::UpdateHelixPdfGenProj(vector<HelixFSFile>& allSqldo)
 		xmlNodePtr check = XmlHelpers::FindChild( item, "Compile" );
 		if(check == nullptr) continue; // Find another ItemGroup
 
-		// Found compiles - check to ensure all of our sqldo items are present
-		// If not, add them.
+		// Found compiles - Remove all that start with DO\ then replace them
+		// with our updated list of data objects.
+		for(auto compile : XmlHelpers::FindChildren( item, "Compile" ) ){
+			twine include( compile, "Include" );
+			if(include.startsWith( "DO\\" )){
+				xmlUnlinkNode( compile ); // Remove it from thedocument
+				xmlFreeNode( compile ); // Free the node memory
+			}
+		}
+
 		for(auto sqldo : allSqldo){
 			twine includeName( "DO\\" + sqldo->LastFolderName() + "\\" + sqldo->DataObjectName() + ".cs" );
-			xmlNodePtr csInclude = XmlHelpers::FindChildWithAttribute( item, "Compile", "Include", includeName() );
-			if(csInclude == nullptr){
-				// Add it in:
-				csInclude = xmlNewChild( item, NULL, (const xmlChar*)"Compile", NULL);
-				xmlSetProp( csInclude, (const xmlChar*)"Include", includeName );
-				modified = true;
-			}
+			// Add it in:
+			xmlNodePtr csInclude = xmlNewChild( item, NULL, (const xmlChar*)"Compile", NULL);
+			xmlSetProp( csInclude, (const xmlChar*)"Include", includeName );
+			modified = true;
 		}
 		break; // We found the ItemGroup with compiles in it - no need to keep searching the file
 	}
 
 	if(modified){
 		// Save the updated file:
-		xmlSaveFile( csprojName(), csproj );
+		File::writeToFile( csprojName, XmlHelpers::docToStringPretty( csproj ) );
 	}
 }
 
