@@ -1,0 +1,128 @@
+/* ************************************************************************************** */
+/* This is an INSERT GUID method.  It is designed to run a single insert                  */
+/* statement and return.  If something  goes wrong, we will throw AnException.            */
+/*                                                                                        */
+/* Developer Comments:                                                                    */
+/* ${comment} */
+/*                                                                                        */
+/* Sql Statement:                                                                         */
+/* ${sql} */
+/*                                                                                        */
+/* ************************************************************************************** */
+twine ${doName}::${methodName}(OdbcObj& odbc, ${doName}& obj, bool suppressTrace )
+{
+	EnEx ee(FL, "${doName}::${methodName}()");
+
+	// Replace all parameter markers
+	twine stmt(
+		${doName}::${methodName}_prepSQL(odbc, obj)
+	);
+
+	return ${doName}::${methodName}(odbc, stmt, false, obj, suppressTrace );
+
+}
+
+/* ************************************************************************************** */
+/* This one matches the above in functionality, but allows you to pass in the sql         */
+/* statement and a flag to indicate whether the input parameters will be used.            */
+/* ************************************************************************************** */
+twine ${doName}::${methodName}(OdbcObj& odbc, twine& stmt, bool useInputs, ${doName}& obj, bool suppressTrace )
+{
+	EnEx ee(FL, "${doName}::${methodName}()");
+
+	Timer selectTimer;
+
+	// Grab the current user name for logging
+	twine currentUser;
+	if(odbc.GetSessionInfo() != NULL){
+		currentUser = odbc.GetSessionInfo()->fullname;
+	}
+
+	if(odbc.isConnected() == 0){
+		throw AnException(0, FL, "OdbcObj passed into ${doName}::${methodName} is not connected.");
+	}
+
+	if(!suppressTrace){
+		SQLTRACE(UFL, "Using SQL: %s", stmt() );
+	}
+	odbc.SetStmt(stmt, SQL_TYPE_UPDATE);
+
+	if(useInputs){
+		throw AnException(0, FL, "useInputs no longer supported." );
+	}
+
+	selectTimer.Start();
+	{ // Used for scope for the timing object.
+		EnEx eeExe("${doName}::${methodName}()-BindExecStmt");
+
+		// Execute the statement
+		if(!suppressTrace){
+			DEBUG(UFL, "Executing the statement for ${doName}::${methodName}");
+		}
+		odbc.ExecStmt();
+	}
+	selectTimer.Finish();
+	if(selectTimer.Duration() > 0.5){
+		WARN(UFL, "Statement ${doName}::${methodName} took longer than 500ms to execute: %f", selectTimer.Duration());
+	}
+
+	// Read the Scope_Identity results and return the id found
+	return Statics::readOutputGuidResult( odbc );
+}
+
+/* ************************************************************************************** */
+/* This method will do a replacement of all of the parameter markers in                   */
+/* the sql statement with the standard parameter list that is defined.                    */
+/* This is useful for automatically prepping a SQL statement that doesn't                 */
+/* work with parameter markers.                                                           */
+/* ************************************************************************************** */
+twine ${doName}::${methodName}_prepSQL(IOConn& ioc, ${doName}& obj )
+{
+	EnEx ee(FL, "${doName}::${methodName}_prepSQL()");
+
+${CPPInputParmsIdx}
+	twine stmt = ${doName}::${methodName}_getSQL();
+	ioc.getDBConnection()->RewriteInsertGuidForCurrent( stmt, "${outputCol}" );// Must happen before replacing parms
+
+${SqlReplaceObjParms}
+
+	// Also take a look at the statement and replace any session variables
+	Statics::ReplaceSessionVars(ioc, stmt);
+
+	return stmt;
+
+}
+
+/* ************************************************************************************** */
+/* This method will do a replacement of all of the parameter markers in                   */
+/* the sql statement with the standard parameter list that is defined.                    */
+/* This is useful for automatically prepping a SQL statement that doesn't                 */
+/* work with parameter markers.                                                           */
+/* ************************************************************************************** */
+twine ${doName}::${methodName}_prepSQL(OdbcObj& odbc, ${doName}& obj )
+{
+	EnEx ee(FL, "${doName}::${methodName}_prepSQL()");
+
+${CPPInputParmsIdx}
+	twine stmt = ${doName}::${methodName}_getSQL();
+	odbc.RewriteInsertGuidForCurrent( stmt, "${outputCol}" ); // Must happen before replacing parms
+
+${SqlReplaceObjParms}
+
+	// Also take a look at the statement and replace any session variables
+	if(odbc.GetSessionInfo() != NULL){
+		Statics::ReplaceSessionVars(*odbc.GetSessionInfo(), stmt);
+	}
+
+	return stmt;
+
+}
+
+/* ************************************************************************************** */
+/* This method returns the sql statement that is used by the above functions.             */
+/* ************************************************************************************** */
+twine ${doName}::${methodName}_getSQL()
+{
+	return "${flatSql}";
+}
+

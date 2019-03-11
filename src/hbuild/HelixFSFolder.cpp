@@ -8,6 +8,8 @@
 
 ************************************************************************** */
 
+#include <algorithm>
+
 #include <AnException.h>
 #include <EnEx.h>
 #include <Log.h>
@@ -39,7 +41,9 @@ void HelixFSFolder_Bare::Load()
 	EnEx ee(FL, "HelixFSFolder_Bare::Load()");
 
 	// Pick up all of our files:
-	for(auto& file : File::listFiles( PhysicalFolderName() ) ){
+	auto files = File::listFiles( PhysicalFolderName() );
+	std::sort( files.begin(), files.end() );
+	for(auto& file : files ) {
 		if(file.endsWith( ".h" ) ||
 			file.endsWith( ".c" ) ||
 			file.endsWith( ".cpp" ) ||

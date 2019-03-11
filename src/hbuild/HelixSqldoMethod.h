@@ -43,6 +43,7 @@ class DLLEXPORT HelixSqldoMethod
 
 		twine name;
 		twine type;
+		twine outputCol;
 		twine target;
 		twine comment;
 		twine sql;

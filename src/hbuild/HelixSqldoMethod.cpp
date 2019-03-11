@@ -34,6 +34,10 @@ HelixSqldoMethod::HelixSqldoMethod(xmlNodePtr elem)
 
 	name.getAttribute( elem, "methodName" );
 	type.getAttribute( elem, "methodType" );
+	outputCol.getAttribute( elem, "outputCol" );
+	if(outputCol.empty()){
+		outputCol = "Id";
+	}
 	target.getAttribute( elem, "target" );
 	xmlNodePtr child = XmlHelpers::FindChild( elem, "Comment" );
 	if(child != nullptr){
@@ -64,6 +68,7 @@ map<twine, twine>& HelixSqldoMethod::BuildStatementParms(const twine& className)
 	m_parms[ "comment" ] = comment;
 	m_parms[ "sql" ] = sql;
 	m_parms[ "methodName" ] = name;
+	m_parms[ "outputCol" ] = outputCol;
 	m_parms[ "flatSql" ] = FlattenSql();
 
 	twine typedParms;
@@ -171,6 +176,8 @@ twine HelixSqldoMethod::GenCPPHeader(const twine& className)
 		tmplName = "CppObjHeader.select.tmpl";
 	} else if(type == "INSERT"){
 		tmplName = "CppObjHeader.insert.tmpl";
+	} else if(type == "INSERTGUID"){
+		tmplName = "CppObjHeader.insertguid.tmpl";
 	} else if(type == "UPDATE"){
 		tmplName = "CppObjHeader.update.tmpl";
 	} else if(type == "DELETE"){
@@ -192,6 +199,8 @@ twine HelixSqldoMethod::GenCPPBody(const twine& className)
 		tmplName = "CppObjBody.select.tmpl";
 	} else if(type == "INSERT"){
 		tmplName = "CppObjBody.insert.tmpl";
+	} else if(type == "INSERTGUID"){
+		tmplName = "CppObjBody.insertguid.tmpl";
 	} else if(type == "UPDATE"){
 		tmplName = "CppObjBody.update.tmpl";
 	} else if(type == "DELETE"){
@@ -211,7 +220,7 @@ twine HelixSqldoMethod::GenCSBody(const twine& className)
 	twine tmplName; 
 	if(type == "SELECTTOXML"){
 		tmplName = "C#ObjHeader.select.tmpl";
-	} else if(type == "INSERT"){
+	} else if(type == "INSERT" || type == "INSERTGUID"){
 		tmplName = "C#ObjHeader.insert.tmpl";
 	} else if(type == "UPDATE"){
 		tmplName = "C#ObjHeader.update.tmpl";

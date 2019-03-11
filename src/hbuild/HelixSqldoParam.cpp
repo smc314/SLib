@@ -79,8 +79,9 @@ twine HelixSqldoParam::CPPType() const
 	else if(type == "bool") return "bool";
 	else if(type == "cdata") return "twine";
 	else if(type == "base64") return "twine";
+	else if(type == "guid" || type == "Guid") return "twine";
 	else if(type == "bin") return "MemBuf";
-	else if(type == "Timestamp" || type == "Date" || type == "DateTime") return "Date";
+	else if(type == "timestamp" || type == "Timestamp" || type == "Date" || type == "DateTime") return "Date";
 	else return type;
 }
 
@@ -92,6 +93,7 @@ twine HelixSqldoParam::CPPParm() const
 	else if(type == "bool") return ", bool " + name;
 	else if(type == "cdata") return ", const twine& " + name;
 	else if(type == "base64") return ", const twine& " + name;
+	else if(type == "guid" || type == "Guid") return ", const twine& " + name;
 	else if(type == "bin") return ", const MemBuf& " + name;
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") return ", const Date& " + name;
 	else return ", const " + type + "& " + name;
@@ -105,6 +107,7 @@ twine HelixSqldoParam::CPPInit() const
 	else if(type == "bool") return name + " = false;";
 	else if(type == "cdata") return name + ".erase();";
 	else if(type == "base64") return name + ".erase();";
+	else if(type == "guid" || type == "Guid") return name + ".erase();";
 	else if(type == "bin") return name + ".erase();";
 	else if(type == "twine") return name + ".erase();";
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") return name + ".SetMinValue();";
@@ -123,6 +126,7 @@ twine HelixSqldoParam::CPPXmlGet() const
 		return "xmlNodePtr " + name + "_child = XmlHelpers::FindChild( node, \"" + name + "\"); if(" + name + "_child != nullptr) " + name + " = XmlHelpers::getCDATASection(" + name + "_child);";
 	else if(type == "base64")
 		return "xmlNodePtr " + name + "_child = XmlHelpers::FindChild( node, \"" + name + "\"); if(" + name + "_child != nullptr) " + name + " = XmlHelpers::getBase64(" + name + "_child);";
+	else if(type == "guid" || type == "Guid") return name + ".getAttribute( node, \"" + name + "\");";
 	else if(type == "bin")
 		return "xmlNodePtr " + name + "_child = XmlHelpers::FindChild( node, \"" + name + "\"); if(" + name + "_child != nullptr) { " + name + " = XmlHelpers::getCDATASection(" + name + "_child); " + name + ".decode64(); }";
 	else if(type == "twine") return name + ".getAttribute( node, \"" + name + "\");";
@@ -143,6 +147,8 @@ twine HelixSqldoParam::CPPXmlSet() const
 		return "XmlHelpers::setDateAttr( child, \"" + name + "\", " + name + ", OdbcObj::DateFormat() );";
 	else if(type == "base64")
 		return "if( " + name + ".size() != 0) XmlHelpers::setBase64( xmlNewChild( child, NULL, (const xmlChar*)\"" + name + "\", NULL), " + name + ");";
+	else if(type == "guid" || type == "Guid") 
+		return "if( !" + name + ".empty()) xmlSetProp( child, (const xmlChar*)\"" + name + "\", " + name + ");";
 	else if(type == "bin")
 		return "if( " + name + ".size() != 0) XmlHelpers::setBase64( xmlNewChild( child, NULL, (const xmlChar*)\"" + name + "\", NULL), " + name + ");";
 	else if(type == "twine") 
@@ -160,6 +166,7 @@ twine HelixSqldoParam::CPPJsonGet() const
 		return name + " = OdbcObj::ReadDate( cJSON_GetStringValueOrEmpty( jsonObj, \"" + name + "\") );";
 	else if(type == "cdata") return name + " = cJSON_GetStringValueOrEmpty( jsonObj, \"" + name + "\");";
 	else if(type == "base64") return "// FIXME - base64 not yet supported for JSON";
+	else if(type == "guid" || type == "Guid") return name + " = cJSON_GetStringValueOrEmpty( jsonObj, \"" + name + "\");";
 	else if(type == "bin") return "// FIXME - bin not yet supported for JSON";
 	else if(type == "twine") return name + " = cJSON_GetStringValueOrEmpty( jsonObj, \"" + name + "\");";
 	else return "// error reading xml for type " + type;
@@ -179,6 +186,8 @@ twine HelixSqldoParam::CPPJsonSet() const
 		return "if(!" + name + ".IsMinValue()) cJSON_SetAddStringValue( child, \"" + name + "\", " + name + ".GetValue( OdbcObj::DateFormat() )() );";
 	else if(type == "base64")
 		return "// FIXME - base64 not yet supported for JSON";
+	else if(type == "guid" || type == "Guid") 
+		return "if( !" + name + ".empty()) cJSON_SetAddStringValue( child, \"" + name + "\", " + name + "() );";
 	else if(type == "bin")
 		return "// FIXME - bin not yet supported for JSON;";
 	else if(type == "twine") 
@@ -210,6 +219,7 @@ twine HelixSqldoParam::CSType() const
 	else if(type == "bool") return "bool";
 	else if(type == "cdata") return "string";
 	else if(type == "base64") return "string";
+	else if(type == "guid" || type == "Guid") return "string";
 	else if(type == "bin") return "string";
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") return "DateTime";
 	else if(type == "twine") return "string";
@@ -224,6 +234,7 @@ twine HelixSqldoParam::CSParm() const
 	else if(type == "bool") return ", bool " + name;
 	else if(type == "cdata") return ", string " + name;
 	else if(type == "base64") return ", string " + name;
+	else if(type == "guid" || type == "Guid") return ", string " + name;
 	else if(type == "bin") return ", string " + name;
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") return ", DateTime " + name;
 	else if(type == "twine") return ", string " + name;
@@ -238,6 +249,7 @@ twine HelixSqldoParam::CSInit() const
 	else if(type == "bool") return name + " = false;";
 	else if(type == "cdata") return name + " = \"\";";
 	else if(type == "base64") return name + " = \"\";";
+	else if(type == "guid" || type == "Guid") return name + " = \"\";";
 	else if(type == "bin") return name + " = \"\";";
 	else if(type == "twine") return name + " = \"\";";
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") return name + " = new DateTime();";
@@ -259,6 +271,7 @@ twine HelixSqldoParam::CSXmlGet() const
 	else if(type == "bin") return name + ".erase();";
 		return "xmlNodePtr " + name + "_child = XmlHelpers::FindChild( node, \"" + name + "\"); if(" + name + "_child != nullptr) { " + name + " = XmlHelpers::getCDATASection(" + name + "_child); " + name + ".decode64(); }";
 	*/
+	else if(type == "guid" || type == "Guid") return name + " = node.GetAttribute( \"" + name + "\");";
 	else if(type == "twine") return name + " = node.GetAttribute( \"" + name + "\");";
 	else return "// error reading xml for type " + type;
 }
@@ -281,6 +294,8 @@ twine HelixSqldoParam::CSXmlSet() const
 	else if(type == "bin") return name + ".erase();";
 		return "xmlNodePtr " + name + "_child = XmlHelpers::FindChild( node, \"" + name + "\"); if(" + name + "_child != nullptr) { " + name + " = XmlHelpers::getCDATASection(" + name + "_child); " + name + ".decode64(); }";
 	*/
+	else if(type == "guid" || type == "Guid") 
+		return "if(!String.IsNullOrEmpty( " + name + " )) child.SetAttribute( \"" + name + "\", " + name + ");";
 	else if(type == "twine") 
 		return "if(!String.IsNullOrEmpty( " + name + " )) child.SetAttribute( \"" + name + "\", " + name + ");";
 	else return "// error setting xml for type " + type;
@@ -297,6 +312,8 @@ twine HelixSqldoParam::CSReadDB(int pos) const
 		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? false : reader.GetBool(" + pos_string + ");\n";
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") 
 		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? DateTime.MinValue: reader.GetDateTime(" + pos_string + ");\n";
+	else if(type == "guid" || type == "Guid") 
+		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? \"\": reader.GetValue(" + pos_string + ").ToString();\n";
 	else if(type == "twine") 
 		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? \"\": reader.GetValue(" + pos_string + ").ToString();\n";
 	else return "// error reading database for type " + type;
@@ -332,6 +349,8 @@ twine HelixSqldoParam::JSPropDef(bool first) const
 		return prefix + name + " : {init: \"\", event: \"change" + name + "\", check: \"String\" }";
 	else if(type == "base64")
 		return prefix + name + " : {init: \"\", event: \"change" + name + "\", check: \"String\" }";
+	else if(type == "guid" || type == "Guid")
+		return prefix + name + " : {init: \"\", event: \"change" + name + "\", check: \"String\" }";
 	else if(type == "bin")
 		return prefix + name + " : {init: \"\", event: \"change" + name + "\", check: \"String\" }";
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime")
@@ -362,6 +381,8 @@ twine HelixSqldoParam::JSXmlGet(const twine& app) const
 			"\t\t\t\t)\n"
 			"\t\t\t);\n"
 		;
+	else if(type == "guid" || type == "Guid")
+		return "\t\t\tif(elem.getAttribute(\"" + name + "\")){ this.set" + ucase + "( elem.getAttribute(\"" + name + "\") ); }\n";
 	else 
 		return "\t\t\tif(elem.getAttribute(\"" + name + "\")){ this.set" + ucase + "( elem.getAttribute(\"" + name + "\") ); }\n";
 }
@@ -397,6 +418,8 @@ twine HelixSqldoParam::JSXmlSet(const twine& app) const
 			"\t\t\t\tsubElem.appendChild( sub );\n"
 			"\t\t\t}\n"
 		;
+	else if(type == "guid" || type == "Guid")
+		return "\t\t\tif( this.get" + ucase + "().length != 0) subElem.setAttribute( \"" + name + "\", this.get" + ucase + "() );\n";
 	else
 		return "\t\t\tif( this.get" + ucase + "().length != 0) subElem.setAttribute( \"" + name + "\", this.get" + ucase + "() );\n";
 }
