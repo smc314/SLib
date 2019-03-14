@@ -316,7 +316,9 @@ twine HelixSqldoParam::CSReadDB(int pos) const
 		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? \"\": reader.GetValue(" + pos_string + ").ToString();\n";
 	else if(type == "twine") 
 		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? \"\": reader.GetValue(" + pos_string + ").ToString();\n";
-	else return "// error reading database for type " + type;
+	else if(type == "base64") 
+		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? \"\": reader.GetValue(" + pos_string + ").ToString();\n";
+	else return "// error reading database for type " + type + "\n";
 }
 
 twine HelixSqldoParam::CSReplaceInput() const
