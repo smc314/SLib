@@ -197,12 +197,20 @@ twine HelixSqldoParam::CPPJsonSet() const
 
 twine HelixSqldoParam::CPPReplaceInput() const
 {
-	return "\tOdbcObj::ReplaceInput(stmt, idx, " + name + ");\n";
+	if(type == "guid" || type == "Guid"){
+		return "\tOdbcObj::ReplaceInput(stmt, idx, " + name + ", true);\n"; // Turn on emptyMeansNull
+	} else {
+		return "\tOdbcObj::ReplaceInput(stmt, idx, " + name + ");\n";
+	}
 }
 
 twine HelixSqldoParam::CPPReplaceInputObj() const
 {
-	return "\tOdbcObj::ReplaceInput(stmt, idx, obj." + name + ");\n";
+	if(type == "guid" || type == "Guid"){
+		return "\tOdbcObj::ReplaceInput(stmt, idx, obj." + name + ", true);\n"; // Turn on emptyMeansNull
+	} else {
+		return "\tOdbcObj::ReplaceInput(stmt, idx, obj." + name + ");\n";
+	}
 }
 
 twine HelixSqldoParam::CPPReadDB(int pos) const
