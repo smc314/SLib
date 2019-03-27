@@ -18,6 +18,7 @@
 using namespace SLib;
 
 #include "HelixSqldoChildVector.h"
+#include "HelixConfig.h"
 using namespace Helix::Build;
 
 
@@ -145,26 +146,47 @@ twine HelixSqldoChildVector::JSPropDef(const twine& app)
 
 twine HelixSqldoChildVector::JSXmlGet(const twine& app) 
 {
+	twine simplePackage( SimplePackage() );
+	twine finalApp( app );
+	if(HelixConfig::getInstance().UseCore()){
+		if(simplePackage == "admin" || simplePackage == "util"){
+			finalApp = "cored"; // Use admin and util classes from cored
+		}
+	}
 	return "\t\t\tvar " + name + "_subElem = " + app + ".Statics.xmlFindChild( elem, \"" + name + "\");\n"
 		"\t\t\tif( " + name + "_subElem ){\n"
-		"\t\t\t\tthis." + name + " = " + app + "." + SimplePackage() + ".sqldo." + SimpleType() + ".readElementChildren( " + name + "_subElem );\n"
+		"\t\t\t\tthis." + name + " = " + finalApp + "." + SimplePackage() + ".sqldo." + SimpleType() + ".readElementChildren( " + name + "_subElem );\n"
 		"\t\t\t}\n"
 	;
 }
 
 twine HelixSqldoChildVector::JSXmlSet(const twine& app) 
 {
+	twine simplePackage( SimplePackage() );
+	twine finalApp( app );
+	if(HelixConfig::getInstance().UseCore()){
+		if(simplePackage == "admin" || simplePackage == "util"){
+			finalApp = "cored"; // Use admin and util classes from cored
+		}
+	}
 	return 
 		"\t\t\tvar " + name + "_subElem = doc.createElement( \"" + name + "\");\n"
 		"\t\t\tsubElem.appendChild( " + name + "_subElem);\n"
-		"\t\t\t" + app + "." + SimplePackage() + ".sqldo." + SimpleType() + ".writeArray( this." + name + ", " + name + "_subElem );\n"
+		"\t\t\t" + finalApp + "." + SimplePackage() + ".sqldo." + SimpleType() + ".writeArray( this." + name + ", " + name + "_subElem );\n"
 	;
 }
 
 twine HelixSqldoChildVector::JSClone(const twine& app) 
 {
+	twine simplePackage( SimplePackage() );
+	twine finalApp( app );
+	if(HelixConfig::getInstance().UseCore()){
+		if(simplePackage == "admin" || simplePackage == "util"){
+			finalApp = "cored"; // Use admin and util classes from cored
+		}
+	}
 	return 
-		"\t\t\tnewObj." + name + " = " + app + "." + SimplePackage() + ".sqldo." + SimpleType() + ".cloneArray( this." + name + " );\n"
+		"\t\t\tnewObj." + name + " = " + finalApp + "." + SimplePackage() + ".sqldo." + SimpleType() + ".cloneArray( this." + name + " );\n"
 	;
 }
 
