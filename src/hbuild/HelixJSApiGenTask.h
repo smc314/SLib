@@ -47,6 +47,9 @@ class DLLEXPORT HelixJSApiGenTask
 		/// Triggers the generation of all artifacts produced from our input file
 		void Generate(const twine& app);
 
+		void GenerateGlobal( const twine& app );
+		void GenerateNamespaced( const twine& app );
+
 	protected:
 
 	private:
