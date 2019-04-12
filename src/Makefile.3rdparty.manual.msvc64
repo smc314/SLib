@@ -137,7 +137,7 @@ libharu:
 qx:
 	rm -rf qooxdoo-5.0.1-sdk*
 	$(CURL) http://www.helixsdk.org/qooxdoo-5.0.1-sdk.zip
-	$(UNZIP) qooxdoo-5.0.1-sdk.zip
+	$(UNZIP) -q qooxdoo-5.0.1-sdk.zip
 
 
 
