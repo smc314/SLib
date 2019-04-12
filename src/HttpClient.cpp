@@ -337,9 +337,19 @@ void HttpClient::AddPostHeader( const twine& postHeader )
 	m_post_headers.push_back( postHeader );
 }
 
+void HttpClient::ClearPostHeaders()
+{
+	m_post_headers.clear();
+}
+
 void HttpClient::AddGetHeader( const twine& postHeader )
 {
 	m_get_headers.push_back( postHeader );
+}
+
+void HttpClient::ClearGetHeaders()
+{
+	m_get_headers.clear();
 }
 
 void HttpClient::SetProxy( const twine& proxy)

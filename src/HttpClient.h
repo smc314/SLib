@@ -99,10 +99,20 @@ class DLLEXPORT HttpClient
 		void AddPostHeader( const twine& postHeader );
 
 		/**
+		  * Clears the list of POST Headers.
+		  */
+		void ClearPostHeaders();
+
+		/**
 		  * Allows the caller to provide header information for us.  We pass this directly
 		  * to the CURLOPT_HTTPHEADER config setting.
 		  */
 		void AddGetHeader( const twine& getHeader );
+
+		/**
+		  * Clears the list of GET Headers.
+		  */
+		void ClearGetHeaders();
 
 		/** When absolute full control is required, use this to obtain the CURL handle itself.
 		  * Note that the handle is cleaned up before Get/Post return, so it's main use is to
