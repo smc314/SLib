@@ -433,12 +433,15 @@ void CopyCore()
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.lib", "bin", ""));
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.dll", "bin", ""));
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.lib", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.dll", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.lib", "bin", ""));
 #else
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixDaemon", "bin", ""));
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain", "bin", ""));
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.so", "bin", ""));
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.so", "bin", ""));
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.so", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.so", "bin", ""));
 #endif
 
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin", ""));
