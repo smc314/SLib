@@ -89,8 +89,13 @@ int main (int argc, char** argv)
 		if(m_targets.size() == 0){
 			handleAll();
 		} else {
+			bool didClean = false;
 			for( auto const& targ : m_targets){
-				if(targ == "clean") handleClean();
+				if(didClean){
+					didClean = false;
+					CopyCore();
+				}
+				if(targ == "clean") { handleClean(); didClean = true; }
 				else if(targ == "all") handleAll();
 				else if(targ == "gen") handleGen();
 				else if(targ == "regen") handleReGen();
