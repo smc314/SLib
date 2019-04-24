@@ -337,12 +337,19 @@ void HelixBuilder::GenerateSqldo(bool forceRegen)
 		
 		// Check our sql.xml file against the sqldo/cpp file
 		HelixFSFile sqldoFile = currentSqldoFolder->FindFile( doName + ".cpp" );
-		if( file->IsNewerThan( sqldoFile ) ){
-			DEBUG(FL, "Data Object: %s is newer than .cpp - triggering regeneration.", file->PhysicalFileName()() );
-			HelixWorker::getInstance().Add( new HelixGenTask( currentSqldoFolder, file ) );
-		} else if(forceRegen){
+		if(forceRegen){
 			DEBUG(FL, "Data Object: %s - forcing regeneration.", file->PhysicalFileName()() );
 			HelixWorker::getInstance().Add( new HelixGenTask( currentSqldoFolder, file ) );
+		} else if( file->IsNewerThan( sqldoFile ) ){
+			DEBUG(FL, "Data Object: %s is newer than .cpp - triggering regeneration.", file->PhysicalFileName()() );
+			HelixWorker::getInstance().Add( new HelixGenTask( currentSqldoFolder, file ) );
+		} else if( file->FromCore() && HelixConfig::getInstance().SkipPdfGen() == false ){
+			// If the file is from core, double-check if we need to generate the C# data object.
+			HelixSqldo s( currentSqldoFolder, file );
+			if( file->IsNewerThan( s.CSBodyFileName() ) ) {
+				DEBUG(FL, "Data Object: %s is newer than .cs - triggering regeneration.", file->PhysicalFileName()() );
+				HelixWorker::getInstance().Add( new HelixGenTask( currentSqldoFolder, file ) );
+			}
 		}
 
 	}
