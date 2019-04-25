@@ -571,6 +571,24 @@ class DLLEXPORT twine
 		twine& to_utf8(const twine& fromEncoding, bool withChatter = false);
 		twine& to_utf16le(const twine& fromEncoding);
 
+		/** We use twine from time to time as a poor-man's guid data type, and these functions
+		  * help with that usage.  This indicates whether the current value of the twine
+		  * is either null or a zero-guid value.
+		  */
+		bool isZeroGuidOrEmpty() const;
+
+		/** We use twine from time to time as a poor-man's guid data type, and these functions
+		  * help with that usage.  This indicates whether the current value of the twine
+		  * is a zero-guid value.
+		  */
+		bool isZeroGuid() const;
+
+		/** We use twine from time to time as a poor-man's guid data type, and these functions
+		  * help with that usage.  This will set the contents of the twine to a zero guid
+		  * representation - "00000000-0000-0000-0000-000000000000".
+		  */
+		twine& zeroGuid();
+
 	private:
 
 		/** Checks the index against the bounds of the array:

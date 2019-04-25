@@ -1470,3 +1470,25 @@ twine& twine::to_utf16le(const twine& fromEncoding)
 	return *this;
 }
 
+bool twine::isZeroGuidOrEmpty() const
+{
+	// Are we empty or the zero-guid
+	if((m_data_size == 0) || (compare("00000000-0000-0000-0000-000000000000") == 0)) return true;
+
+	// Nope
+	return false;
+}
+
+bool twine::isZeroGuid() const
+{
+	// Are we the zero-guid?
+	if(compare("00000000-0000-0000-0000-000000000000") == 0) return true;
+
+	// Nope
+	return false;
+}
+
+twine& twine::zeroGuid()
+{
+	return set("00000000-0000-0000-0000-000000000000");
+}
