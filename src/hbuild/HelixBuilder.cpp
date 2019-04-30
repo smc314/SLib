@@ -16,6 +16,7 @@
 #include <XmlHelpers.h>
 #include <Timer.h>
 #include <Tools.h>
+#include <suvector.h>
 using namespace SLib;
 
 #include "HelixFS.h"
@@ -405,11 +406,18 @@ void HelixBuilder::UpdateHelixPdfGenProj(vector<HelixFSFile>& allSqldo)
 			}
 		}
 
+		// Use a sorted-unique vector to eliminate duplicates
+		suvector<twine> donames;
 		for(auto sqldo : allSqldo){
 			twine includeName( "DO\\" + sqldo->LastFolderName() + "\\" + sqldo->DataObjectName() + ".cs" );
+			donames.push_back( includeName );
+		}
+
+		// add all of the unique sqldo names to the cs compile list
+		for(auto& sqldo : donames){
 			// Add it in:
 			xmlNodePtr csInclude = xmlNewChild( item, NULL, (const xmlChar*)"Compile", NULL);
-			xmlSetProp( csInclude, (const xmlChar*)"Include", includeName );
+			xmlSetProp( csInclude, (const xmlChar*)"Include", sqldo);
 			modified = true;
 		}
 		break; // We found the ItemGroup with compiles in it - no need to keep searching the file
