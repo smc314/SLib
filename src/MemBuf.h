@@ -40,6 +40,8 @@ using namespace std;
 
 namespace SLib {
 
+#define MB_UNZIP_ST_DESTSIZE 32
+
 /**
   * This class represents a memory buffer that can be safely allocated, expanded,
   * indexed, and will ensure deletion of it's contents.

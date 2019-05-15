@@ -155,6 +155,7 @@ TEST_CASE( "MemBuf - Digest - Unsigned - Hello World", "[membuf]" )
 	// d2 a8 4f 4b 8b 65 09 37 ec 8f 73 cd 8b e2 c7 4a dd 5a 91 1b a6 4d f2 74 58 ed 82 29 da 80 4a 26
 
 	MemBuf m( "Hello World\n" );
+
 	MemBuf digest = m.Digest();
 	REQUIRE( digest.size() == 32 );
 
@@ -163,6 +164,24 @@ TEST_CASE( "MemBuf - Digest - Unsigned - Hello World", "[membuf]" )
 	REQUIRE( digestHex == "d2a84f4b8b650937ec8f73cd8be2c74add5a911ba64df27458ed8229da804a26" );
 
 
+}
+
+TEST_CASE( "MemBuf - Compression - Unsigned - Hello World", "[membuf]" )
+{
+	// echo "Hello World" | openssl sha256
+
+	MemBuf m( "Hello World\n" );
+
+    MemBuf z(m);
+    z.zip();
+    MemBuf u(z);
+    u.unzip();
+
+
+    printf("\"Hello World\\n\"\n\traw: %s\n\tzipped: %s\n\tunzipped: %s\n",
+            m.hex()(), z.hex()(), u.hex()());
+
+    REQUIRE( m == u );
 }
 
 TEST_CASE( "MemBuf - Digest - Signed - Hello World", "[membuf]" )
