@@ -29,6 +29,10 @@
 #include "AutoXMLChar.h"
 #include "XmlHelpers.h"
 #include "memptr.h"
+#include "zip.h"
+
+#include "zlib.h"
+
 using namespace SLib;
 
 MemBuf::MemBuf() :
@@ -612,6 +616,54 @@ MemBuf& MemBuf::zip()
 {
 	EnEx ee("MemBuf::zip()");
 
+	if(m_data_size == 0){
+		return *this;
+	}
+
+	int ret;
+	z_stream strm;
+
+	/* allocate deflate state *
+	 * -- Use default allocation fuctions */
+	strm.zalloc = Z_NULL;
+	strm.zfree = Z_NULL;
+	strm.opaque = Z_NULL;
+	strm.avail_in = m_data_size;
+	strm.next_in = (Bytef*) m_data;
+
+	ret = deflateInit2(&strm,
+			Z_BEST_COMPRESSION, // level:
+			Z_DEFLATED, // method: must be Z_DEFLATED in current version of zlib
+			15+16, // windowBits: lg(winSize), [8,15];larger:better comp, more mem;+16 gzip
+			9, // memLevel: [1,9]; max mem, optimal speed
+			Z_DEFAULT_STRATEGY // strategy: don't know data type, so go with default
+			);
+	if(ret != Z_OK){
+		throw AnException(0, FL,"Error initializing zlib deflate: %s", strm.msg);
+	}
+
+	size_t destSize = (size_t)deflateBound(&strm, m_data_size);
+
+	// For now, we'll allocate a temp buffer.
+	memptr<unsigned char> dest((unsigned char*)malloc( destSize ));
+	memset( dest, 0, destSize );
+
+	// set up data pointers
+	strm.avail_out = destSize;
+	strm.next_out = dest;
+
+	ret = deflate(&strm, Z_FINISH); // do it in one go
+	if(ret != Z_STREAM_END){
+		deflateEnd(&strm);
+		throw AnException(0, FL, "deflate() did not return Z_STREAM_END: %s", strm.msg);
+	}
+
+	destSize -= strm.avail_out;
+
+	deflateEnd(&strm);
+
+	size(destSize); // resize our buffer to the compressed size
+	memcpy( m_data, dest, destSize );
 
 	return *this;
 }
@@ -620,6 +672,65 @@ MemBuf& MemBuf::unzip()
 {
 	EnEx ee("MemBuf::unzip()");
 
+	if(m_data_size == 0){
+		return *this;
+	}
+
+	int ret;
+	z_stream strm;
+
+	/* allocate inflate state             *
+	 * -- Use default allocation fuctions */
+	strm.zalloc = Z_NULL;
+	strm.zfree  = Z_NULL;
+	strm.opaque = Z_NULL;
+	strm.avail_in = m_data_size;
+	strm.next_in = (Bytef*) m_data;
+
+	// initialize the inflate stream
+	ret = inflateInit2(&strm,
+			15+16 // windowBits, corresponds with zip 
+			);
+	if(ret != Z_OK){
+		throw AnException(0, FL, "Error initializing zlib inflate: %s", strm.msg);
+	}
+
+	/* Note: zlib has an inflateGetHeader() function that will tell inflate() to put
+	 * the gzip header into a gz_header struct. This, however, requires a call to inflate()
+	 * to actually decode. It is unclear whether we can catch a malformed data stream
+	 * in this way. */
+
+	// Allocate a buffer. Likely, most cases will be at most twice the data size
+	size_t destSize = m_data_size * 2;
+	memptr<unsigned char> dest((unsigned char*)malloc(destSize));
+	memset( dest, 0, destSize );
+
+	strm.avail_out = destSize;
+	strm.next_out = dest;
+
+	ret = inflate( &strm, Z_NO_FLUSH ); // Unzip as much as possible
+	while(ret == Z_OK){
+		dest = (unsigned char*)realloc(dest.release(), destSize * 2);
+		memset( dest + destSize, 0, destSize );
+		strm.avail_out = destSize; // Because we're doubling each time
+		strm.next_out = dest + destSize; // Move to end of saved data
+		destSize *= 2;
+		ret = inflate( &strm, Z_NO_FLUSH ); // Unzip as much as possible
+	}
+	if(ret != Z_STREAM_END){
+		// At some point, it may make sense to use this if to simply return *this
+		// because it'll usually mean a malformed (i.e., not zipped) data stream.
+		// Perhaps have multiple return value checks with different results.
+		deflateEnd(&strm);
+		throw AnException(0, FL, "error while inflating: %s", strm.msg);
+	}
+
+	destSize -= strm.avail_out; // get the number of bytes written
+	deflateEnd(&strm);
+
+	size(destSize);
+
+	memcpy(m_data, dest, destSize);
 
 	return *this;
 }

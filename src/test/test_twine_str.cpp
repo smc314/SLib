@@ -28,7 +28,7 @@
 #include <iomanip>
 
 #include "twine.h"
-#include "xmlInc.h"
+#include "xmlinc.h"
 using namespace SLib;
 
 #include "catch.hpp"
