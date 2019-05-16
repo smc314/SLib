@@ -152,16 +152,16 @@ TEST_CASE( "MemBuf - Compression - Hello World", "[membuf]" )
 
 	MemBuf m( "Hello World\n" );
 
-    MemBuf z(m);
-    z.zip();
-    MemBuf u(z);
-    u.unzip();
+	MemBuf z(m);
+	z.zip();
+	MemBuf u(z);
+	u.unzip();
 
 
-    printf("\"Hello World\\n\"\n\traw: %s\n\tzipped: %s\n\tunzipped: %s\n",
-            m.hex()(), z.hex()(), u.hex()());
+	printf("\"Hello World\\n\"\n\traw: %s\n\tzipped: %s\n\tunzipped: %s\n",
+			m.hex()(), z.hex()(), u.hex()());
 
-    REQUIRE( m == u );
+	REQUIRE( m == u );
 }
 
 TEST_CASE( "MemBuf - Compression - Hello World RSA", "[membuf]" )
@@ -170,35 +170,35 @@ TEST_CASE( "MemBuf - Compression - Hello World RSA", "[membuf]" )
 echo "Hello World" | openssl dgst -sha256 -hex -sign SLib.rsa
 61ca40cb35fb7ebb94873f6ecea33ab02ebf47f10375e1d9bc12623ae9af64a3c6657b46c2c9cdf0c1963999c79befc69ac463797ad19773a101d0f110304a2e70717289c5d5d4a084f8b409f3c40d9469c4b038c43bfaa3200b8b00a7b79839eb268a0257a14daccfddaef9269a3e5ce0299f75a60fabff476b7d2e2a44fbfd9445f318fa14ca16c165b9177eae132898eb61d5940220151634c6b5794b00cd940d51823f2f8b762dec7cd2d21a6a081737110d43e22fc1ba545e06954ab5594b061a69cd9d2d00abdfe89784586b2649fe093130b868b5f29e9217834b881d7e26c5dc110171bb81ae9f8e1e18a54c0bbe328a6da33734528aeeba9bfeb961
 */
-    MemBuf m( "Hello World\n" );
-    MemBuf digest = m.Digest( MemBufTest_GetKeypair() );
-    
-    REQUIRE(digest.size() == 256);
+	MemBuf m( "Hello World\n" );
+	MemBuf digest = m.Digest( MemBufTest_GetKeypair() );
 
-    MemBuf z(digest);
-    z.zip();
-    MemBuf u(z);
-    u.unzip();
+	REQUIRE(digest.size() == 256);
 
-    printf("\"Hello World\\n\"\n\tdigest: %s\n\tzip: %s\n\tunzip: %s\n",
-            digest.hex()(), z.hex()(), u.hex()());
+	MemBuf z(digest);
+	z.zip();
+	MemBuf u(z);
+	u.unzip();
 
-    REQUIRE(digest == u);
+	printf("\"Hello World\\n\"\n\tdigest: %s\n\tzip: %s\n\tunzip: %s\n",
+			digest.hex()(), z.hex()(), u.hex()());
+
+	REQUIRE(digest == u);
 }
 
 TEST_CASE( "MemBuf - Compression - Image", "[membuf]")
 {
-    // reads an image from ./image.jpg and compresses it in memory
-    MemBuf im;
-    File image("./image.jpg");
-    image.readContents(im);
+	// reads an image from ./image.jpg and compresses it in memory
+	MemBuf im;
+	File image("./image.jpg");
+	image.readContents(im);
 
-    MemBuf z(im);
-    z.zip();
-    MemBuf u(z);
-    u.unzip();
+	MemBuf z(im);
+	z.zip();
+	MemBuf u(z);
+	u.unzip();
 
-    REQUIRE(im == u);
+	REQUIRE(im == u);
 }
 
 TEST_CASE( "MemBuf - Digest - Unsigned - Hello World", "[membuf]" )
