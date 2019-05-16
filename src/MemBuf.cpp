@@ -503,8 +503,6 @@ void MemBuf::bounds_check(size_t p) const
 {
 	EnEx ee("MemBuf::bounds_check(size_t p)");
 	if( (p < 0) || (p >= m_data_size)){
-        printf("%s - %d: MemBuf: Index out of bounds. p(%d) m_data_size(%d)",
-                __FILE__, __LINE__, p, m_data_size);
 		throw AnException(0, FL, "MemBuf: Index out of bounds. p(%d) m_data_size(%d)", p, m_data_size);
 	}
 }
