@@ -150,7 +150,11 @@ twine HelixSqldoChildVector::JSXmlGet(const twine& app)
 	twine finalApp( app );
 	if(HelixConfig::getInstance().UseCore()){
 		if(simplePackage == "admin" || simplePackage == "util"){
-			finalApp = "cored"; // Use admin and util classes from cored
+			if(app == "atm" || app == "sspm"){
+				finalApp = "corem";
+			} else {
+				finalApp = "cored"; // Use admin and util classes from cored
+			}
 		}
 	}
 	return "\t\t\tvar " + name + "_subElem = " + app + ".Statics.xmlFindChild( elem, \"" + name + "\");\n"
@@ -166,7 +170,11 @@ twine HelixSqldoChildVector::JSXmlSet(const twine& app)
 	twine finalApp( app );
 	if(HelixConfig::getInstance().UseCore()){
 		if(simplePackage == "admin" || simplePackage == "util"){
-			finalApp = "cored"; // Use admin and util classes from cored
+			if(app == "atm" || app == "sspm"){
+				finalApp = "corem";
+			} else {
+				finalApp = "cored"; // Use admin and util classes from cored
+			}
 		}
 	}
 	return 
@@ -182,7 +190,11 @@ twine HelixSqldoChildVector::JSClone(const twine& app)
 	twine finalApp( app );
 	if(HelixConfig::getInstance().UseCore()){
 		if(simplePackage == "admin" || simplePackage == "util"){
-			finalApp = "cored"; // Use admin and util classes from cored
+			if(app == "atm" || app == "sspm"){
+				finalApp = "corem";
+			} else {
+				finalApp = "cored"; // Use admin and util classes from cored
+			}
 		}
 	}
 	return 
