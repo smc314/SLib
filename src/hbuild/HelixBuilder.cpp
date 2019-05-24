@@ -207,12 +207,23 @@ void HelixBuilder::BuildCS()
 		return; // Bail out early on any previous errors
 	}
 
-	INFO(FL, "Building HelixPdfGen" );
-	twine pdfGen = "..\\c#\\HelixPdfGen";
-
 	twine cmd;
+	twine pdfGen;
+	INFO(FL, "Building HelixPdfGen" );
+
 	// Run the restore of all NuGet packages
+#ifdef _WIN32
+	pdfGen = "..\\c#\\HelixPdfGen";
 	cmd = "cd " + pdfGen + " && c:\\software\\NuGet.exe restore HelixPdfGen.sln";
+#elif __APPLE__
+	pdfGen = "../c#/HelixPdfGen";
+	cmd = "cd " + pdfGen + " && mono ~/bin/nuget.exe restore HelixPdfGen.sln";
+#elif __linux__
+	pdfGen = "../c#/HelixPdfGen";
+	cmd = "cd " + pdfGen + " && mono nuget.exe restore HelixPdfGen.sln";
+#else
+	throw AnException(0, FL, "Unknown compile environment.");
+#endif
 	if(std::system( cmd() ) != 0) throw AnException(0, FL, "C# - NuGet restore failed.");
 
 	// Run the build of the project
@@ -273,12 +284,23 @@ void HelixBuilder::BuildCSTest()
 		return; // Bail out early on any previous errors
 	}
 
-	INFO(FL, "Building Helix.Test" );
-	twine testRoot = "..\\..\\test\\Helix.Test";
-
 	twine cmd;
+	twine testRoot;
+	INFO(FL, "Building Helix.Test" );
+
 	// Run the restore of all NuGet packages
+#ifdef _WIN32
+	testRoot = "..\\..\\test\\Helix.Test";
 	cmd = "cd " + testRoot + " && c:\\software\\NuGet.exe restore Helix.Test.sln";
+#elif __APPLE__
+	testRoot = "../../test/Helix.Test";
+	cmd = "cd " + testRoot + " && mono ~/bin/nuget.exe restore Helix.Test.sln";
+#elif __linux__
+	testRoot = "../../test/Helix.Test";
+	cmd = "cd " + testRoot + " && mono ~/bin/nuget.exe restore Helix.Test.sln";
+#else
+	throw AnException(0, FL, "Unknown compile environment.");
+#endif
 	if(std::system( cmd() ) != 0) throw AnException(0, FL, "C# - Helix.Test NuGet restore failed.");
 
 	// Run the build of the project
