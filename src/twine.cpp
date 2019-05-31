@@ -737,7 +737,8 @@ size_t twine::rfind(const char c, size_t p) const
 	while(p >= 0){
 		if(m_data[p] == c)
 			return p;
-		p--;
+		if(p == 0) break;
+		p--; // otherwise keep going
 	}
 	return TWINE_NOT_FOUND;
 }
@@ -755,7 +756,8 @@ size_t twine::rfind(const char* c) const
 	while(p >= 0){
 		if(strncmp(&m_data[p], c, len) == 0)
 			return p;
-		p--;
+		if(p == 0) break;
+		p--; // otherwise keep going
 	}
 	return TWINE_NOT_FOUND;
 }
@@ -773,7 +775,8 @@ size_t twine::rfind(const char* c, size_t p) const
 	while(p >= 0){
 		if(strncmp(&m_data[p], c, len) == 0)
 			return p;
-		p--;
+		if(p == 0) break;
+		p--; // otherwise keep going
 	}
 	return TWINE_NOT_FOUND;
 }
