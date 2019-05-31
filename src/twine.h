@@ -442,6 +442,10 @@ class DLLEXPORT twine
 		  */
 		twine& replaceAll(const twine& target, const twine& replacement);
 
+		/** Replaces all instances of a case insensitive search string with an alternate string
+		  */
+		twine& cireplaceAll(const twine& target, const twine& replacement);
+
 		/** Appends a const char* to the end of the twine
 		  */
 		twine& append(const char* c);

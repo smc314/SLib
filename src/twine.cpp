@@ -1050,6 +1050,19 @@ twine& twine::replaceAll(const twine& target, const twine& replacement)
 	return *this;
 }
 
+twine& twine::cireplaceAll(const twine& target, const twine& replacement)
+{
+	size_t idx = cifind(target);
+	while(idx != TWINE_NOT_FOUND){
+		replace(idx, target.size(), replacement);
+		if(idx + replacement.size() >= m_data_size)
+			idx = TWINE_NOT_FOUND; // reached the end of the string
+		else
+			idx = cifind(target, idx + replacement.size());
+	}
+	return *this;
+}
+
 twine& twine::append(const char* c)
 {
 	//EnEx ee("twine::append(const char* c)");

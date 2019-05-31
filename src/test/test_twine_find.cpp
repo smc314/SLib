@@ -23,6 +23,7 @@
 
 #include "twine.h"
 #include "xmlinc.h"
+#include "AnException.h"
 using namespace SLib;
 
 #include "catch.hpp"
@@ -188,4 +189,30 @@ TEST_CASE( "Twine - Reverse Finds - Case Insensitive", "[twine][twine-find][ci]"
     REQUIRE( t.cirfind( twine("Search"), 5 ) == 0 );
     REQUIRE( t.cirfind( twine("search"), 15 ) == 14 );
     REQUIRE( t.cirfind( twine("SEARCH"), 10 ) == 7 );
+}
+
+TEST_CASE( "Twine - Replace", "[twine][twine-find]" )
+{
+    //        0123456789 123456789 123456789 1234
+    twine t( "Search search SEARCH se8arch search" );
+
+    REQUIRE( t.find( "Foo" ) == TWINE_NOT_FOUND );
+    REQUIRE( t.find( "FOO" ) == TWINE_NOT_FOUND );
+    t.replaceAll( "search", "Foo" );
+    t.replaceAll( "Search", "FOO" );
+    REQUIRE( t == "FOO Foo SEARCH se8arch Foo" );
+}
+
+TEST_CASE( "Twine - Replace - Case Insensitive", "[twine][twine-find][ci]" )
+{
+    //        0123456789 123456789 123456789 1234
+    twine t( "Search search SEARCH se8arch search" );
+
+    REQUIRE( t.cifind( "Foo" ) == TWINE_NOT_FOUND );
+    REQUIRE( t.cifind( "FOO" ) == TWINE_NOT_FOUND );
+//  try{
+    t.cireplaceAll( "search", "Foo" );
+    t.cireplaceAll( "Search", "FOO" );
+//  }catch(AnException e){printf("%s\n%s\n", e.Msg(), e.Stack());}
+    REQUIRE( t == "Foo Foo Foo se8arch Foo" );
 }
