@@ -370,6 +370,54 @@ class DLLEXPORT twine
 		  */
 		size_t rfind(const twine& needle, size_t p) const;
 
+		/** Searches the twine, case insensitively,  Returns position or TWINE_NOT_FOUND.
+		  */
+		size_t cifind(const char* needle) const;
+
+		/** Searches the twine, case insensitively,  Returns position or TWINE_NOT_FOUND.
+		  */
+		size_t cifind(const char c) const;
+
+		/** Searches the twine, case insensitively,  Returns position or TWINE_NOT_FOUND.
+		  */
+		size_t cifind(const twine& t) const;
+
+		/** Searches the twine, case insensitively, starting at position p.
+		  */
+		size_t cifind(const char* needle, size_t p) const;
+
+		/** Searches the twine, case insensitively, starting at position p.
+		  */
+		size_t cifind(const char c, size_t p) const;
+
+		/** Searches the twine, case insensitively, starting at position p.
+		  */
+		size_t cifind(const twine& t, size_t p) const;
+
+		/** Searches the twine, case insensitively, in reverse for the target.
+		  */
+		size_t cirfind(const char c) const;
+
+		/** Searches the twine, case insensitively, in reverse starting at p.
+		  */
+		size_t cirfind(const char c, size_t p) const;
+
+		/** Searches the twine, case insensitively, in reverse for the target.
+		  */
+		size_t cirfind(const char* needle) const;
+
+		/** Searches the twine, case insensitively, in reverse starting at p.
+		  */
+		size_t cirfind(const char* needle, size_t p) const;
+
+		/** Searches the twine, case insensitively, in reverse for the target.
+		  */
+		size_t cirfind(const twine& needle) const;
+
+		/** Searches the twine, case insensitively, in reverse starting at p.
+		  */
+		size_t cirfind(const twine& needle, size_t p) const;
+
 		/** Counts the number of occurrances of a char in the twine.
 		  */
 		size_t countof(const char needle) const;
@@ -393,6 +441,10 @@ class DLLEXPORT twine
 		/** Replaces all instances of a search string with an alternate string
 		  */
 		twine& replaceAll(const twine& target, const twine& replacement);
+
+		/** Replaces all instances of a case insensitive search string with an alternate string
+		  */
+		twine& cireplaceAll(const twine& target, const twine& replacement);
 
 		/** Appends a const char* to the end of the twine
 		  */
