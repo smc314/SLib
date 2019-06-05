@@ -526,6 +526,16 @@ class DLLEXPORT twine
 		twine& ucase(size_t i);
 
 		/**
+		  * Lowercases the whole twine.
+		  */
+		twine& lcase(void);
+
+		/**
+		  * Lowercases the character at i in the twine.
+		  */
+		twine& lcase(size_t i);
+
+		/**
 		  * Uppercases the given string in place.
 		  */
 		static void strupr(char* input);

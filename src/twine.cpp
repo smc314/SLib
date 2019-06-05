@@ -825,14 +825,8 @@ size_t twine::cifind(const char *needle, size_t p) const
 	if(nlen == 0)
 		return TWINE_NOT_FOUND;
 
-	char upneedle[nlen + 1];
-	char loneedle[nlen + 1];
-	for(size_t i = 0; i < nlen; ++i){
-		upneedle[i] = toupper( needle[i] );
-		loneedle[i] = tolower( needle[i] );
-	}
-	upneedle[nlen] = 0;
-	loneedle[nlen] = 0;
+	twine upneedle( needle ); upneedle.ucase();
+	twine loneedle( needle ); loneedle.lcase();
 
 	// start with i = p to start searching at p
 	for(size_t i = p; i <= m_data_size - nlen; ++i){
@@ -925,14 +919,8 @@ size_t twine::cirfind(const char *needle, size_t p) const
 	if(nlen == 0)
 		return TWINE_NOT_FOUND;
 
-	char upneedle[nlen + 1];
-	char loneedle[nlen + 1];
-	for(size_t i = 0; i < nlen; ++i){
-		upneedle[i] = toupper( needle[i] );
-		loneedle[i] = tolower( needle[i] );
-	}
-	upneedle[nlen] = 0;
-	loneedle[nlen] = 0;
+	twine upneedle( needle ); upneedle.ucase();
+	twine loneedle( needle ); loneedle.lcase();
 
 	for(size_t i = p; i >= 0; --i){
 		bool found = true;
@@ -1300,6 +1288,24 @@ twine& twine::ucase(size_t i)
 	//EnEx ee("twine::ucase(size_t i)");
 	bounds_check(i);
 	m_data[i] = toupper(m_data[i]);
+	return *this;
+}
+
+twine& twine::lcase(void)
+{
+	//EnEx ee("twine::lcase(void)");
+	size_t i;
+	for(i = 0; i < m_data_size; i++){
+		m_data[i] = tolower(m_data[i]);
+	}
+	return *this;
+}
+
+twine& twine::lcase(size_t i)
+{
+	//EnEx ee("twine::lcase(size_t i)");
+	bounds_check(i);
+	m_data[i] = tolower(m_data[i]);
 	return *this;
 }
 
