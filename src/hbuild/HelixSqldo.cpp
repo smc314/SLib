@@ -288,6 +288,7 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 	twine xmlCSWriteMembers;
 	twine jsonReadMembers;
 	twine jsonWriteMembers;
+	twine csDOUsing;
 	for(auto& p : m_all_params){
 		DEBUG(FL, "%s - Parm %s(%s)", m_class_name(), p.second.name(), p.second.type() );
 		defineDataMembers.append("\t\t" + p.second.CPPType() + " " + p.second.name + ";\n");
@@ -337,6 +338,17 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 		jsonReadMembers.append( co.CPPJsonGet() );
 		jsonWriteMembers.append( co.CPPJsonSet() );
 	}
+
+	// DO Using statements always include admin and util - everyone has visibility to them
+	csDOUsing = 
+		"using HelixPdfGen.DO.admin;\n"
+		"using HelixPdfGen.DO.util;\n"
+	;
+	// Add in the rest of the using statements based on our logic dependencies
+	for(auto dep : HelixConfig::getInstance().LogicDepends( LogicFolder() ) ){
+		csDOUsing.append( "using HelixPdfGen.DO." ).append( dep ).append(";\n");
+	}
+
 	m_parms[ "ChildObjectIncludes" ] = childObjectIncludes;
 	m_parms[ "DefineDataMembers" ] = defineDataMembers;
 	m_parms[ "C#DefineDataMembers" ] = defineCSDataMembers;
@@ -352,6 +364,7 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 	m_parms[ "C#XmlWriteMembers" ] = xmlCSWriteMembers;
 	m_parms[ "JSONReadMembers" ] = jsonReadMembers;
 	m_parms[ "JSONWriteMembers" ] = jsonWriteMembers;
+	m_parms[ "C#DOUsing" ] = csDOUsing;
 
 	return m_parms;
 }
