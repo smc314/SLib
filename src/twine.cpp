@@ -963,6 +963,25 @@ size_t twine::countof(const char needle) const
 	return count;
 }
 
+size_t twine::findSkipNested(size_t start, const char startChar, const char endChar ) const
+{
+	bounds_check(start);
+	int nestCount = 0;
+	for(size_t i = start; i < m_data_size; i++){
+		if(m_data[i] == endChar){
+			if(nestCount == 0) {
+				return i; // we're done
+			} else {
+				nestCount --; // end of a nested section
+			}
+		} else if(m_data[i] == startChar){
+			nestCount ++; // start of a nested section
+		}
+	}
+	// If we get here - we didn't find it
+	return TWINE_NOT_FOUND;
+}
+
 twine& twine::replace(size_t start, size_t count, const char* rep)
 {
 	//EnEx ee("twine::replace(size_t start, size_t count, const char* rep)");

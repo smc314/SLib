@@ -422,6 +422,14 @@ class DLLEXPORT twine
 		  */
 		size_t countof(const char needle) const;
 
+		/** Does a find on a character that is the second of a pair that define start
+		  * and end of sections, while skipping over any nested sections defined by the
+		  * same start/end pair of characters.  Use this to find the next } of a {, }
+		  * pair while skipping over all nested pairs of {,} characters.  Works for any
+		  * pair of start/end characters.
+		  */
+		size_t findSkipNested( size_t start, const char startChar, const char endChar ) const;
+
 		/** Replaces a range with the input.
 		  */
 		twine& replace(size_t start, size_t count, const char* rep);
