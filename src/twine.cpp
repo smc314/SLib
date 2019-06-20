@@ -824,6 +824,8 @@ size_t twine::cifind(const char *needle, size_t p) const
 	size_t nlen = strlen(needle);
 	if(nlen == 0)
 		return TWINE_NOT_FOUND;
+	if(nlen > m_data_size)
+		return TWINE_NOT_FOUND;
 
 	twine upneedle( needle ); upneedle.ucase();
 	twine loneedle( needle ); loneedle.lcase();
