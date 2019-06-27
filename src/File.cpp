@@ -484,7 +484,14 @@ void File::EnsurePath(const twine& fileName)
 		startingPath = ".";
 	}
 
-	for(size_t i = 0; i < segments.size() - 1; i++){
+	size_t limit;
+	if(fileName.endsWith("/") || fileName.endsWith("\\")){
+		limit = segments.size(); // go all the way to the end
+	} else {
+		limit = segments.size() - 1; // Leave off the last one
+	}
+
+	for(size_t i = 0; i < limit; i++){
 		if(segments[i].length() == 0 ||
 			segments[i] == "."
 		){

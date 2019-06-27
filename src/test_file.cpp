@@ -39,6 +39,10 @@ int main (void)
 		// Absolute Path for unix
 		File::EnsurePath( "/slib_root/file/ensure/path" );
 
+		// path with a trailing slash
+		File::EnsurePath( "c:\\slib\\path\\to\\the\\end\\" );
+		File::EnsurePath( "c:/slib/path/to/the/final/" );
+
 	} catch (AnException& e){
 		printf("Exception caught: %s\n", e.Msg() );
 	}
