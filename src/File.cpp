@@ -463,19 +463,26 @@ void File::EnsurePath(const twine& fileName)
 {
 	EnEx ee("File::EnsurePath(const twine& fileName)");
 
-	vector<twine> segments;
-	twine seg;
-	for(size_t i = 0; i < fileName.length(); i++){
-		if(fileName[i] == '/' || fileName[i] == '\\'){
-			segments.push_back(seg);
-			seg = "";
-		} else {
-			seg += fileName[i];
-		}
-	}
-	segments.push_back(seg);
+	if(fileName.length() == 0) return; // nothing to do
 
-	twine startingPath = ".";
+	vector<twine> segments = fileName.tokenize( "/\\" ); // Split up on forward and back slash
+	twine startingPath;
+
+	// What kind of path prefix did we have?
+	if(fileName[0] == '/') { // Unix style absolute path
+		startingPath = "/";
+	} else if( fileName.length() >= 2 && fileName[1] == ':' ){ // Windows style absolute path
+		startingPath = segments[0];
+		segments.erase( segments.begin() ); // remove the first segment - it's in startingPath
+	} else if( fileName.length() >= 2 && fileName[0] == '\\' && fileName[1] == '\\'){ // Windows style network path
+		startingPath = "\\\\" + segments[0];
+		segments.erase( segments.begin() ); // remove the first segment - it's in startingPath
+	} else if( fileName.length() >= 2 && fileName[0] == '/' && fileName[1] == '/'){ // Windows style network path
+		startingPath = "//" + segments[0];
+		segments.erase( segments.begin() ); // remove the first segment - it's in startingPath
+	} else {
+		startingPath = ".";
+	}
 
 	for(size_t i = 0; i < segments.size() - 1; i++){
 		if(segments[i].length() == 0 ||
@@ -493,13 +500,13 @@ void File::EnsurePath(const twine& fileName)
 		}
 
 		bool found = false;
-		for(size_t j = 0; j < folders.size(); j++){
-			if(folders[j] == segments[i]){
+		for(auto& folder : folders){
+			if(folder == segments[i]){
 				found = true;
 				break;
 			}
 		}
-		startingPath += "/" + segments[i];
+		startingPath = PathCombine(startingPath, segments[i]);
 		if(!found){
 			// Create the new directory:
 #ifdef _WIN32

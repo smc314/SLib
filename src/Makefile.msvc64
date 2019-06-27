@@ -93,6 +93,9 @@ test_socket: test_socket.$(OHEXT)
 test_hexdump: test_hexdump.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_hexdump.exe test_hexdump.$(OHEXT) libSLib.lib $(LLIBS)
 
+test_file: test_file.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_file.exe test_file.$(OHEXT) libSLib.lib $(LLIBS)
+
 test_runcmd: test_runcmd.$(OHEXT) test_echoargs.$(OHEXT)
 	$(LINK) $(LFLAGS) /OUT:test_echoargs.exe test_echoargs.$(OHEXT) libSLib.lib $(LLIBS)
 	$(LINK) $(LFLAGS) /OUT:test_runcmd.exe test_runcmd.$(OHEXT) libSLib.lib $(LLIBS)

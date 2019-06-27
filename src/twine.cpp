@@ -1360,7 +1360,7 @@ void twine::strlwr(char* input)
 	}
 }
 
-vector < twine > twine::split(const twine& spliton)
+vector < twine > twine::split(const twine& spliton) const
 {
 	//EnEx ee("twine::split(twine spliton)");
 	vector < twine > v;

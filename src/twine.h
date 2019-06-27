@@ -557,7 +557,7 @@ class DLLEXPORT twine
 		* Splits the current twine into a vector of twines based
 		* on the given split string.
 		*/
-		vector < twine > split(const twine& spliton);
+		vector < twine > split(const twine& spliton) const;
 
 		/** A more sophisticated version of split, which allows you to pass in
 		  * a string containing a list of token separators that we will use to parse
