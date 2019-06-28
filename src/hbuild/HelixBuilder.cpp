@@ -84,7 +84,15 @@ void HelixBuilder::Build( const twine& folderPath )
 	HelixFSFolder sqldo = folder->FindFolder( "sqldo" );
 	if(sqldo){
 		for(auto file : sqldo->Files()){
-			if( file->FileName().endsWith(".cpp") && file->NeedsRebuild( )){
+			// Check to see if this is an orphan file by looking for the sql.xml file in the parent folder:
+			twine fn( file->FileName() );
+			auto splits = fn.split( "." );
+			twine sqlXml( splits[0] + ".sql.xml");
+			auto sqlXmlFile = folder->FindFile( sqlXml );
+			if(sqlXmlFile == nullptr){
+				WARN(FL, "Found orphan sqldo file: %s - deleting", file->PhysicalFileName()() );
+				File::Delete( file->PhysicalFileName() );
+			} else if( file->FileName().endsWith(".cpp") && file->NeedsRebuild( )){
 				HelixWorker::getInstance().Add( new HelixCompileTask( sqldo, file ) );
 				relinkRequired = true;
 			}
@@ -138,7 +146,15 @@ void HelixBuilder::Clean( const twine& folderPath )
 	HelixFSFolder sqldo = folder->FindFolder( "sqldo" );
 	if(sqldo){
 		for(auto file : sqldo->Files()){
-			if( file->FileName().endsWith(".cpp") ){
+			// Check to see if this is an orphan file by looking for the sql.xml file in the parent folder:
+			twine fn( file->FileName() );
+			auto splits = fn.split( "." );
+			twine sqlXml( splits[0] + ".sql.xml");
+			auto sqlXmlFile = folder->FindFile( sqlXml );
+			if(sqlXmlFile == nullptr){
+				WARN(FL, "Found orphan sqldo file: %s - deleting", file->PhysicalFileName()() );
+				File::Delete( file->PhysicalFileName() );
+			} else if( file->FileName().endsWith(".cpp") ){
 				DEBUG(FL, "Cleaning File: %s/%s", file->FolderName()(), file->DotOh()() );
 				File::Delete( sqldo->PhysicalFolderName() + "/" + file->DotOh() );
 			}
