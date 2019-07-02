@@ -42,3 +42,4 @@ include/*.cpp
 ##########################
 .DS_Store
 *.dSYM/
+.vscode/ipch
