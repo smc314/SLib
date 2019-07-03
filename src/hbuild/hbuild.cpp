@@ -25,6 +25,8 @@ using namespace SLib;
 #include "HelixWorker.h"
 #include "HelixAutoAsset.h"
 #include "HelixExtractStrings.h"
+#include "HelixCountLines.h"
+#include "HelixFind.h"
 #include "HelixJSGenTask.h"
 using namespace Helix::Build;
 
@@ -42,6 +44,8 @@ void handleInstall(bool displayBanner = true);
 void handleDeploy(bool displayBanner = true);
 void handleAsset(bool displayBanner = true);
 void handleStrings(bool displayBanner = true);
+void handleFind(const twine& searchString, bool displayBanner = true);
+void handleLines(bool displayBanner = true);
 void testDep();
 void CopyCore();
 void describe();
@@ -90,7 +94,8 @@ int main (int argc, char** argv)
 			handleAll();
 		} else {
 			bool didClean = false;
-			for( auto const& targ : m_targets){
+			for( size_t i = 0; i < m_targets.size(); i++){
+				twine targ( m_targets[i] );
 				if(didClean){
 					didClean = false;
 					CopyCore();
@@ -107,6 +112,16 @@ int main (int argc, char** argv)
 				else if(targ == "testdep") testDep();
 				else if(targ == "asset") handleAsset();
 				else if(targ == "strings") handleStrings();
+				else if(targ == "lines") handleLines();
+				else if(targ == "find") {
+					if( i + 1 < m_targets.size()){
+						twine findArg( m_targets[i+1] );
+						i++;
+						handleFind(findArg);
+					} else {
+						throw AnException(0, FL, "find requires an argument.");
+					}
+				}
 				else if(targ == "?") describe();
 				else if(targ == "help") describe();
 				else if(targ == "-?") describe();
@@ -160,6 +175,8 @@ void describe()
 	printf("== dep - Runs the Deploy section from the hbuild.xml file\n");
 	printf("== asset - Runs the auto-asset function against all QX projects\n");
 	printf("== strings - Runs the extract-strings process to build translation files\n");
+	printf("== lines - Runs a count of all source code files and lines\n");
+	printf("== find searchString - Searches the source code for the given searchString\n");
 	printf("\n");
 	printf("== If no target is specified, the 'all' target is invoked.\n");
 	printf("\n");
@@ -308,6 +325,36 @@ void handleStrings(bool displayBanner)
 
 	HelixExtractStrings strings;	
 	strings.Generate();
+}
+
+void handleLines(bool displayBanner)
+{
+	if(HelixWorker::getInstance().HasError()){
+		return;
+	}
+	if(displayBanner){
+		printf("============================================================================\n");
+		printf("== Count Lines Target\n");
+		printf("============================================================================\n");
+	}
+
+	HelixCountLines lines;	
+	lines.Generate();
+}
+
+void handleFind(const twine& searchString, bool displayBanner)
+{
+	if(HelixWorker::getInstance().HasError()){
+		return;
+	}
+	if(displayBanner){
+		printf("============================================================================\n");
+		printf("== Search Target\n");
+		printf("============================================================================\n");
+	}
+
+	HelixFind find;	
+	find.Generate(searchString);
 }
 
 void handleJSApiGen(bool displayBanner)
