@@ -198,6 +198,6 @@ void HelixFind::FindInLines(const twine& fileName, const vector<twine>& lines)
 		}
 	}
 	if(found){
-		printf("%s\n", fileName() );
+		printf("%s\n\n", fileName() );
 	}
 }
