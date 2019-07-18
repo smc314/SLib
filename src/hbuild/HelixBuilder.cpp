@@ -48,7 +48,7 @@ void HelixBuilder::Build( const twine& folderPath )
 	}
 
 	// Some special cases
-	if(folderPath == "HelixMain" || folderPath == "HelixDaemon"){
+	if(folderPath == "HelixMain" || folderPath == "HelixDaemon" || folderPath == "HelixTest"){
 		dptr<HelixLinkTask> lt = new HelixLinkTask( std::make_shared<HelixFSFolder_Bare>(folderPath)  );
 		if(lt->RequiresLink()){
 			HelixWorker::getInstance().Add( lt.release() );
@@ -77,6 +77,19 @@ void HelixBuilder::Build( const twine& folderPath )
 		if( (file->FileName().endsWith(".c") || file->FileName().endsWith(".cpp")) && file->NeedsRebuild( )){
 			HelixWorker::getInstance().Add( new HelixCompileTask( folder, file ) );
 			relinkRequired = true;
+		}
+	}
+
+	if(HelixConfig::getInstance().IncludeTest()){
+		// Check for a test sub-folder
+		HelixFSFolder test = folder->FindFolder( "test" );
+		if(test){
+			for(auto file : test->Files()){
+				if( (file->FileName().endsWith(".c") || file->FileName().endsWith(".cpp")) && file->NeedsRebuild( )){
+					HelixWorker::getInstance().Add( new HelixCompileTask( test, file ) );
+					relinkRequired = true;
+				}
+			}
 		}
 	}
 
@@ -119,6 +132,10 @@ void HelixBuilder::Clean( const twine& folderPath )
 		INFO(FL, "Cleaning HelixDaemon");
 		CleanAllRuntime( "./bin" );
 		return;
+	} else if(folderPath == "HelixTest"){
+		INFO(FL, "Cleaning HelixTest");
+		CleanAllRuntime( "./bin" );
+		return;
 	}
 
 	HelixFSFolder folder = HelixFS::getInstance().FindPath( folderPath );
@@ -141,6 +158,18 @@ void HelixBuilder::Clean( const twine& folderPath )
 		}
 	}
 	CleanAllRuntime( folder->PhysicalFolderName() );
+
+	// Check for a test sub-folder
+	HelixFSFolder test = folder->FindFolder( "test" );
+	if(test){
+		for(auto file : test->Files()){
+			if( file->FileName().endsWith(".cpp") ){
+				DEBUG(FL, "Cleaning File: %s/%s", file->FolderName()(), file->DotOh()() );
+				File::Delete( test->PhysicalFolderName() + "/" + file->DotOh() );
+			}
+		}
+		CleanAllRuntime( test->PhysicalFolderName() );
+	}
 
 	// Check for a sqldo sub-folder
 	HelixFSFolder sqldo = folder->FindFolder( "sqldo" );
@@ -192,6 +221,7 @@ void HelixBuilder::CleanAllRuntime( const twine& physicalPath )
 				file == "GenerateSqlClasses" ||
 				file == "HelixDaemon" ||
 				file == "HelixMain" ||
+				file == "HelixTest" ||
 				file == "LogDump" ||
 				file == "MakeMakefiles" ||
 				file == "SLogDump" ||

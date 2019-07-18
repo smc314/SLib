@@ -35,6 +35,7 @@ std::vector<twine> m_targets;
 
 void handleAll();
 void handleClean();
+void handleTest( int argIndex );
 void handleGen(bool displayBanner = true);
 void handleReGen(bool displayBanner = true);
 void handleJSApiGen(bool displayBanner = true);
@@ -122,6 +123,10 @@ int main (int argc, char** argv)
 						throw AnException(0, FL, "find requires an argument.");
 					}
 				}
+				else if(targ == "test") {
+					handleTest( (int)i );
+					break; // All the rest of the arguments belong to the test command
+				}
 				else if(targ == "?") describe();
 				else if(targ == "help") describe();
 				else if(targ == "-?") describe();
@@ -177,6 +182,7 @@ void describe()
 	printf("== strings - Runs the extract-strings process to build translation files\n");
 	printf("== lines - Runs a count of all source code files and lines\n");
 	printf("== find searchString - Searches the source code for the given searchString\n");
+	printf("== test - Builds the system with testing enabled, and then launches the test app\n");
 	printf("\n");
 	printf("== If no target is specified, the 'all' target is invoked.\n");
 	printf("\n");
@@ -269,6 +275,45 @@ void handleClean()
 
 	builder.CleanCS();
 	builder.CleanCSTest();
+}
+
+void handleTest(int argIndex )
+{
+	printf("============================================================================\n");
+	printf("== Test Target - Build\n");
+	printf("============================================================================\n");
+
+	// Turn on the flag to get testing included
+	HelixConfig::getInstance().IncludeTest( true );
+
+	handleAll();
+
+	HelixBuilder builder;	
+	builder.Build("HelixTest");
+
+	if(HelixWorker::getInstance().HasError()){
+		return; // don't run the tests if we have a compile error
+	}
+
+	// Then run the tests with the rest of our arguments
+	/*
+	printf("============================================================================\n");
+	printf("== Test Target - Run\n");
+	printf("============================================================================\n");
+#ifdef _WIN32
+	twine cmd = "cd bin && ./HelixTest.exe";
+#else
+	twine cmd = "cd bin && ./HelixTest";
+#endif
+
+	for(size_t i = argIndex; i < m_targets.size(); i++){
+		cmd += " " + m_targets[i];
+	}
+	int ret = std::system( cmd() );
+	if(ret != 0){
+		HelixWorker::getInstance().CompileError();
+	}
+	*/
 }
 
 void handleGen(bool displayBanner)

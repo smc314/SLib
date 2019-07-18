@@ -111,33 +111,53 @@ twine HelixCompileTask::GetCommandLine()
 			"-I../glob -I../logic/admin -I../logic/admin/sqldo -I../logic/util -I../logic/util/sqldo "
 		);
 		cmd.append( m_file->FileName() );
-	} else if(m_file->FolderName().find("logic/") != TWINE_NOT_FOUND && !m_file->FolderName().endsWith("/sqldo")){
-		auto splits = twine(m_file->FolderName()).split("/");
-		auto& logicName = splits[ splits.size() - 1 ];
+	} else if(m_file->FolderName().find("logic/") != TWINE_NOT_FOUND){
+		if(m_file->FolderName().endsWith("/sqldo")){
+			auto splits = twine(m_file->FolderName()).split("/");
+			auto& logicName = splits[ splits.size() - 2 ];
+			//printf("Logic name is %s\n", logicName() );
 
-		cmd.append(CC(tpl5) + "-I sqldo " + LogicIncludes(logicName));
+			cmd.append(CC(tpl6) + LogicIncludes(logicName, true));
 
-		// Pick up any dependent folders from our config file
-		for(auto& depName : HelixConfig::getInstance().LogicDepends( logicName ) ){
-			cmd.append( DependentInclude( logicName, depName, false ) );
+			// Pick up any dependent folders from our config file
+			auto deps = HelixConfig::getInstance().LogicDepends( logicName );
+			for(auto depName : deps){
+				cmd.append( DependentInclude( logicName, depName, true ) );
+			}
+			//printf("Finished adding dependencies\n");
+
+			cmd.append( m_file->FileName() );
+		} else if(m_file->FolderName().endsWith("/test")){
+			if(HelixConfig::getInstance().IncludeTest() == false){
+				return ""; // Don't compile the tests
+			}
+			auto splits = twine(m_file->FolderName()).split("/");
+			auto& logicName = splits[ splits.size() - 2 ];
+			//printf("Logic name is %s\n", logicName() );
+
+			cmd.append(CC(tpl6) + "-I .. -I ../sqldo " + LogicIncludes(logicName, true));
+
+			// Pick up any dependent folders from our config file
+			auto deps = HelixConfig::getInstance().LogicDepends( logicName );
+			for(auto depName : deps){
+				cmd.append( DependentInclude( logicName, depName, true ) );
+			}
+			//printf("Finished adding dependencies\n");
+
+			cmd.append( m_file->FileName() );
+		} else {
+			auto splits = twine(m_file->FolderName()).split("/");
+			auto& logicName = splits[ splits.size() - 1 ];
+
+			cmd.append(CC(tpl5) + "-I sqldo " + LogicIncludes(logicName));
+
+			// Pick up any dependent folders from our config file
+			for(auto& depName : HelixConfig::getInstance().LogicDepends( logicName ) ){
+				cmd.append( DependentInclude( logicName, depName, false ) );
+			}
+
+			cmd.append( m_file->FileName() );
 		}
-
-		cmd.append( m_file->FileName() );
-	} else if(m_file->FolderName().find("logic/") != TWINE_NOT_FOUND && m_file->FolderName().endsWith("/sqldo")){
-		auto splits = twine(m_file->FolderName()).split("/");
-		auto& logicName = splits[ splits.size() - 2 ];
-		//printf("Logic name is %s\n", logicName() );
-
-		cmd.append(CC(tpl6) + LogicIncludes(logicName, true));
-
-		// Pick up any dependent folders from our config file
-		auto deps = HelixConfig::getInstance().LogicDepends( logicName );
-		for(auto depName : deps){
-			cmd.append( DependentInclude( logicName, depName, true ) );
-		}
-		//printf("Finished adding dependencies\n");
-
-		cmd.append( m_file->FileName() );
 	}
 
 	return cmd;

@@ -159,3 +159,13 @@ vector<xmlNodePtr> HelixConfig::Deploy()
 	if(node == nullptr) return ret;
 	return XmlHelpers::FindChildren( node, "Install" );
 }
+
+void HelixConfig::IncludeTest( bool tf )
+{
+	m_include_test = tf;
+}
+
+bool HelixConfig::IncludeTest( )
+{
+	return m_include_test;
+}

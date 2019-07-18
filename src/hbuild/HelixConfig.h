@@ -68,6 +68,12 @@ class DLLEXPORT HelixConfig
 		/// Returns the list of Deploy Nodes
 		vector<xmlNodePtr> Deploy();
 
+		/// Sets whether the tests should be included or not
+		void IncludeTest( bool tf );
+
+		/// Returns whether the tests should be included or not
+		bool IncludeTest( );
+
 	private:
 		/// Standard Constructor
 		HelixConfig();
@@ -80,6 +86,9 @@ class DLLEXPORT HelixConfig
 
 		// Our hbuild cache file
 		sptr<xmlDoc, xmlFreeDoc> m_config;
+
+		/// Whether or not tests are included
+		bool m_include_test = false;
 
 };
 
