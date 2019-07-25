@@ -91,11 +91,11 @@ twine HelixLinkTask::GetCommandLine()
 	} else if(m_folder->FolderName().endsWith( "client" )){
 		twine tp( "../../../../3rdParty/" );
 		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && " +
-			Link(File::Pwd() + "/bin/", "libhelix.client") +
+			Link( File::Pwd() + "/bin/", "libhelix.client" ) +
 			"HelixApi_Part1" + ObjExt() + 
 			"HelixApi_Part2" + ObjExt() +
 			LinkLibs2( tp ) +
-			BinLib( "../bin", "helix.glob" );
+			BinLib( File::Pwd() + "/bin", "helix.glob" );
 	} else if(m_folder->FolderName().find("logic/") != TWINE_NOT_FOUND && !m_folder->FolderName().endsWith("/sqldo")){
 		auto splits = twine(m_folder->FolderName()).split("/");
 		auto subFolder = splits[ splits.size() - 1];
@@ -119,18 +119,30 @@ twine HelixLinkTask::GetCommandLine()
 		// Nothing to do
 	} else if(m_folder->FolderName() == "HelixMain"){
 		twine tp( "../../../../3rdParty/" );
+		twine hm( "/server/HelixMain" );
+		if(HelixConfig::getInstance().UseCore()){
+			hm = "../" + HelixConfig::getInstance().CoreFolder() + "/server/c" + hm;
+		} else {
+			hm = ".." + hm;
+		}
 		cmd = "cd " + FixPhysical("./bin") + " && " +
 			LinkMain( "./", "HelixMain" ) +
-			FixPhysical("../server/HelixMain") + ObjExt() + 
+			FixPhysical(hm) + ObjExt() + 
 			BinLib( ".", "helix.glob" ) +
 			LinkLibs4( tp );
 
 	} else if(m_folder->FolderName() == "HelixDaemon"){
+		twine prefix( "/server/" );
+		if(HelixConfig::getInstance().UseCore()){
+			prefix = "../" + HelixConfig::getInstance().CoreFolder() + "/server/c" + prefix;
+		} else {
+			prefix = ".." + prefix;
+		}
 		cmd = "cd " + FixPhysical("./bin") + " && " +
 #ifdef _WIN32
-			LinkMain( "./", "HelixSvc" ) + FixPhysical("../server/HelixSvc") + 
+			LinkMain( "./", "HelixSvc" ) + FixPhysical( prefix + "HelixSvc" ) + 
 #else
-			LinkMain( "./", "HelixDaemon" ) + FixPhysical("../server/HelixDaemon") + 
+			LinkMain( "./", "HelixDaemon" ) + FixPhysical( prefix + "HelixDaemon" ) + 
 #endif
 			ObjExt() + LinkLibs5( );
 	}

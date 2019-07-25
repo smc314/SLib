@@ -214,13 +214,13 @@ void handleAll()
 		}
 	}
 
-	if(!HelixConfig::getInstance().UseCore()){
+//	if(!HelixConfig::getInstance().UseCore()){
 		// Only build these if we're not using a core folder
 		builder.Build( "HelixMain" );
 		builder.Build( "HelixDaemon" );
-	} else {
-		CopyCore(); // get our executables
-	}
+//	} else {
+//		CopyCore(); // get our executables
+//	}
 
 	handleAsset(false);
 	handleStrings(false);
