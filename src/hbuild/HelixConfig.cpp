@@ -112,6 +112,9 @@ vector<twine> HelixConfig::LogicRepos()
 			ret.push_back( repo );
 		}
 	}
+	if(UseCore()){
+		ret.push_back( "core" ); // make sure core's logic/admin and logic/util are available
+	}
 	return ret;
 }
 

@@ -83,7 +83,6 @@ int main (int argc, char** argv)
 	try {
 		// Load our config file and make sure it exists
 		HelixConfig::getInstance();
-//		CopyCore(); // Why is this here? 
 
 		printf("Loading the helix filesystem");
 		timer.Start();
@@ -96,11 +95,7 @@ int main (int argc, char** argv)
 			bool didClean = false;
 			for( size_t i = 0; i < m_targets.size(); i++){
 				twine targ( m_targets[i] );
-				if(didClean){
-					didClean = false;
-//					CopyCore();
-				}
-				if(targ == "clean") { handleClean(); didClean = true; }
+				if(targ == "clean") handleClean();
 				else if(targ == "all") handleAll();
 				else if(targ == "gen") handleGen();
 				else if(targ == "regen") handleReGen();
@@ -214,13 +209,8 @@ void handleAll()
 		}
 	}
 
-//	if(!HelixConfig::getInstance().UseCore()){
-		// Only build these if we're not using a core folder
-		builder.Build( "HelixMain" );
-		builder.Build( "HelixDaemon" );
-//	} else {
-//		CopyCore(); // get our executables
-//	}
+	builder.Build( "HelixMain" );
+	builder.Build( "HelixDaemon" );
 
 	handleAsset(false);
 	handleStrings(false);
@@ -470,17 +460,12 @@ void CopyCore()
 	}
 
 	printf("============================================================================\n");
-	printf("== Build and Copy Core Binaries and Files\n");
+	printf("== Copy Core Binaries and Files\n");
 	printf("============================================================================\n");
 
 	// Copy over the core binaries that we will need
 	twine core = HelixConfig::getInstance().CoreFolder();
 
-	HelixBuilder builder;
-
-	// presumably, build the executables
-//	builder.Build("HelixMain");
-//	builder.Build("HelixDaemon");
 #ifdef _WIN32
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixSvc.exe", "bin", ""));
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain.exe", "bin", ""));
@@ -501,5 +486,6 @@ void CopyCore()
 	//HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.so", "bin", ""));
 #endif
 
+	// TODO: This line looks like it's the only one from CopyCore() that's necessary anymore
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin", ""));
 }

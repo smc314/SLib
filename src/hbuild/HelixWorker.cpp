@@ -91,9 +91,9 @@ void HelixWorker::Add(HelixLinkTask* task)
 	dptr<HelixLinkTask> t = task;
 	twine cmd( task->GetCommandLine() );
 	if(cmd.empty()){
-		if(task->Folder()->FolderName() != "logic/util" &&
-			task->Folder()->FolderName() != "logic/admin" &&
-			task->Folder()->FolderName() != "server"
+		if(!task->Folder()->FolderName().endsWith( "logic/util" ) &&
+			!task->Folder()->FolderName().endsWith( "logic/admin" ) &&
+			!task->Folder()->FolderName().endsWith( "server" )
 		){
 			WARN(FL, "Link Command is empty for: %s", task->Folder()->FolderName()() );
 		}

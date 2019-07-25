@@ -161,15 +161,15 @@ twine HelixLinkTask::FixPhysical(const twine& path)
 
 twine HelixLinkTask::LinkTarget()
 {
-	if(m_folder->FolderName() == "logic/util"){
+	if(m_folder->FolderName().endsWith( "logic/util" )){
 		return ""; // No library to link
-	} else if(m_folder->FolderName() == "logic/admin"){
+	} else if(m_folder->FolderName().endsWith( "logic/admin" )){
 		return ""; // no library to link
-	} else if(m_folder->FolderName() == "glob"){
+	} else if(m_folder->FolderName().endsWith( "glob" )){
 		return "./bin/libhelix.glob" + DLLExt();
-	} else if(m_folder->FolderName() == "server"){
+	} else if(m_folder->FolderName().endsWith( "server" )){
 		return ""; // no library to link
-	} else if(m_folder->FolderName() == "client"){
+	} else if(m_folder->FolderName().endsWith( "client" )){
 		return "./bin/libhelix.client" + DLLExt();
 	} else if(m_folder->FolderName().find("logic/") != TWINE_NOT_FOUND && !m_folder->FolderName().endsWith("/sqldo")){
 		vector<twine> splits = twine(m_folder->FolderName()).split("/");
@@ -202,7 +202,11 @@ bool HelixLinkTask::RequiresLink()
 	if(m_folder->FolderName().endsWith("glob") ){
 		HelixWorker::getInstance().WaitForCompilers();
 		twine globLinkTarget( LinkTarget() );
-		HelixFSFolder logicUtil = HelixFS::getInstance().FindPath( "logic/util" );
+		twine prefix( "" );
+		if(HelixConfig::getInstance().UseCore()){
+			prefix = HelixConfig::getInstance().CoreFolder() + "/server/c/";
+		}
+		HelixFSFolder logicUtil = HelixFS::getInstance().FindPath( prefix + "logic/util" );
 		if(logicUtil){
 			vector<HelixFSFile> cppFiles;
 			logicUtil->FindFilesByType(".cpp", cppFiles);
@@ -212,7 +216,7 @@ bool HelixLinkTask::RequiresLink()
 				}
 			}
 		}
-		HelixFSFolder logicAdmin = HelixFS::getInstance().FindPath( "logic/admin" );
+		HelixFSFolder logicAdmin = HelixFS::getInstance().FindPath( prefix + "logic/admin" );
 		if(logicAdmin){
 			vector<HelixFSFile> cppFiles;
 			logicAdmin->FindFilesByType(".cpp", cppFiles);

@@ -68,11 +68,11 @@ void HelixBuilder::Build( const twine& folderPath )
 
 	// Main folder given
 	for(auto file : folder->Files()){
-		if(folderPath == "glob" && file->FileName() == "Jvm.cpp") continue; // Skip this one
+		if(folderPath.endsWith( "glob" ) && file->FileName() == "Jvm.cpp") continue; // Skip this one
 #ifdef _WIN32
-		if(folderPath == "server" && file->FileName() == "HelixDaemon.cpp") continue; // Skip this one
+		if(folderPath.endsWith( "server" ) && file->FileName() == "HelixDaemon.cpp") continue; // Skip this one
 #else
-		if(folderPath == "server" && file->FileName() == "HelixSvc.cpp") continue; // Skip this one
+		if(folderPath.endsWith( "server" ) && file->FileName() == "HelixSvc.cpp") continue; // Skip this one
 #endif
 		if( (file->FileName().endsWith(".c") || file->FileName().endsWith(".cpp")) && file->NeedsRebuild( )){
 			HelixWorker::getInstance().Add( new HelixCompileTask( folder, file ) );

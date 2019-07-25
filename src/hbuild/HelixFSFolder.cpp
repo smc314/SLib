@@ -26,6 +26,7 @@ HelixFSFolder_Bare::HelixFSFolder_Bare(const twine& folderName) : m_name( folder
 {
 	EnEx ee(FL, "HelixFSFolder_Bare::HelixFSFolder_Bare(const twine& folderName)");
 
+	DEBUG(FL, "Added folder: %s", m_name());
 	vector<twine> splits = m_name.split("/");	
 	m_last_name = splits[ splits.size() - 1 ];
 }
@@ -33,7 +34,7 @@ HelixFSFolder_Bare::HelixFSFolder_Bare(const twine& folderName) : m_name( folder
 HelixFSFolder_Bare::~HelixFSFolder_Bare()
 {
 	EnEx ee(FL, "HelixFSFolder_Bare::~HelixFSFolder_Bare()");
-
+	DEBUG(FL, "Removed folder: %s", m_name());
 }
 
 void HelixFSFolder_Bare::Load()
