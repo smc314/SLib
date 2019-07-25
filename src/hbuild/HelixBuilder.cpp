@@ -371,6 +371,20 @@ void HelixBuilder::GenerateSqldo(bool forceRegen)
 			currentFolderName = file->FolderName();
 		}
 
+		twine logicRepo( HelixConfig::getInstance().LogicRepo( currentFolder->LastName()() ) );
+		twine logicFolder;
+		if(logicRepo.empty()){
+			// Regular local logic folder
+			logicFolder = "logic/" + currentFolder->LastName();
+		} else {
+			// Logic folder lives in another repository
+			logicFolder = "../../../" + logicRepo + "/server/c/logic/" + currentFolder->LastName();
+		}
+		if( logicFolder != currentFolderName ){
+			DEBUG( FL, "Skipping %s because %s != %s", file->FileName()(), logicFolder(), currentFolderName() );
+			continue;
+		}
+
 		// What's the data object being generated?  Usually matches the name of the .sql.xml file, but double-check
 		twine doName( file->DataObjectName() );
 		

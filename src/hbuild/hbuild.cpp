@@ -83,7 +83,7 @@ int main (int argc, char** argv)
 	try {
 		// Load our config file and make sure it exists
 		HelixConfig::getInstance();
-		CopyCore();
+//		CopyCore(); // Why is this here? 
 
 		printf("Loading the helix filesystem");
 		timer.Start();
@@ -98,7 +98,7 @@ int main (int argc, char** argv)
 				twine targ( m_targets[i] );
 				if(didClean){
 					didClean = false;
-					CopyCore();
+//					CopyCore();
 				}
 				if(targ == "clean") { handleClean(); didClean = true; }
 				else if(targ == "all") handleAll();
@@ -191,14 +191,16 @@ void handleAll()
 	HelixBuilder builder;	
 	handleGen(false);
 
-	if(!HelixConfig::getInstance().UseCore()){
-		// Only build these if we're not using a core folder
-		builder.Build( "logic/util" );
-		builder.Build( "logic/admin" );
-		builder.Build( "glob" );
-		builder.Build( "server" );
-		builder.Build( "client" );
-	}
+	twine corePrefix = "";
+	if(HelixConfig::getInstance().UseCore()){
+		corePrefix = HelixConfig::getInstance().CoreFolder() + "/server/c/"; // these are from core
+	} // otherwise, they're from this repo
+
+	builder.Build( corePrefix + "logic/util" );
+	builder.Build( corePrefix + "logic/admin" );
+	builder.Build( corePrefix + "glob" );
+	builder.Build( corePrefix + "server" );
+	builder.Build( corePrefix + "client" );
 
 	// Use the config file to tell us which logics to build, and in what order
 	for(auto& logic : HelixConfig::getInstance().Logics() ){
@@ -216,6 +218,8 @@ void handleAll()
 		// Only build these if we're not using a core folder
 		builder.Build( "HelixMain" );
 		builder.Build( "HelixDaemon" );
+	} else {
+		CopyCore(); // get our executables
 	}
 
 	handleAsset(false);
@@ -466,29 +470,35 @@ void CopyCore()
 	}
 
 	printf("============================================================================\n");
-	printf("== Copy Core Binaries and Files\n");
+	printf("== Build and Copy Core Binaries and Files\n");
 	printf("============================================================================\n");
 
 	// Copy over the core binaries that we will need
 	twine core = HelixConfig::getInstance().CoreFolder();
+
+	HelixBuilder builder;
+
+	// presumably, build the executables
+//	builder.Build("HelixMain");
+//	builder.Build("HelixDaemon");
 #ifdef _WIN32
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixSvc.exe", "bin", ""));
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain.exe", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.dll", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.lib", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.dll", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.lib", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.dll", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.lib", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.dll", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.lib", "bin", ""));
+//	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.dll", "bin", ""));
+//	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.lib", "bin", ""));
+//	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.dll", "bin", ""));
+//	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.lib", "bin", ""));
+//	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.dll", "bin", ""));
+//	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.lib", "bin", ""));
+//	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.dll", "bin", ""));
+//	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.lib", "bin", ""));
 #else
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixDaemon", "bin", ""));
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.so", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.so", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.so", "bin", ""));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.so", "bin", ""));
+	//HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.so", "bin", ""));
+	//HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.so", "bin", ""));
+	//HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.so", "bin", ""));
+	//HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.so", "bin", ""));
 #endif
 
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin", ""));

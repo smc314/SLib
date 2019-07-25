@@ -117,10 +117,15 @@ vector<twine> HelixConfig::LogicRepos()
 
 twine HelixConfig::LogicRepo( const twine& logic )
 {
+
 	auto node = XmlHelpers::FindChild( xmlDocGetRootElement( m_config ), "Logics" );
 	if(node == nullptr) return "";
 	auto child = XmlHelpers::FindChildWithAttribute( node, "Logic", "name", logic() );
 	if(child == nullptr){ // No Logic with this name
+		if (UseCore() && (logic == "admin" || logic == "util")) {
+			// TODO: fix hard coded. Maybe there's a list of these in a var somewhere?
+			return "core";
+		}
 		return "";
 	}
 	twine repo( child, "repo" );

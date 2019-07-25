@@ -74,24 +74,24 @@ twine HelixLinkTask::GetCommandLine()
 
 	twine cmd;
 
-	if(m_folder->FolderName() == "logic/util"){
+	if(m_folder->FolderName().endsWith( "logic/util" )){
 		// Nothing to do - logic/util gets linked into helix glob.
-	} else if(m_folder->FolderName() == "logic/admin"){
+	} else if(m_folder->FolderName().endsWith( "logic/admin" )){
 		// Nothing to do - logic/admin gets linked into helix glob.
-	} else if(m_folder->FolderName() == "glob"){
+	} else if(m_folder->FolderName().endsWith( "glob" )){
 		twine tp( "../../../../3rdParty/" );
 		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && " +
-			Link("../bin/", "libhelix.glob") +
+			Link(File::Pwd() + "/bin/", "libhelix.glob") +
 			ObjList( "./" ) + 
 			ObjList( "../logic/util/" ) + ObjList( "../logic/util/sqldo/" ) +
 			ObjList( "../logic/admin/" ) + ObjList( "../logic/admin/sqldo/" ) +
 			+ LinkLibs1( tp );
-	} else if(m_folder->FolderName() == "server"){
+	} else if(m_folder->FolderName().endsWith( "server" )){
 		// Nothing to do
-	} else if(m_folder->FolderName() == "client"){
+	} else if(m_folder->FolderName().endsWith( "client" )){
 		twine tp( "../../../../3rdParty/" );
 		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && " +
-			Link("../bin/", "libhelix.client") +
+			Link(File::Pwd() + "/bin/", "libhelix.client") +
 			"HelixApi_Part1" + ObjExt() + 
 			"HelixApi_Part2" + ObjExt() +
 			LinkLibs2( tp ) +

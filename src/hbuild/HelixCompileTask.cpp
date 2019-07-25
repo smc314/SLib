@@ -85,20 +85,20 @@ twine HelixCompileTask::GetCommandLine()
 	twine cmd;
 	cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && ";
 
-	if(m_file->FolderName() == "logic/util"){
+	if(m_file->FolderName().endsWith( "logic/util" )){
 		cmd.append(CC(tpl5) + "-I sqldo -I ../../glob -I ../../client -I ../admin -I ../admin/sqldo " 
 		);
 		cmd.append( m_file->FileName() );
-	} else if(m_file->FolderName() == "logic/admin"){
+	} else if(m_file->FolderName().endsWith( "logic/admin" )){
 		cmd.append(CC(tpl5) + "-I sqldo -I ../../glob -I ../../client -I ../util -I ../util/sqldo ");
 		cmd.append( m_file->FileName() );
-	} else if(m_file->FolderName() == "glob"){
+	} else if(m_file->FolderName().endsWith( "glob" )){
 		if(m_file->FileName() == "Jvm.cpp") return ""; // Skip this one
 		cmd.append(CC(tpl4) + 
 			"-I../logic/util -I../logic/util/sqldo -I ../logic/admin -I ../logic/admin/sqldo "
 		);
 		cmd.append( m_file->FileName() );
-	} else if(m_file->FolderName() == "server"){
+	} else if(m_file->FolderName().endsWith( "server" )){
 #ifdef _WIN32
 		if(m_file->FileName() == "HelixDaemon.cpp") return ""; // Skip this one
 #else
@@ -106,7 +106,7 @@ twine HelixCompileTask::GetCommandLine()
 #endif
 		cmd.append(CC(tpl4) + "-I ../glob -I ../logic/admin -I../logic/util ");
 		cmd.append( m_file->FileName() );
-	} else if(m_file->FolderName() == "client"){
+	} else if(m_file->FolderName().endsWith( "client" )){
 		cmd.append(CC(tpl4) + 
 			"-I../glob -I../logic/admin -I../logic/admin/sqldo -I../logic/util -I../logic/util/sqldo "
 		);
