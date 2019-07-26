@@ -686,9 +686,6 @@ size_t twine::find(const char* needle, size_t p) const
 	char *ptr;
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
-
-	bounds_check(p);
-
 	ptr = strstr(m_data + p, needle);
 	if(ptr == NULL){
 		return TWINE_NOT_FOUND;
@@ -703,9 +700,6 @@ size_t twine::find(const char c, size_t p) const
 	char *ptr;
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
-
-	bounds_check(p);
-
 	ptr = strchr(m_data + p, c);
 	if(ptr == NULL){
 		return TWINE_NOT_FOUND;
