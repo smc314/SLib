@@ -686,6 +686,9 @@ size_t twine::find(const char* needle, size_t p) const
 	char *ptr;
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
+
+	bounds_check(p);
+
 	ptr = strstr(m_data + p, needle);
 	if(ptr == NULL){
 		return TWINE_NOT_FOUND;
@@ -700,6 +703,9 @@ size_t twine::find(const char c, size_t p) const
 	char *ptr;
 	if(m_data_size == 0)
 		return TWINE_NOT_FOUND;
+
+	bounds_check(p);
+
 	ptr = strchr(m_data + p, c);
 	if(ptr == NULL){
 		return TWINE_NOT_FOUND;
@@ -816,10 +822,11 @@ size_t twine::cifind(const char *needle, size_t p) const
 	if(needle == NULL){
 		throw AnException(0, FL, "Can't search for NULL input.");
 	}
-	bounds_check(p);
 
-	if(m_data_size == 0)
+	if(m_data_size == 0) // Do this before bounds_check so we don't throw an error if we're empty
 		return TWINE_NOT_FOUND;
+
+	bounds_check(p);
 
 	size_t nlen = strlen(needle);
 	if(nlen == 0)
@@ -854,10 +861,12 @@ size_t twine::cifind(const char *needle, size_t p) const
 size_t twine::cifind(const char c, size_t p) const
 {
 	//EnEx ee("twine::cifind(const char c, size_t p)");
+
+	if(m_data_size == 0) // Do this before bounds_check so we don't throw an error if we're empty
+		return TWINE_NOT_FOUND;
+
 	bounds_check(p);
 	char *ptrl, *ptru;
-	if(m_data_size == 0)
-		return TWINE_NOT_FOUND;
 	ptrl = strchr( m_data + p, tolower( c ) );
 	ptru = strchr( m_data + p, toupper( c ) );
 	if(ptrl == NULL && ptru == NULL){ // catch both null
