@@ -331,12 +331,20 @@ twine HelixSqldoParam::CSReadDB(int pos) const
 
 twine HelixSqldoParam::CSReplaceInput() const
 {
-	return "\t\t\tstmt = Util.Statics.FindReplaceParm( stmt, ref idx, " + name + " );\n";
+	if(type == "guid" || type == "Guid"){
+		return "\t\t\tstmt = Util.Statics.FindReplaceParm( stmt, ref idx, " + name + ", true, true);\n"; // Turn on emptyMeansNull
+	} else {
+		return "\t\t\tstmt = Util.Statics.FindReplaceParm( stmt, ref idx, " + name + " );\n";
+	}
 }
 
 twine HelixSqldoParam::CSReplaceInputObj() const
 {
-	return "\t\t\tstmt = Util.Statics.FindReplaceParm( stmt, ref idx, obj." + name + " );\n";
+	if(type == "guid" || type == "Guid"){
+		return "\t\t\tstmt = Util.Statics.FindReplaceParm( stmt, ref idx, obj." + name + ", true, true);\n"; // Turn on emptyMeansNull
+	} else {
+		return "\t\t\tstmt = Util.Statics.FindReplaceParm( stmt, ref idx, obj." + name + " );\n";
+	}
 }
 
 twine HelixSqldoParam::JSPropDef(bool first) const

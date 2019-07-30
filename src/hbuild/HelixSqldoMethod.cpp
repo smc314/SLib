@@ -220,8 +220,10 @@ twine HelixSqldoMethod::GenCSBody(const twine& className)
 	twine tmplName; 
 	if(type == "SELECTTOXML"){
 		tmplName = "C#ObjHeader.select.tmpl";
-	} else if(type == "INSERT" || type == "INSERTGUID"){
+	} else if(type == "INSERT"){
 		tmplName = "C#ObjHeader.insert.tmpl";
+	} else if(type == "INSERTGUID"){
+		tmplName = "C#ObjHeader.insertguid.tmpl";
 	} else if(type == "UPDATE"){
 		tmplName = "C#ObjHeader.update.tmpl";
 	} else if(type == "DELETE"){
