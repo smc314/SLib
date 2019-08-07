@@ -69,7 +69,7 @@ ${CSInputParmsIdx}
 ${CSSqlReplaceParms}
 
 			// Also take a look at the statement and replace any session variables
-			// FIXME
+			stmt = Util.Statics.ReplaceSessionVars(stmt);
 
 			return stmt;
 		}
