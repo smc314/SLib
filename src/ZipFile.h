@@ -30,6 +30,7 @@
 
 #include "xmlinc.h"
 #include "twine.h"
+#include "MemBuf.h"
 using namespace SLib;
 
 #include "zip.h"
@@ -52,6 +53,9 @@ class DLLEXPORT ZipFile
 
 		/// Standard Destructor
 		virtual ~ZipFile();
+
+		/// Use this to add a single file from memory
+		void AddFile( const twine& filePath, const MemBuf& fileData );
 
 		/// Use this to add a single file
 		void AddFile( const twine& infile);

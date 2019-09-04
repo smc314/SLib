@@ -84,109 +84,25 @@ using namespace SLib;
 #define WRITEBUFFERSIZE (16384)
 #define MAXFILENAME (256)
 
-int isLargeFile(const char* filename)
+int isLargeFile(size_t fileSize)
 {
-	int largeFile = 0;
-	ZPOS64_T pos = 0;
-	FILE* pFile = FOPEN_FUNC(filename, "rb");
-
-	if(pFile != NULL) {
-		FSEEKO_FUNC(pFile, 0, SEEK_END);
-		pos = FTELLO_FUNC(pFile);
-
-		//printf("File : %s is %lld bytes\n", filename, pos);
-
-		if(pos >= 0xffffffff)
-			largeFile = 1;
-
-		fclose(pFile);
+	if(fileSize >= 0xffffffff){
+		return 1;
 	}
-
-	return largeFile;
+	return 0;
 }
 
-#ifdef _WIN32
-/**
-    f name of file to get info on
-    tmzip return value: access, modific. and creation times
-    dt dostime 
-*/
-uLong filetime(const char* f, tm_zip* tmzip, uLong* dt)
+uLong filetime(const Date& lastModified, tm_zip* tmzip)
 {
-  int ret = 0;
-  {
-      FILETIME ftLocal;
-      HANDLE hFind;
-      WIN32_FIND_DATAA ff32;
-
-      hFind = FindFirstFileA(f,&ff32);
-      if (hFind != INVALID_HANDLE_VALUE)
-      {
-        FileTimeToLocalFileTime(&(ff32.ftLastWriteTime),&ftLocal);
-        FileTimeToDosDateTime(&ftLocal,((LPWORD)dt)+1,((LPWORD)dt)+0);
-        FindClose(hFind);
-        ret = 1;
-      }
-  }
-  return ret;
+	const struct tm* lm = (const struct tm*)lastModified;
+	tmzip->tm_sec  = lm->tm_sec;
+	tmzip->tm_min  = lm->tm_min;
+	tmzip->tm_hour = lm->tm_hour;
+	tmzip->tm_mday = lm->tm_mday;
+	tmzip->tm_mon  = lm->tm_mon ;
+	tmzip->tm_year = lm->tm_year;
+	return 1;
 }
-#else
-#ifdef unix || __APPLE__
-/**
-    f name of file to get info on
-    tmzip return value: access, modific. and creation times
-    dt dostime 
-*/
-uLong filetime(const char* f, tm_zip* tmzip, uLong* dt)
-{
-  int ret=0;
-  struct stat s;        /* results of stat() */
-  struct tm* filedate;
-  time_t tm_t=0;
-
-  if (strcmp(f,"-")!=0)
-  {
-    char name[MAXFILENAME+1];
-    int len = strlen(f);
-    if (len > MAXFILENAME)
-      len = MAXFILENAME;
-
-    strncpy(name, f,MAXFILENAME-1);
-    /* strncpy doesnt append the trailing NULL, of the string is too long. */
-    name[ MAXFILENAME ] = '\0';
-
-    if (name[len - 1] == '/')
-      name[len - 1] = '\0';
-    /* not all systems allow stat'ing a file with / appended */
-    if (stat(name,&s)==0)
-    {
-      tm_t = s.st_mtime;
-      ret = 1;
-    }
-  }
-  filedate = localtime(&tm_t);
-
-  tmzip->tm_sec  = filedate->tm_sec;
-  tmzip->tm_min  = filedate->tm_min;
-  tmzip->tm_hour = filedate->tm_hour;
-  tmzip->tm_mday = filedate->tm_mday;
-  tmzip->tm_mon  = filedate->tm_mon ;
-  tmzip->tm_year = filedate->tm_year;
-
-  return ret;
-}
-#else
-/**
-    f name of file to get info on
-    tmzip return value: access, modific. and creation times
-    dt dostime 
-*/
-uLong filetime(const char* f, tm_zip* tmzip, uLong* dt)
-{
-    return 0;
-}
-#endif
-#endif
 
 /* change_file_date : change the date/time of a file
     filename : the filename of the file where date/time must be modified
@@ -291,8 +207,6 @@ void ZipFile::AddFile(const twine& infile)
 
     int opt_compress_level=9;
     int err=0;
-    int size_buf=0;
-    void* buf=NULL;
     const char* password=NULL;
 
 	if(m_zf == NULL){
@@ -303,14 +217,6 @@ void ZipFile::AddFile(const twine& infile)
 		throw AnException(0, FL, "ZipFile input file may not start with / or \\.");
 	}
 
-    size_buf = WRITEBUFFERSIZE;
-    buf = (void*)malloc(size_buf);
-    if (buf==NULL) {
-        throw AnException(0, FL, "Error allocating memory");
-    }
-
-	FILE * fin;
-	int size_read;
 	zip_fileinfo zi;
 	unsigned long crcFile=0;
 	int zip64 = 0;
@@ -320,9 +226,21 @@ void ZipFile::AddFile(const twine& infile)
 	zi.dosDate = 0;
 	zi.internal_fa = 0;
 	zi.external_fa = 0;
-	filetime(infile(),&zi.tmz_date,&zi.dosDate);
 
-	zip64 = isLargeFile(infile());
+	twine fullFileName;
+	if(m_root.empty()){
+		fullFileName = infile;
+	} else {
+		if(m_root.endsWith("/") || m_root.endsWith("\\")){
+			fullFileName = m_root + infile;
+		} else {
+			fullFileName = m_root + "/" + infile;
+		}
+	}
+
+	File inputFile( fullFileName );
+	filetime(inputFile.lastModified(), &zi.tmz_date);
+	zip64 = isLargeFile( inputFile.size() );
 
 	err = zipOpenNewFileInZip3_64(
 		m_zf, 
@@ -336,7 +254,6 @@ void ZipFile::AddFile(const twine& infile)
 		Z_DEFLATED,
 		opt_compress_level,
 		0,
-		/* -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY, */
 		-MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
 		password, crcFile, zip64);
 
@@ -344,36 +261,77 @@ void ZipFile::AddFile(const twine& infile)
 		throw AnException(0, FL, "Error creating %s in zipfile", infile());
 	} 
 
-	twine fullFileName;
-	if(m_root.empty()){
-		fullFileName = infile;
-	} else {
-		if(m_root.endsWith("/") || m_root.endsWith("\\")){
-			fullFileName = m_root + infile;
-		} else {
-			fullFileName = m_root + "/" + infile;
-		}
-	}
-
-	fin = FOPEN_FUNC(fullFileName(),"rb");
-	if (fin==NULL) {
-		throw AnException(0, FL, "Error in opening %s for reading", fullFileName());
-	}
+	// Read the contents from the file
+	MemBuf fullFileContents;
+	inputFile.readContents( fullFileContents );
 
 	// Write the file contents to the zip file.
-	while ( (size_read = (int)fread(buf, 1, size_buf, fin)) != 0) {
-		if( zipWriteInFileInZip (m_zf,buf,size_read) < 0 ){
-			throw AnException(0, FL, "Error in writing %s to the zipfile", fullFileName());
-		}
+	if( zipWriteInFileInZip (m_zf, fullFileContents(), fullFileContents.size() ) < 0 ){
+		throw AnException(0, FL, "Error in writing %s to the zipfile", fullFileName());
 	}
-
-	fclose(fin);
 
 	if( zipCloseFileInZip(m_zf) != ZIP_OK){
 		throw AnException(0, FL, "Error closing %s in the zipfile.", fullFileName() );
 	}
+}
 
-    free(buf);
+void ZipFile::AddFile(const twine& filePath, const MemBuf& fileData)
+{
+	EnEx ee(FL, "ZipFile::AddFile(const twine& filePath, const MemBuf& fileData)");
+
+    int opt_compress_level=9;
+    int err=0;
+    const char* password=NULL;
+
+	if(m_zf == NULL){
+		throw AnException(0, FL, "This zipfile has been closed.  Adding more files is not allowed.");
+	}
+
+	if(filePath.startsWith("/") || filePath.startsWith("\\") ){
+		throw AnException(0, FL, "ZipFile input file may not start with / or \\.");
+	}
+
+	zip_fileinfo zi;
+	unsigned long crcFile=0;
+	int zip64 = 0;
+
+	zi.tmz_date.tm_sec = zi.tmz_date.tm_min = zi.tmz_date.tm_hour =
+	zi.tmz_date.tm_mday = zi.tmz_date.tm_mon = zi.tmz_date.tm_year = 0;
+	zi.dosDate = 0;
+	zi.internal_fa = 0;
+	zi.external_fa = 0;
+
+	Date now;
+	filetime(now, &zi.tmz_date);
+	zip64 = isLargeFile( fileData.size() );
+
+	err = zipOpenNewFileInZip3_64(
+		m_zf, 
+		filePath(), 
+		&zi,
+		NULL,
+		0,
+		NULL,
+		0,
+		NULL /* comment*/,
+		Z_DEFLATED,
+		opt_compress_level,
+		0,
+		-MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
+		password, crcFile, zip64);
+
+	if (err != ZIP_OK) {
+		throw AnException(0, FL, "Error creating %s in zipfile", filePath());
+	} 
+
+	// Write the file contents to the zip file.
+	if( zipWriteInFileInZip (m_zf, fileData(), fileData.size() ) < 0 ){
+		throw AnException(0, FL, "Error in writing %s to the zipfile", filePath());
+	}
+
+	if( zipCloseFileInZip(m_zf) != ZIP_OK){
+		throw AnException(0, FL, "Error closing %s in the zipfile.", filePath() );
+	}
 }
 
 void ZipFile::AddFolder(const twine& infolder)
