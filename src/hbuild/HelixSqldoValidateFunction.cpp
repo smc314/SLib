@@ -80,7 +80,7 @@ twine HelixSqldoValidateFunction::GenCPPBody(const twine& className)
 					"\t// Validate maximum length\n"
 					"\tif(" + field.name + ".length() > " + field.max + "){\n"
 					"\t\tthrow AnException(EXCEPTION_HANDLED_VALIDATION, FL,\n"
-					"\t\t\t\"" + className + " - " + field.name + " must be longer than " + field.max +
+					"\t\t\t\"" + className + " - " + field.name + " must be less than " + field.max +
 					" characters.\"\n"
 					"\t\t);\n"
 					"\t}\n"

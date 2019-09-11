@@ -267,7 +267,7 @@ void Date::SetValue(const char* date, const char* format)
 		ret = sscanf(date, format_copy(), 
 			values[0], values[1], values[2],
 			values[3], values[4]);
-		if(ret != 4){
+		if(ret != 5){
 			throw AnException(0, FL, "Not all conversions happend "
 				"for date (%s) in format (%s).", date, format);
 		}
