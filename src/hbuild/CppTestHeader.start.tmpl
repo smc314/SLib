@@ -52,9 +52,11 @@ ${TestRequireCompareWithoutId}
 
 void ${shortName}_CompareWithId(${shortName}& obj1, ${shortName}& obj2)
 {
-	// Compare all fields including the Id field - adjust this list as required
-${TestRequireCompareWithId}
+	// Compare all fields without the Id first
+	${shortName}_CompareWithoutId( obj1, obj2 );
 
+	// Then also compare the Id field:
+	REQUIRE( obj1.Id == obj2.Id );
 }
 
 bool ${shortName}_MatchesCrudObj(${shortName}& obj1, ${shortName}& obj2)

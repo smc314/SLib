@@ -338,11 +338,11 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 		jsonWriteMembers.append("\t" + p.second.CPPJsonSet() + "\n" );
 		if(!p.second.IsTestIgnoredField()){
 			testRequireCompareWithId.append("\t" + p.second.CPPTestRequireCompare() + "\n" );
-			testCompareAllFields.append("\t" + p.second.CPPTestCompare() + "\n" );
 		}
 		if(p.second.name != "Id" && !p.second.IsTestIgnoredField()){
 			testPopulateMemberData.append("\t" + p.second.CPPTestPopulate() + "\n" );
 			testRequireCompareWithoutId.append("\t" + p.second.CPPTestRequireCompare() + "\n" );
+			testCompareAllFields.append("\t" + p.second.CPPTestCompare() + "\n" );
 		}
 	}
 	for(auto& cv : m_child_vectors){
