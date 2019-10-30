@@ -112,6 +112,30 @@ twine HelixSqldo::CPPBodyFileName()
 	}
 }
 
+twine HelixSqldo::CPPTestHeaderFileName()
+{
+	twine logicRepo( HelixConfig::getInstance().LogicRepo( LogicFolder() ) );
+	if(logicRepo.empty()){
+		// Regular local logic folder
+		return "./" + m_package_name + "/test/Test_" + m_class_name + ".h";
+	} else {
+		// Logic folder lives in another repository
+		return "../../../" + logicRepo + "/server/c/" + m_package_name + "/test/Test_" + m_class_name + ".h";
+	}
+}
+
+twine HelixSqldo::CPPTestBodyFileName()
+{
+	twine logicRepo( HelixConfig::getInstance().LogicRepo( LogicFolder() ) );
+	if(logicRepo.empty()){
+		// Regular local logic folder
+		return "./" + m_package_name + "/test/Test_" + m_class_name + ".cpp";
+	} else {
+		// Logic folder lives in another repository
+		return "../../../" + logicRepo + "/server/c/" + m_package_name + "/test/Test_" + m_class_name + ".cpp";
+	}
+}
+
 twine HelixSqldo::CSBodyFileName()
 {
 	return "../c#/HelixPdfGen/HelixPdfGen/DO/" + LogicFolder() + "/" + m_class_name + ".cs";
@@ -289,6 +313,11 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 	twine jsonReadMembers;
 	twine jsonWriteMembers;
 	twine csDOUsing;
+	twine testPopulateMemberData;
+	twine testRequireCompareWithoutId;
+	twine testRequireCompareWithId;
+	twine testCompareAllFields;
+
 	for(auto& p : m_all_params){
 		DEBUG(FL, "%s - Parm %s(%s)", m_class_name(), p.second.name(), p.second.type() );
 		defineDataMembers.append("\t\t" + p.second.CPPType() + " " + p.second.name + ";\n");
@@ -307,6 +336,14 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 		xmlCSWriteMembers.append("\t\t\t" + p.second.CSXmlSet() + "\n" );
 		jsonReadMembers.append("\t" + p.second.CPPJsonGet() + "\n" );
 		jsonWriteMembers.append("\t" + p.second.CPPJsonSet() + "\n" );
+		if(!p.second.IsTestIgnoredField()){
+			testRequireCompareWithId.append("\t" + p.second.CPPTestRequireCompare() + "\n" );
+			testCompareAllFields.append("\t" + p.second.CPPTestCompare() + "\n" );
+		}
+		if(p.second.name != "Id" && !p.second.IsTestIgnoredField()){
+			testPopulateMemberData.append("\t" + p.second.CPPTestPopulate() + "\n" );
+			testRequireCompareWithoutId.append("\t" + p.second.CPPTestRequireCompare() + "\n" );
+		}
 	}
 	for(auto& cv : m_child_vectors){
 		DEBUG(FL, "%s - Child Vector %s(%s)", m_class_name(), cv.name(), cv.type() );
@@ -365,6 +402,10 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 	m_parms[ "JSONReadMembers" ] = jsonReadMembers;
 	m_parms[ "JSONWriteMembers" ] = jsonWriteMembers;
 	m_parms[ "C#DOUsing" ] = csDOUsing;
+	m_parms[ "TestPopulateMemberData" ] = testPopulateMemberData;
+	m_parms[ "TestRequireCompareWithoutId" ] = testRequireCompareWithoutId;
+	m_parms[ "TestRequireCompareWithId" ] = testRequireCompareWithId;
+	m_parms[ "TestCompareAllFields" ] = testCompareAllFields;
 
 	return m_parms;
 }
@@ -389,6 +430,26 @@ twine HelixSqldo::GenCPPBody()
 	for(auto& sort : m_sorts) output.append( sort.GenCPPBody(m_class_name) );
 	for(auto& match : m_matches) output.append( match.GenCPPBody(m_class_name) );
 	for(auto& valid : m_validations) output.append( valid.GenCPPBody(m_class_name) );
+	return output;
+}
+
+twine HelixSqldo::GenCPPTestHeader(bool includeCrud, bool includePage)
+{
+	twine output;
+	output.append( loadTmpl( "CppTestHeader.start.tmpl", BuildObjectParms() ) );
+	if(includeCrud) output.append( loadTmpl( "CppTestHeader.crud.tmpl", BuildObjectParms() ) );
+	if(includePage) output.append( loadTmpl( "CppTestHeader.page.tmpl", BuildObjectParms() ) );
+
+	return output;
+}
+
+twine HelixSqldo::GenCPPTestBody(bool includeCrud, bool includePage)
+{
+	twine output;
+	output.append( loadTmpl( "CppTestBody.start.tmpl", BuildObjectParms() ) );
+	if(includeCrud) output.append( loadTmpl( "CppTestBody.crud.tmpl", BuildObjectParms() ) );
+	if(includePage) output.append( loadTmpl( "CppTestBody.page.tmpl", BuildObjectParms() ) );
+
 	return output;
 }
 

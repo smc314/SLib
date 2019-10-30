@@ -1,0 +1,76 @@
+void ${shortName}_PageExecution( IOConn* ioc )
+{
+	GetPaged${shortName} getPagedApi( nullptr );
+	PageTracker pageTracker( ${shortName}_CreatePageTracker() );
+	pageTracker.SearchString.erase(); // clear the search string.
+
+	// Run a normal page query
+	xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}", "/logic/${shortPackage}/GetPaged${shortName}" );
+	pageTracker.createXmlNode( root );
+	getPagedApi.ExecuteRequest( *ioc );
+	auto v = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+	REQUIRE(v->size() != 0);
+
+	// Run a count query
+	root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}Count", "/logic/${shortPackage}/GetPaged${shortName}Count" );
+	pageTracker.createXmlNode( root );
+	getPagedApi.ExecuteRequest( *ioc );
+	auto v2 = PageTracker::readXmlChildren( ioc->getResponseRoot() );
+	REQUIRE(v2->size() != 0);
+
+	// Run a filtered page query
+	pageTracker = ${shortName}_CreatePageTracker();
+	root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}", "/logic/${shortPackage}/GetPaged${shortName}" );
+	pageTracker.createXmlNode( root );
+	getPagedApi.ExecuteRequest( *ioc );
+	auto v3 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+	REQUIRE(v3->size() != 0);
+
+	// Run a filtered count query
+	root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}Count", "/logic/${shortPackage}/GetPaged${shortName}Count" );
+	pageTracker.createXmlNode( root );
+	getPagedApi.ExecuteRequest( *ioc );
+	auto v4 = PageTracker::readXmlChildren( ioc->getResponseRoot() );
+	REQUIRE(v4->size() != 0);
+}
+
+
+TEST_CASE( "${shortName}_Api_GetPaged_Normal", "[Logic_${shortPackage}][${shortName}][${shortName}_Api][Paging]")
+{
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+
+	try {
+		${shortName}_PageExecution( ioc );
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+
+TEST_CASE( "${shortName}_Api_GetPaged_Admin", "[Logic_${shortPackage}][${shortName}][${shortName}_Api][Paging]")
+{
+	dptr<IOConn> ioc( TestStatics::GetAdminConn() );
+
+	try {
+		${shortName}_PageExecution( ioc );
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+
+TEST_CASE( "${shortName}_Api_GetPaged_Super", "[Logic_${shortPackage}][${shortName}][${shortName}_Api][Paging]")
+{
+	dptr<IOConn> ioc( TestStatics::GetSuperConn() );
+
+	try {
+		${shortName}_PageExecution( ioc );
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+

@@ -1,0 +1,43 @@
+/* ******************************************************************************** */
+/* This file is generated and should not be edited manually.  Any changes to the    */
+/* code in this file should be handled in the code generator so that they will be   */
+/* applied to all future versions.                                                  */
+/* ******************************************************************************** */
+
+#include "catch.hpp"
+
+#include "TheMain.h"
+using namespace Helix::Glob;
+
+#include "TestStatics.h"
+#include "PageTracker.h"
+using namespace Helix::Logic::util;
+
+#include "Test_${shortName}.h"
+
+TEST_CASE( "${shortName}_Setup", "[Logic_${shortPackage}][${shortName}][${shortName}_Raw][${shortName}_Api][Setup]")
+{
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+
+	OdbcObj& db = *ioc->getDBConnection();
+	try {
+		// Pull up the list of data objects
+		auto v = ${shortName}::selectAll( db );
+		if(v->size() == 0){
+			// Create some values
+			${shortName}::insert( db, ${shortName}_CreateTestObj1() );
+			${shortName}::insert( db, ${shortName}_CreateTestObj2() );
+			${shortName}::insert( db, ${shortName}_CreateTestObj3() );
+		}
+
+		// Check it again:
+		auto v2 = ${shortName}::selectAll( db );
+		REQUIRE( v2->size() != 0 );
+
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+

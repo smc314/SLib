@@ -219,6 +219,45 @@ twine HelixSqldoParam::CPPReadDB(int pos) const
 	return "\t\t\todbc.GetData( " + pos_string + ", obj->" + name + " );\n";
 }
 
+twine HelixSqldoParam::CPPTestPopulate() const
+{
+	if(type == "int" || type == "autogen") return "ret." + name + " = 3;";
+	else if(type == "long") return "ret." + name + " = 3;";
+	else if(type == "float") return "ret." + name + " = 3.1f;";
+	else if(type == "bool") return "ret." + name + " = true;";
+	else if(type == "cdata") return "ret." + name + " = \"cdata value\";";
+	else if(type == "base64") return "ret." + name + ".erase();";
+	else if(type == "guid" || type == "Guid") return "ret." + name + " = IOConn::genSessionID();";
+	else if(type == "bin") return "ret." + name + ".erase();";
+	else if(type == "twine") return "ret." + name + " = \"string value\";";
+	else if(type == "Timestamp" || type == "Date" || type == "DateTime") return "ret." + name + ".SetCurrent();";
+	else return "// error setting test value for type " + type;
+}
+
+twine HelixSqldoParam::CPPTestRequireCompare() const
+{
+	return "REQUIRE( obj1." + name + " == obj2." + name + ");";
+}
+
+twine HelixSqldoParam::CPPTestCompare() const
+{
+	return "if( obj1." + name + " != obj2." + name + ") return false;";
+}
+
+bool HelixSqldoParam::IsTestIgnoredField() const
+{
+	if(name == "CreatedBy" ||
+		name == "CreatedDate" ||
+		name == "ModifiedBy" ||
+		name == "ModifiedDate" ||
+		name == "RowCount" ||
+		name == "RowNumber"
+	){
+		return true;
+	}
+	return false;
+}
+
 twine HelixSqldoParam::CSType() const
 {
 	if(type == "int" || type == "autogen") return "int";

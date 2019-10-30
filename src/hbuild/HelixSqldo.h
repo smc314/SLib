@@ -59,6 +59,8 @@ class DLLEXPORT HelixSqldo
 		twine CPPBodyFileName();
 		twine CSBodyFileName();
 		twine JSBodyFileName(const twine& app);
+		twine CPPTestHeaderFileName();
+		twine CPPTestBodyFileName();
 
 		const HelixSqldoParam& Param(const twine& paramName);
 		const map<twine, HelixSqldoParam>& AllParams();
@@ -82,6 +84,8 @@ class DLLEXPORT HelixSqldo
 		twine GenCPPBody();
 		twine GenCSBody();
 		twine GenJSBody(const twine& app);
+		twine GenCPPTestHeader(bool includeCrud, bool includePage);
+		twine GenCPPTestBody(bool includeCrud, bool includePage);
 
 		static twine loadTmpl( const twine& tmplName, map<twine, twine>& vars );
 		static twine replaceVars( const twine& tmplName, size_t lineIdx, twine line, map<twine, twine>& vars );

@@ -41,6 +41,11 @@ class DLLEXPORT HelixSqldoParam
 		twine CPPReplaceInput() const;
 		twine CPPReplaceInputObj() const;
 
+		twine CPPTestPopulate() const;
+		twine CPPTestRequireCompare() const;
+		twine CPPTestCompare() const;
+		bool IsTestIgnoredField() const;
+
 		twine CSType() const;
 		twine CSParm() const;
 		twine CSInit() const;

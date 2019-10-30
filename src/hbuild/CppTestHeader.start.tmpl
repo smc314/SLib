@@ -1,0 +1,68 @@
+/* ******************************************************************************** */
+/* This file is generated once, and then can be edited safely.  Future calls to     */
+/* generate this test object will not overwrite this test header.                   */
+/* ******************************************************************************** */
+
+#include "${shortName}.h"
+using namespace Helix::Logic::${shortPackage};
+
+${shortName} ${shortName}_CreateTestObj1()
+{
+	${shortName} ret;
+	// Fill out the details of the object here
+
+${TestPopulateMemberData}
+
+	return ret;
+}
+
+${shortName} ${shortName}_CreateTestObj2()
+{
+	// Use CreateTestObj1 to get the core object created
+	${shortName} ret( ${shortName}_CreateTestObj1() ); 
+
+	// Adjust anything here to make it different
+
+	return ret;
+}
+
+${shortName} ${shortName}_CreateTestObj3()
+{
+	// Use CreateTestObj1 to get the core object created
+	${shortName} ret( ${shortName}_CreateTestObj1() ); 
+
+	// Adjust anything here to make it different
+
+	return ret;
+}
+
+void ${shortName}_ModifyObject(${shortName}& obj)
+{
+	// Make any modifications to the data to prepare for an Update test
+	// e.g:
+	// obj.Description += " - Update";
+}
+
+void ${shortName}_CompareWithoutId(${shortName}& obj1, ${shortName}& obj2)
+{
+	// Compare all fields except the Id field - adjust this list as required
+${TestRequireCompareWithoutId}
+
+}
+
+void ${shortName}_CompareWithId(${shortName}& obj1, ${shortName}& obj2)
+{
+	// Compare all fields including the Id field - adjust this list as required
+${TestRequireCompareWithId}
+
+}
+
+bool ${shortName}_MatchesCrudObj(${shortName}& obj1, ${shortName}& obj2)
+{
+	// Compare all fields required
+${TestCompareAllFields}
+
+	// If everything compared correctly, then return true
+	return true;
+}
+

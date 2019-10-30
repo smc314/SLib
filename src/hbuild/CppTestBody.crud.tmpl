@@ -1,0 +1,229 @@
+TEST_CASE( "${shortName}_Raw_selectAll", "[Logic_${shortPackage}][${shortName}][${shortName}_Raw]")
+{
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+
+	OdbcObj& db = *ioc->getDBConnection();
+	try {
+		// Pull up the list of data objects
+		auto v = ${shortName}::selectAll( db );
+		REQUIRE( v->size() != 0 );
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+
+TEST_CASE( "${shortName}_Raw_selectById", "[Logic_${shortPackage}][${shortName}][${shortName}_Raw]")
+{
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+
+	OdbcObj& db = *ioc->getDBConnection();
+	try {
+		// Pull up the list of data objects
+		auto v = ${shortName}::selectAll( db );
+		REQUIRE( v->size() != 0 );
+
+		auto v2 = ${shortName}::selectById( db, v->at(0)->Id );
+		REQUIRE( v2->size() != 0 );
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+
+TEST_CASE( "${shortName}_Raw_CRUD", "[Logic_${shortPackage}][${shortName}][${shortName}_Raw]")
+{
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+
+	OdbcObj& db = *ioc->getDBConnection();
+	try {
+		${shortName} test1( ${shortName}_CreateTestObj1() );
+
+		// Pull up the list of data objects
+		auto v = ${shortName}::selectAll( db );
+		// Make sure our test description is not present
+		for(auto obj : *v){
+			if(${shortName}_MatchesCrudObj( test1, *obj )){
+				// Delete it
+				${shortName}::deleteById( db, obj->Id );
+				break;
+			}
+		}
+
+		// Insert our test object
+		test1.Id.erase(); // ensure it's empty
+		test1.Id = ${shortName}::insert( db, test1 );
+		REQUIRE( test1.Id.empty() == false );
+
+		// Select it back again by Id and compare
+		auto c = ${shortName}::selectById( db, test1.Id );
+		REQUIRE(c->size() != 0);
+		${shortName}_CompareWithId(test1, *c->at(0));
+
+		// Make an update to the object
+		${shortName}_ModifyObject(test1);
+		${shortName}::update( db, test1 );
+
+		// Select it back again by Id and compare
+		auto c2 = ${shortName}::selectById( db, test1.Id );
+		REQUIRE(c2->size() != 0);
+		${shortName}_CompareWithId(test1, *c2->at(0));
+
+		// Delete it and make sure we can't find it
+		${shortName}::deleteById( db, test1.Id );
+		auto c3 = ${shortName}::selectById( db, test1.Id );
+		REQUIRE( c3->size() == 0 );
+
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+
+TEST_CASE( "${shortName}_Api_GetAll", "[Logic_${shortPackage}][${shortName}][${shortName}_Api]")
+{
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+
+	OdbcObj& db = *ioc->getDBConnection();
+	try {
+		// Pull up the list of data objects
+		xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetAll${shortName}", "/logic/${shortPackage}/GetAll${shortName}" );
+		GetAll${shortName} getAllApi( nullptr );
+		getAllApi.ExecuteRequest( *ioc );
+
+		// Read the response data
+		auto v = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+		REQUIRE(v->size() != 0);
+
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+
+TEST_CASE( "${shortName}_Api_GetOne", "[Logic_${shortPackage}][${shortName}][${shortName}_Api]")
+{
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+
+	OdbcObj& db = *ioc->getDBConnection();
+	try {
+		// Pull up the list of data objects
+		xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetAll${shortName}", "/logic/${shortPackage}/GetAll${shortName}" );
+		GetAll${shortName} getAllApi( nullptr );
+		getAllApi.ExecuteRequest( *ioc );
+
+		// Read the response data
+		auto v = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+		REQUIRE(v->size() != 0);
+
+		root = TestStatics::ResetRequest( ioc, "GetOne${shortName}", "/logic/${shortPackage}/GetOne${shortName}" );
+		${shortName} justId;
+		justId.Id = v->at(0)->Id;
+		justId.createXmlNode( root );
+		GetOne${shortName} getOneApi( nullptr );
+		getOneApi.ExecuteRequest( *ioc );
+
+		// Read the response data
+		auto v2 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+		REQUIRE( v2->size() != 0 );
+		REQUIRE( v2->at(0)->Id == justId.Id );
+
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+
+TEST_CASE( "${shortName}_Api_CRUD", "[Logic_${shortPackage}][${shortName}][${shortName}_Api]")
+{
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+
+	OdbcObj& db = *ioc->getDBConnection();
+	try {
+		${shortName} test1( ${shortName}_CreateTestObj1() );
+
+		// Check to make sure our test object is not already in the database
+		xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetAll${shortName}", "/logic/${shortPackage}/GetAll${shortName}" );
+		GetAll${shortName} getAllApi( nullptr );
+		getAllApi.ExecuteRequest( *ioc );
+
+		// Read the response data
+		auto c = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+		for(auto obj : *c){
+			if(${shortName}_MatchesCrudObj( test1, *obj )){
+				// Delete it
+				root = TestStatics::ResetRequest( ioc, 
+					"Delete${shortName}", "/logic/${shortPackage}/Delete${shortName}" );
+				obj->createXmlNode( root );
+				Delete${shortName} deleteApi( nullptr );
+				deleteApi.ExecuteRequest( *ioc );
+				break;
+			}
+		}
+
+		// Insert our test object
+		root = TestStatics::ResetRequest( ioc, "Insert${shortName}", "/logic/${shortPackage}/Insert${shortName}" );
+		test1.createXmlNode( root );
+		Update${shortName} insertApi( nullptr );
+		insertApi.ExecuteRequest( *ioc );
+		auto v = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+		REQUIRE(v->size() != 0);
+		REQUIRE(v->at(0)->Id.empty() == false );
+
+		// Select it by Id
+		test1.Id = v->at(0)->Id;
+		root = TestStatics::ResetRequest( ioc, "GetOne${shortName}", "/logic/${shortPackage}/GetOne${shortName}" );
+		test1.createXmlNode( root );
+		GetOne${shortName} getOneApi( nullptr );
+		getOneApi.ExecuteRequest( *ioc );
+		auto v2 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+		REQUIRE(v2->size() != 0);
+		${shortName}_CompareWithId(test1, *v2->at(0));
+
+		// Modify it
+		${shortName}_ModifyObject(test1);
+		root = TestStatics::ResetRequest( ioc, "Update${shortName}", "/logic/${shortPackage}/Update${shortName}" );
+		test1.createXmlNode( root );
+		Update${shortName} updateApi( nullptr );
+		updateApi.ExecuteRequest( *ioc );
+		auto v3 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+		REQUIRE(v3->size() != 0);
+		REQUIRE(v3->at(0)->Id.empty() == false );
+
+		// Select it by Id again and compare
+		root = TestStatics::ResetRequest( ioc, "GetOne${shortName}", "/logic/${shortPackage}/GetOne${shortName}" );
+		test1.createXmlNode( root );
+		getOneApi.ExecuteRequest( *ioc );
+		auto v4 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
+		REQUIRE(v4->size() != 0);
+		${shortName}_CompareWithId(test1, *v4->at(0));
+
+		// Delete it
+		root = TestStatics::ResetRequest( ioc, "Delete${shortName}", "/logic/${shortPackage}/Delete${shortName}" );
+		test1.createXmlNode( root );
+		Delete${shortName} deleteApi( nullptr );
+		deleteApi.ExecuteRequest( *ioc );
+
+		// Select it by Id again and make sure it's gone
+		try {
+			root = TestStatics::ResetRequest( ioc, "GetOne${shortName}", "/logic/${shortPackage}/GetOne${shortName}" );
+			test1.createXmlNode( root );
+			getOneApi.ExecuteRequest( *ioc );
+			UNSCOPED_INFO( "GetOne${shortName} - should have returned an exception for a missing record." );
+			CHECK(false);
+		} catch (AnException&){
+			// An Exception here is fine - it's just the message '...did not match the given Id...'
+		}
+
+	} catch (AnException& e){
+		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
+		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		CHECK(false); // Manually signal the test as failed
+	}
+}
+

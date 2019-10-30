@@ -47,6 +47,7 @@ void handleAsset(bool displayBanner = true);
 void handleStrings(bool displayBanner = true);
 void handleFind(const twine& searchString, bool displayBanner = true);
 void handleLines(bool displayBanner = true);
+void handleTestGen(int argIndex);
 void testDep();
 void CopyCore();
 void describe();
@@ -127,6 +128,10 @@ int main (int argc, char** argv)
 					handleTest( (int)i );
 					break; // All the rest of the arguments belong to the test command
 				}
+				else if(targ == "testgen") {
+					handleTestGen( (int)i );
+					break; // All the rest of the arguments belong to the test command
+				}
 				else if(targ == "?") describe();
 				else if(targ == "help") describe();
 				else if(targ == "-?") describe();
@@ -183,6 +188,12 @@ void describe()
 	printf("== lines - Runs a count of all source code files and lines\n");
 	printf("== find searchString - Searches the source code for the given searchString\n");
 	printf("== test - Builds the system with testing enabled, and then launches the test app\n");
+	printf("== testgen - creates a test program with the following options\n");
+	printf("             logic=... - specifies which logic folder to use\n");
+	printf("             api=... - specifies which server API to generate tests for\n");
+	printf("             do=... - specifies which server Data Object to generate full crud/paging tests for\n");
+	printf("             crud=true/false - specifies whether crud testing is generated\n");
+	printf("             page=true/false - specifies which page testing is generated\n");
 	printf("\n");
 	printf("== If no target is specified, the 'all' target is invoked.\n");
 	printf("\n");
@@ -314,6 +325,68 @@ void handleTest(int argIndex )
 		HelixWorker::getInstance().CompileError();
 	}
 	*/
+}
+
+void handleTestGen(int argIndex )
+{
+	printf("============================================================================\n");
+	printf("== Test Generation Target - Build\n");
+	printf("============================================================================\n");
+
+	twine logic; // Picks up argument: logic=ttvx 
+	twine forApi; // Picks up argument: api=/logic/ttvx/UpdateITOStatus
+	twine forDO; // Picks up argument do=ITOStatus
+	twine forCrud; // Picks up argument crud=true
+	twine forPage; // Picks up argument page=true
+	
+	for(size_t i = argIndex; i < m_targets.size(); i++){
+		auto splits = m_targets[i].split("=");
+		if(splits[0] == "logic"){
+			logic = splits[1];
+		} else if(splits[0] == "api"){
+			forApi = splits[1];
+		} else if(splits[0] == "do"){
+			forDO = splits[1];
+		} else if(splits[0] == "crud"){
+			forCrud = splits[1];
+		} else if(splits[0] == "page"){
+			forPage = splits[1];
+		}
+	}
+
+	if(logic.empty()){
+		throw AnException(0, FL, "logic=... parameter required for testgen option");
+	}
+	if(forApi.empty() && forDO.empty()){
+		throw AnException(0, FL, "At least one of api=... do=... must be specified for testgen option");
+	}
+
+	if(!forDO.empty()){
+		printf("Generating test for %s in logic/%s/test/\n", forDO(), logic() );
+
+		twine path = "logic/" + logic;
+		HelixFSFolder folder = HelixFS::getInstance().FindPath( path );
+		if(!folder){
+			WARN(FL, "Unknown target path: %s", path() );
+			return;
+		}
+		twine fileName = forDO + ".sql.xml";
+		HelixFSFile sqldoFile = folder->FindFile( fileName );
+		if(!sqldoFile){
+			WARN(FL, "Unknown target data object: %s/%s", path(), fileName() );
+			return;
+		}
+		HelixSqldo sqldo( folder, sqldoFile );
+		twine testHeader = sqldo.CPPTestHeaderFileName();
+		File::EnsurePath( testHeader );
+		if(!File::Exists( testHeader )){
+			printf( "Writing Test Header to: %s\n", testHeader() );
+			File::writeToFile( testHeader, sqldo.GenCPPTestHeader( forCrud != "false", forPage != "false" ) );
+		}
+		twine testBody = sqldo.CPPTestBodyFileName();
+		printf("Writing Test Body to: %s\n", testBody() );
+		File::writeToFile( testBody, sqldo.GenCPPTestBody( forCrud != "false", forPage != "false" ) );
+	}
 }
 
 void handleGen(bool displayBanner)

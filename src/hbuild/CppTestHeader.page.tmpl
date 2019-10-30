@@ -1,0 +1,16 @@
+#include "GetPaged${shortName}.h"
+using namespace Helix::Logic::${shortPackage};
+
+PageTracker ${shortName}_CreatePageTracker()
+{
+	PageTracker ret;
+
+	// Fill out the details of the object here
+	ret.FirstRow = 0;
+	ret.LastRow = 100;
+	ret.SortBy = "Description";
+	ret.SearchString = "test";
+
+	return ret;
+}
+
