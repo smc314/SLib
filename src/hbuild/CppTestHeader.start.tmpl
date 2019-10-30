@@ -43,17 +43,21 @@ void ${shortName}_ModifyObject(${shortName}& obj)
 	// obj.Description += " - Update";
 }
 
-void ${shortName}_CompareWithoutId(${shortName}& obj1, ${shortName}& obj2)
+void ${shortName}_CompareWithoutId(${shortName}& obj1, ${shortName}& obj2, bool compareChildren)
 {
 	// Compare all fields except the Id field - adjust this list as required
 ${TestRequireCompareWithoutId}
 
+	if(compareChildren){
+		// Compare any child objects here
+
+	}
 }
 
-void ${shortName}_CompareWithId(${shortName}& obj1, ${shortName}& obj2)
+void ${shortName}_CompareWithId(${shortName}& obj1, ${shortName}& obj2, bool compareChildren)
 {
 	// Compare all fields without the Id first
-	${shortName}_CompareWithoutId( obj1, obj2 );
+	${shortName}_CompareWithoutId( obj1, obj2, compareChildren );
 
 	// Then also compare the Id field:
 	REQUIRE( obj1.Id == obj2.Id );

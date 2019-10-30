@@ -60,7 +60,7 @@ TEST_CASE( "${shortName}_Raw_CRUD", "[Logic_${shortPackage}][${shortName}][${sho
 		// Select it back again by Id and compare
 		auto c = ${shortName}::selectById( db, test1.Id );
 		REQUIRE(c->size() != 0);
-		${shortName}_CompareWithId(test1, *c->at(0));
+		${shortName}_CompareWithId(test1, *c->at(0), false); // Don't compare chilren in RAW testing
 
 		// Make an update to the object
 		${shortName}_ModifyObject(test1);
@@ -69,7 +69,7 @@ TEST_CASE( "${shortName}_Raw_CRUD", "[Logic_${shortPackage}][${shortName}][${sho
 		// Select it back again by Id and compare
 		auto c2 = ${shortName}::selectById( db, test1.Id );
 		REQUIRE(c2->size() != 0);
-		${shortName}_CompareWithId(test1, *c2->at(0));
+		${shortName}_CompareWithId(test1, *c2->at(0), false); // Don't compare chilren in RAW testing
 
 		// Delete it and make sure we can't find it
 		${shortName}::deleteById( db, test1.Id );
@@ -183,7 +183,7 @@ TEST_CASE( "${shortName}_Api_CRUD", "[Logic_${shortPackage}][${shortName}][${sho
 		getOneApi.ExecuteRequest( *ioc );
 		auto v2 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
 		REQUIRE(v2->size() != 0);
-		${shortName}_CompareWithId(test1, *v2->at(0));
+		${shortName}_CompareWithId(test1, *v2->at(0), true); // Do compare children in API testing
 
 		// Modify it
 		${shortName}_ModifyObject(test1);
@@ -201,7 +201,7 @@ TEST_CASE( "${shortName}_Api_CRUD", "[Logic_${shortPackage}][${shortName}][${sho
 		getOneApi.ExecuteRequest( *ioc );
 		auto v4 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
 		REQUIRE(v4->size() != 0);
-		${shortName}_CompareWithId(test1, *v4->at(0));
+		${shortName}_CompareWithId(test1, *v4->at(0), true); // Do compare children in API testing
 
 		// Delete it
 		root = TestStatics::ResetRequest( ioc, "Delete${shortName}", "/logic/${shortPackage}/Delete${shortName}" );
