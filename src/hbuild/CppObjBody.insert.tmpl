@@ -34,8 +34,10 @@ intptr_t ${doName}::${methodName}(OdbcObj& odbc, twine& stmt, bool useInputs, ${
 
 	// Grab the current user name for logging
 	twine currentUser;
-	if(odbc.GetSessionInfo() != NULL){
+	twine currentUserId;
+	if(odbc.GetSessionInfo() != nullptr){
 		currentUser = odbc.GetSessionInfo()->fullname;
+		currentUserId = odbc.GetSessionInfo()->userid;
 	}
 
 	if(odbc.isConnected() == 0){
@@ -69,8 +71,8 @@ intptr_t ${doName}::${methodName}(OdbcObj& odbc, twine& stmt, bool useInputs, ${
 		odbc.ExecStmt();
 	}
 	selectTimer.Finish();
-	if(selectTimer.Duration() > 0.5){
-		WARN(UFL, "Statement ${doName}::${methodName} took longer than 500ms to execute: %f", selectTimer.Duration());
+	if(selectTimer.Duration() > 1.0){
+		PerfLogs::LogSql( currentUserId, "${doName}::${methodName}", stmt, (int)(selectTimer.Duration() * 1000.0f) );
 	}
 
 	// Read the Scope_Identity results and return the id found

@@ -35,8 +35,10 @@ ${doName}_svect ${doName}::${methodName}(OdbcObj& odbc, twine& stmt, bool useInp
 
 	// Grab the current user name for logging
 	twine currentUser;
-	if(odbc.GetSessionInfo() != NULL){
+	twine currentUserId;
+	if(odbc.GetSessionInfo() != nullptr){
 		currentUser = odbc.GetSessionInfo()->fullname;
+		currentUserId = odbc.GetSessionInfo()->userid;
 	}
 
 	if(odbc.isConnected() == 0){
@@ -67,8 +69,8 @@ ${doName}_svect ${doName}::${methodName}(OdbcObj& odbc, twine& stmt, bool useInp
 		odbc.ExecStmt();
 	}
 	selectTimer.Finish();
-	if(selectTimer.Duration() > 0.5){
-		WARN(UFL, "Statement ${doName}::${methodName} took longer than 500ms to execute: %f", selectTimer.Duration());
+	if(selectTimer.Duration() > 1.0){
+		PerfLogs::LogSql( currentUserId, "${doName}::${methodName}", stmt, (int)(selectTimer.Duration() * 1000.0f) );
 	}
 
 	// Now that we've executed the statement, we'll know how many output columns we have.
@@ -106,7 +108,7 @@ ${CPPReadResultOutput}
 	}
 	fetchTimer.Finish();
 	if(fetchTimer.Duration() > 1.0){
-		WARN(UFL, "Statement ${doName}::${methodName} took longer than 1000ms to fetch: %f", fetchTimer.Duration() );
+		PerfLogs::LogSql( currentUserId, "${doName}::${methodName}-fetch", stmt, (int)(fetchTimer.Duration() * 1000.0f) );
 	}
 
 	// When we return, the unique_ptr semantics make this work correctly

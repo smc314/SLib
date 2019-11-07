@@ -104,7 +104,7 @@ twine HelixCompileTask::GetCommandLine()
 #else
 		if(m_file->FileName() == "HelixSvc.cpp") return ""; // Skip this one
 #endif
-		cmd.append(CC(tpl4) + "-I ../glob -I ../logic/admin -I../logic/util ");
+		cmd.append(CC(tpl4) + "-I ../glob -I ../logic/admin -I ../logic/admin/sqldo -I../logic/util -I ../logic/util/sqldo ");
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName() == "client"){
 		cmd.append(CC(tpl4) + 
