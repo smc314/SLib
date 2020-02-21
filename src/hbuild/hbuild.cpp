@@ -15,6 +15,7 @@
 #include <twine.h>
 #include <File.h>
 #include <Timer.h>
+#include <Date.h>
 using namespace SLib;
 
 #include <vector>
@@ -30,6 +31,8 @@ using namespace SLib;
 #include "HelixJSGenTask.h"
 using namespace Helix::Build;
 
+Date m_start_date;
+Date m_end_date;
 twine m_platform;
 std::vector<twine> m_targets;
 
@@ -54,6 +57,8 @@ void describe();
 
 int main (int argc, char** argv)
 {
+	m_start_date.SetCurrent();
+
 	if(argc > 1){
 		for(int i = 1; i < argc; i++){
 			twine argv1(argv[i]);
@@ -78,7 +83,7 @@ int main (int argc, char** argv)
 #else
 	m_platform = "LINUX_x64";
 #endif
-	printf("Helix Build Running for a %s platform.\n", m_platform());
+	printf("%s - Helix Build Running for a %s platform.\n", m_start_date.GetValue()(), m_platform());
 	printf("============================================================================\n");
 
 	Timer timer;
@@ -148,22 +153,26 @@ int main (int argc, char** argv)
 		*/
 
 	} catch(AnException& e){
+		m_end_date.SetCurrent();
+		auto duration = m_end_date - m_start_date;
 		printf("%s\n", e.Msg());
 		printf("%s\n", e.Stack());
 		printf("============================================================================\n");
-		printf("== hbuild complete - with errors\n");
+		printf("== %s (%ds) hbuild complete - with errors\n", m_end_date.GetValue()(), duration.Sec() );
 		printf("============================================================================\n");
 		return 1; // Errors
 	}
 
+	m_end_date.SetCurrent();
+	auto duration = m_end_date - m_start_date;
 	if(HelixWorker::getInstance().HasError()){
 		printf("============================================================================\n");
-		printf("== hbuild complete - with errors\n");
+		printf("== %s (%ds) hbuild complete - with errors\n", m_end_date.GetValue()(), duration.Sec() );
 		printf("============================================================================\n");
 		return 1; // Errors
 	} else {
 		printf("============================================================================\n");
-		printf("== hbuild complete.\n");
+		printf("== %s (%ds) hbuild complete.\n", m_end_date.GetValue()(), duration.Sec() );
 		printf("============================================================================\n");
 		return 0; // No error
 	}

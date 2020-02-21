@@ -279,6 +279,16 @@ bool HelixSqldo::SanityCheck()
 			}
 		}
 	}
+
+	// Now check for xml comments in the raw xml source - these can sometimes lead to problems.
+	auto lines = m_file->Lines();
+	for(size_t i = 0; i < lines.size(); i++){
+		if(lines[i].find("<!--") != TWINE_NOT_FOUND){
+			WARN(FL, "SqlDo Error - %s::%d don't use xml style comments: <!--", FQName()(), (int) i );
+			foundProblem = true;
+		}
+	}
+
 	return foundProblem;
 }
 
