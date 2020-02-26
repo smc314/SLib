@@ -132,6 +132,8 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 	//printf("Here's what we're sending:\n%s\n", SendLines() );
 
 	CURLcode res = CURLE_OK;
+	char errbuf[ CURL_ERROR_SIZE ];
+	memset(errbuf, 0, CURL_ERROR_SIZE);
 	struct curl_slist *recipients = NULL;
 
 	// Set the user name and password
@@ -171,7 +173,8 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 	curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSFUNCTION, SmtpClient_ProgressCallback );
 	curl_easy_setopt( m_curl_handle, CURLOPT_PROGRESSDATA, this );
 
-	curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 0L );
+	curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1L );
+	curl_easy_setopt( m_curl_handle, CURLOPT_ERRORBUFFER, errbuf );
 
 	// Add in proxy information if given
 	if(!m_proxy.empty()){
@@ -184,7 +187,7 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 	res = curl_easy_perform( m_curl_handle );
 	twine errmsg; 
 	if(res != CURLE_OK){
-		errmsg.format("Sending SMTP Message failed: %s", curl_easy_strerror(res) );
+		errmsg.format("Sending SMTP Message failed: %s: %s", curl_easy_strerror(res), errbuf );
 		//printf("%s", errmsg() );
 	}
 
