@@ -94,6 +94,9 @@ class DLLEXPORT File
 		/// Opens the file name given.
 		File& open(const twine& fileName);
 
+		/// Creates the file name given.
+		File& create(const twine& fileName);
+
 		/// Returns the file name:
 		twine& name();
 
@@ -121,6 +124,14 @@ class DLLEXPORT File
 		  * the number of bytes read & written to the buffer.
 		  */
 		size_t read(MemBuf& buffer);
+
+		/** Writes out the given buffer to the file and returns how many bytes were written.
+		  */
+		size_t write(MemBuf& buffer);
+
+		/** Flushes the file buffer to write out anything that is pending.
+		  */
+		void flush();
 
 		void CopyPermissionsTo( const twine& targetName );
 

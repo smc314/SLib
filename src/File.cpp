@@ -60,6 +60,19 @@ File& File::open(const twine& fileName)
 	return *this;
 }
 
+File& File::create(const twine& fileName)
+{
+	EnEx ee("File::create(const twine fileName)");
+	closeFile();
+
+	m_fileName = fileName;
+	m_fp = fopen(m_fileName(), "w+b");
+	if(m_fp == NULL){
+		throw AnException(0, FL, "Error creating file (%s).", m_fileName() );
+	}
+	return *this;
+}
+
 void File::closeFile()
 {
 	EnEx ee("File::closeFile()");
@@ -171,6 +184,8 @@ unsigned char* File::readContents()
 	}
 
 	// Read the whole file in at once.
+	getStat();
+	rewind( m_fp ); // Ensure we start at the beginning
 	size_t ret = fread(buff, size(), 1, m_fp);
 
 	if(ret != 1){
@@ -184,10 +199,12 @@ MemBuf& File::readContents(MemBuf& contents)
 {
 	EnEx ee("File::readContentsAsMemBuf()");
 
+	getStat();
 	contents.reserve( size() );
 
 	if(size() != 0){
 		// Read the whole file in at once.
+		rewind( m_fp ); // Ensure we start at the beginning
 		size_t ret = fread(contents.data(), size(), 1, m_fp);
 
 		if(ret != 1){
@@ -202,10 +219,12 @@ twine File::readContentsAsTwine()
 	EnEx ee("File::readContentsTwine()");
 
 	twine contents;
+	getStat();
 	size_t content_size = size();
 	contents.reserve(content_size);
 
 	// Read the whole file in at once.
+	rewind( m_fp ); // Ensure we start at the beginning
 	size_t ret = fread(contents.data(), content_size, 1, m_fp);
 
 	if(ret != 1){
@@ -224,6 +243,8 @@ vector<twine> File::readLines()
 	contents.reserve(size());
 
 	// Read the whole file in at once.
+	getStat();
+	rewind( m_fp ); // Ensure we start at the beginning
 	size_t ret = fread(contents.data(), size(), 1, m_fp);
 
 	if(ret != 1){
@@ -242,10 +263,25 @@ vector<twine> File::readLines()
 
 size_t File::read(MemBuf& buffer)
 {
-	EnEx ee("File::read(char* buffer, size_t buffer_size)");
+	EnEx ee("File::read(MemBuf& buffer)");
 
 	size_t ret = fread(buffer.data(), 1, buffer.size(), m_fp);
 	return ret;
+}
+
+size_t File::write(MemBuf& buffer)
+{
+	EnEx ee("File::write(MemBuf& buffer)");
+
+	size_t ret = fwrite(buffer.data(), 1, buffer.size(), m_fp);
+	return ret;
+}
+
+void File::flush()
+{
+	EnEx ee("File::flush()");
+
+	fflush(m_fp);
 }
 
 bool File::Exists(const twine& fileName)

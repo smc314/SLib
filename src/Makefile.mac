@@ -24,7 +24,7 @@ ifeq ($(UNAME),Linux)
 	CFLAGS=$(_CFLAGS) -rdynamic
 	CPPFLAGS=$(_CPPFLAGS) -rdynamic
 	LFLAGS=-L$(OPENSSLDIR)/lib -lssl -lcrypto -lpthread $(SOCKET_LIB) \
-		-lresolv -lxml2 -lz -lcurl -lrt
+		-lresolv -lxml2 -luuid -lz -lcurl -lrt
 else
 	CFLAGS=$(_CFLAGS)
 	CPPFLAGS=$(_CPPFLAGS)
@@ -43,7 +43,7 @@ zip.o:	zip.c
 # on a mac before including it in this list.
 DOTOH=Base64.o Log.o SSocket.o Socket.o Thread.o Mutex.o Tools.o twine.o Date.o \
 	SmtpClient.o Interval.o EMail.o Timer.o Parms.o LogMsg.o EnEx.o XmlHelpers.o BlockingQueue.o File.o \
-	LogFile.o HttpClient.o ZipFile.o MemBuf.o sqlite3.o LogFile2.o
+	LogFile.o HttpClient.o ZipFile.o MemBuf.o sqlite3.o LogFile2.o TmpFile.o
 
 MINIZIP_OH=ioapi.o mztools.o unzip.o zip.o
 

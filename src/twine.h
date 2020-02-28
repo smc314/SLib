@@ -659,6 +659,12 @@ class DLLEXPORT twine
 		  */
 		twine& zeroGuid();
 
+		/** Use this to create a Guid in this twine.  This will erase the current contents
+		  * of the twine and replace it with a string representation of a new Guid.  Each
+		  * time this method is called a new Guid will be created.
+		  */
+		twine& Guid();
+
 	private:
 
 		/** Checks the index against the bounds of the array:

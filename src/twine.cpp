@@ -32,6 +32,12 @@
 #include "AutoXMLChar.h"
 #include "memptr.h"
 
+#ifdef _WIN32
+#include <rpc.h> // For GUID creation
+#else
+#include <uuid/uuid.h> // For GUID generation
+#endif
+
 const size_t MAX_INPUT_SIZE = 1024000000;
 
 using namespace SLib;
@@ -1710,3 +1716,30 @@ twine& twine::zeroGuid()
 {
 	return set("00000000-0000-0000-0000-000000000000");
 }
+
+twine& twine::Guid()
+{
+	erase(); // Clear out any contents we might have
+	reserve(36); // Make sure we have enough space to hold the guid
+
+#ifdef _WIN32
+	// First generate the uuid
+	UUID u;
+	UuidCreate( &u );
+
+	// Then convert it to a string that we can use:
+	RPC_CSTR uStr;
+	UuidToString( &u, &uStr );
+	
+	set( (char*)uStr );
+	RpcStringFree( &uStr );
+#else
+	uuid_t u;
+	uuid_generate(u);
+	uuid_unparse(u, m_data); // Write directly to our data
+	check_size(); // Get all of our size counters correct
+#endif
+
+	return *this;
+}
+

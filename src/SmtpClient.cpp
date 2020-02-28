@@ -24,6 +24,7 @@
 #include "dptr.h"
 #include "AnException.h"
 #include "XmlHelpers.h"
+#include "TmpFile.h"
 using namespace SLib;
 
 static bool SmtpClient_cURL_Initialized = false;
@@ -125,6 +126,7 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 {
 	EnEx ee(FL, "SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user, const twine& pass, int port, bool useSsl)");
 
+	TmpFile verboseLog; // Create a temp file to hold the verbose log - will be cleaned up when this method exits
 	SendLines.clear();
 	SendIndex = 0;
 	FormatMessage( message );
@@ -175,6 +177,7 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 
 	curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1L );
 	curl_easy_setopt( m_curl_handle, CURLOPT_ERRORBUFFER, errbuf );
+	curl_easy_setopt( m_curl_handle, CURLOPT_STDERR, (FILE*)verboseLog );
 
 	// Add in proxy information if given
 	if(!m_proxy.empty()){
@@ -185,8 +188,10 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 	PostOptions();
 
 	res = curl_easy_perform( m_curl_handle );
+	verboseLog.flush();
 	twine errmsg; 
 	if(res != CURLE_OK){
+		WARN(FL, "Sending SMTP Message failed: %s: %s", curl_easy_strerror(res), errbuf );
 		errmsg.format("Sending SMTP Message failed: %s: %s", curl_easy_strerror(res), errbuf );
 		//printf("%s", errmsg() );
 	}
