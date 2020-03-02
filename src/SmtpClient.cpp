@@ -157,11 +157,15 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 
 	curl_easy_setopt( m_curl_handle, CURLOPT_MAIL_FROM, message.From()() );
 
-	for(size_t i = 0; i < message.TOList().size(); i++){
-		recipients = curl_slist_append(recipients, message.TOList()[ i ]() );
+	for(auto& to : message.TOList()){
+		if(to.empty() == false){
+			recipients = curl_slist_append(recipients, to() );
+		}
 	}
-	for(size_t i = 0; i < message.CCList().size(); i++){
-		recipients = curl_slist_append(recipients, message.CCList()[ i ]() );
+	for(auto& cc : message.CCList()){
+		if(cc.empty() == false){
+			recipients = curl_slist_append(recipients, cc() );
+		}
 	}
 	curl_easy_setopt( m_curl_handle, CURLOPT_MAIL_RCPT, recipients );
 
