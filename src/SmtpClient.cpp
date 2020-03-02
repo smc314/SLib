@@ -191,7 +191,9 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 	verboseLog.flush();
 	twine errmsg; 
 	if(res != CURLE_OK){
-		WARN(FL, "Sending SMTP Message failed: %s: %s", curl_easy_strerror(res), errbuf );
+		WARN(FL, "Sending SMTP Message failed: %s: %s\n%s", 
+			curl_easy_strerror(res), errbuf, verboseLog.readContentsAsTwine()() 
+		);
 		errmsg.format("Sending SMTP Message failed: %s: %s", curl_easy_strerror(res), errbuf );
 		//printf("%s", errmsg() );
 	}
