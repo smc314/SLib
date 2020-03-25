@@ -576,6 +576,10 @@ class DLLEXPORT twine
 		  */
 		twine& encode64url();
 
+		/** Handles converting the contents of our twine into a url encoded version.
+		  */
+		twine& urlEncode();
+
 		/** Handles converting the contents of our twine into a base64 decoded
 		  * version.
 		  */
@@ -585,6 +589,8 @@ class DLLEXPORT twine
 		  * version which is safe to be used in the contents of url's.
 		  */
 		twine& decode64url();
+
+
 
 		/** Determines if the given twine pointer is null, or if the
 		 * twine itself is empty.

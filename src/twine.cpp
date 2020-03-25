@@ -25,6 +25,8 @@
 #include <errno.h>
 #include <inttypes.h>
 
+#include <curl/curl.h>
+
 #include "twine.h"
 
 #include "AnException.h"
@@ -1483,6 +1485,24 @@ twine& twine::encode64url()
 
 	replace( '+', '-' ); // Plusses convert to dashes
 	replace( '/', '_' ); // Slashes become underscores
+
+	// Return ourselves
+	return *this;
+}
+
+twine& twine::urlEncode()
+{
+	if(size() == 0) return *this; // We're an empty string
+
+	// Use curl to url encode our data
+	char* tmpEscaped = curl_escape( m_data, (int)size() );
+
+	// Now copy the converted data over to ourself:
+	erase();
+	set( tmpEscaped );
+
+	// Now free up the temporary pointer
+	curl_free( tmpEscaped );
 
 	// Return ourselves
 	return *this;
