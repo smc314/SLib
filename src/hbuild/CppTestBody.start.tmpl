@@ -37,6 +37,7 @@ TEST_CASE( "${shortName}_Setup", "[Logic_${shortPackage}][${shortName}][${shortN
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }

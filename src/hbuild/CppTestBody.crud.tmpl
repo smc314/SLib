@@ -10,6 +10,7 @@ TEST_CASE( "${shortName}_Raw_selectAll", "[Logic_${shortPackage}][${shortName}][
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }
@@ -29,6 +30,7 @@ TEST_CASE( "${shortName}_Raw_selectById", "[Logic_${shortPackage}][${shortName}]
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }
@@ -79,6 +81,7 @@ TEST_CASE( "${shortName}_Raw_CRUD", "[Logic_${shortPackage}][${shortName}][${sho
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }
@@ -101,6 +104,7 @@ TEST_CASE( "${shortName}_Api_GetAll", "[Logic_${shortPackage}][${shortName}][${s
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }
@@ -135,6 +139,7 @@ TEST_CASE( "${shortName}_Api_GetOne", "[Logic_${shortPackage}][${shortName}][${s
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }
@@ -185,10 +190,12 @@ TEST_CASE( "${shortName}_Api_CRUD", "[Logic_${shortPackage}][${shortName}][${sho
 		REQUIRE(v2->size() != 0);
 		${shortName}_CompareWithId(test1, *v2->at(0), true); // Do compare children in API testing
 
+		${shortName}& newTest = *v2->at( 0 ); // Stick with this object for the update/delete
+
 		// Modify it
-		${shortName}_ModifyObject(test1);
+		${shortName}_ModifyObject(newTest);
 		root = TestStatics::ResetRequest( ioc, "Update${shortName}", "/logic/${shortPackage}/Update${shortName}" );
-		test1.createXmlNode( root );
+		newTest.createXmlNode( root );
 		Update${shortName} updateApi( nullptr );
 		updateApi.ExecuteRequest( *ioc );
 		auto v3 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
@@ -197,22 +204,22 @@ TEST_CASE( "${shortName}_Api_CRUD", "[Logic_${shortPackage}][${shortName}][${sho
 
 		// Select it by Id again and compare
 		root = TestStatics::ResetRequest( ioc, "GetOne${shortName}", "/logic/${shortPackage}/GetOne${shortName}" );
-		test1.createXmlNode( root );
+		newTest.createXmlNode( root );
 		getOneApi.ExecuteRequest( *ioc );
 		auto v4 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
 		REQUIRE(v4->size() != 0);
-		${shortName}_CompareWithId(test1, *v4->at(0), true); // Do compare children in API testing
+		${shortName}_CompareWithId(newTest, *v4->at(0), true); // Do compare children in API testing
 
 		// Delete it
 		root = TestStatics::ResetRequest( ioc, "Delete${shortName}", "/logic/${shortPackage}/Delete${shortName}" );
-		test1.createXmlNode( root );
+		newTest.createXmlNode( root );
 		Delete${shortName} deleteApi( nullptr );
 		deleteApi.ExecuteRequest( *ioc );
 
 		// Select it by Id again and make sure it's gone
 		try {
 			root = TestStatics::ResetRequest( ioc, "GetOne${shortName}", "/logic/${shortPackage}/GetOne${shortName}" );
-			test1.createXmlNode( root );
+			newTest.createXmlNode( root );
 			getOneApi.ExecuteRequest( *ioc );
 			UNSCOPED_INFO( "GetOne${shortName} - should have returned an exception for a missing record." );
 			CHECK(false);
@@ -223,6 +230,7 @@ TEST_CASE( "${shortName}_Api_CRUD", "[Logic_${shortPackage}][${shortName}][${sho
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }

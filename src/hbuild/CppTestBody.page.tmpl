@@ -11,6 +11,17 @@ void ${shortName}_PageExecution( IOConn* ioc )
 	auto v = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
 	REQUIRE(v->size() != 0);
 
+	// Make sure that Row Id values line up with where they are in the returned list of data
+	for(size_t i = 0; i < v->size(); i++){
+		xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}", "/logic/ttvx/GetPaged${shortName}" );
+		pageTracker.CurrentId = v->at(i)->Id;
+		pageTracker.createXmlNode( root );
+		getPagedApi.ExecuteRequest( *ioc );
+		auto id_check = PageTracker::readXmlChildren( ioc->getResponseRoot() );
+		REQUIRE(id_check->size() != 0);
+		REQUIRE(id_check->at(0)->RowForCurrentId == i);
+	}
+
 	// Run a count query
 	root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}Count", "/logic/${shortPackage}/GetPaged${shortName}Count" );
 	pageTracker.createXmlNode( root );
@@ -25,6 +36,17 @@ void ${shortName}_PageExecution( IOConn* ioc )
 	getPagedApi.ExecuteRequest( *ioc );
 	auto v3 = ${shortName}::readXmlChildren( ioc->getResponseRoot() );
 	REQUIRE(v3->size() != 0);
+
+	// Make sure that Row Id values line up with where they are in the returned list of data
+	for(size_t i = 0; i < v3->size(); i++){
+		xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}", "/logic/ttvx/GetPaged${shortName}" );
+		pageTracker.CurrentId = v3->at(i)->Id;
+		pageTracker.createXmlNode( root );
+		getPagedApi.ExecuteRequest( *ioc );
+		auto id_check = PageTracker::readXmlChildren( ioc->getResponseRoot() );
+		REQUIRE(id_check->size() != 0);
+		REQUIRE(id_check->at(0)->RowForCurrentId == i);
+	}
 
 	// Run a filtered count query
 	root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}Count", "/logic/${shortPackage}/GetPaged${shortName}Count" );
@@ -44,6 +66,7 @@ TEST_CASE( "${shortName}_Api_GetPaged_Normal", "[Logic_${shortPackage}][${shortN
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }
@@ -57,6 +80,7 @@ TEST_CASE( "${shortName}_Api_GetPaged_Admin", "[Logic_${shortPackage}][${shortNa
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }
@@ -70,6 +94,7 @@ TEST_CASE( "${shortName}_Api_GetPaged_Super", "[Logic_${shortPackage}][${shortNa
 	} catch (AnException& e){
 		ERRORL(FL, "%s", e.Msg() ); // something went wrong - AirTime Log it
 		UNSCOPED_INFO(e.Msg()); // Catch2 Log it
+		UNSCOPED_INFO(e.Stack()); // Catch2 Log it
 		CHECK(false); // Manually signal the test as failed
 	}
 }
