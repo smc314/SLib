@@ -24,7 +24,7 @@ using namespace SLib;
 using namespace Helix::Build;
 
 
-HelixSqldo::HelixSqldo(HelixFSFolder folder, HelixFSFile file) 
+HelixSqldo::HelixSqldo(HelixFSFolder* folder, HelixFSFile* file) 
 	: m_folder( folder ), m_file( file )
 {
 	EnEx ee(FL, "HelixSqldo::HelixSqldo()");
@@ -67,12 +67,12 @@ HelixSqldo::~HelixSqldo()
 
 }
 
-HelixFSFile HelixSqldo::File()
+HelixFSFile* HelixSqldo::File()
 {
 	return m_file;
 }
 
-HelixFSFolder HelixSqldo::Folder()
+HelixFSFolder* HelixSqldo::Folder()
 {
 	return m_folder;
 }
@@ -179,6 +179,11 @@ const vector<HelixSqldoSortFunction>& HelixSqldo::SortFunctions()
 	return m_sorts;
 }
 
+const vector<HelixSqldoXlsxFunction>& HelixSqldo::XlsxFunctions()
+{
+	return m_xlsxs;
+}
+
 const vector<HelixSqldoMatchFunction>& HelixSqldo::MatchFunctions()
 {
 	return m_matches;
@@ -196,6 +201,7 @@ void HelixSqldo::ReadSqldo()
 	m_child_vectors.clear();
 	m_child_objects.clear();
 	m_sorts.clear();
+	m_xlsxs.clear();
 	m_matches.clear();
 	m_validations.clear();
 	m_parms.clear();
@@ -219,6 +225,9 @@ void HelixSqldo::ReadSqldo()
 	}
 	for(auto n : XmlHelpers::FindChildren( root, "SortFunction" ) ){
 		m_sorts.push_back( HelixSqldoSortFunction( n ) );
+	}
+	for(auto n : XmlHelpers::FindChildren( root, "XlsxFunction" ) ){
+		m_xlsxs.push_back( HelixSqldoXlsxFunction( n ) );
 	}
 	for(auto n : XmlHelpers::FindChildren( root, "MatchFunction" ) ){
 		m_matches.push_back( HelixSqldoMatchFunction( n ) );
@@ -396,6 +405,10 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 		csDOUsing.append( "using HelixPdfGen.DO." ).append( dep ).append(";\n");
 	}
 
+	if(m_xlsxs.size() > 0){
+		childObjectIncludes.append( "\n#include \"Xlsx.h\"\nusing namespace Helix::Logic::xlsxwriter;\n\n" );
+	}
+
 	m_parms[ "ChildObjectIncludes" ] = childObjectIncludes;
 	m_parms[ "DefineDataMembers" ] = defineDataMembers;
 	m_parms[ "C#DefineDataMembers" ] = defineCSDataMembers;
@@ -426,6 +439,7 @@ twine HelixSqldo::GenCPPHeader()
 	output.append( loadTmpl( "CppObjHeader.start.tmpl", BuildObjectParms() ) );
 	for(auto& method : m_methods) output.append( method.GenCPPHeader(m_class_name) );
 	for(auto& sort : m_sorts) output.append( sort.GenCPPHeader(m_class_name) );
+	for(auto& xlsx : m_xlsxs) output.append( xlsx.GenCPPHeader(m_class_name) );
 	for(auto& match : m_matches) output.append( match.GenCPPHeader(m_class_name) );
 	for(auto& valid : m_validations) output.append( valid.GenCPPHeader(m_class_name) );
 	output.append( loadTmpl( "CppObjHeader99.tmpl", BuildObjectParms() ) );
@@ -438,6 +452,7 @@ twine HelixSqldo::GenCPPBody()
 	output.append( loadTmpl( "CppObjBody.start.tmpl", BuildObjectParms() ) );
 	for(auto& method : m_methods) output.append( method.GenCPPBody(m_class_name) );
 	for(auto& sort : m_sorts) output.append( sort.GenCPPBody(m_class_name) );
+	for(auto& xlsx : m_xlsxs) output.append( xlsx.GenCPPBody(m_class_name) );
 	for(auto& match : m_matches) output.append( match.GenCPPBody(m_class_name) );
 	for(auto& valid : m_validations) output.append( valid.GenCPPBody(m_class_name) );
 	return output;
@@ -473,6 +488,7 @@ twine HelixSqldo::GenCSBody()
 	output.append( loadTmpl( "C#ObjHeader.start.tmpl", BuildObjectParms() ) );
 	for(auto& method : m_methods) output.append( method.GenCSBody(m_class_name) );
 	//for(auto& sort : m_sorts) output.append( sort.GenCPPBody(m_class_name) );
+	//for(auto& xlsx : m_xlsxs) output.append( xlsx.GenCPPBody(m_class_name) );
 	//for(auto& match : m_matches) output.append( match.GenCPPBody(m_class_name) );
 	output.append( loadTmpl( "C#ObjHeader99.tmpl", BuildObjectParms() ) );
 	return output;

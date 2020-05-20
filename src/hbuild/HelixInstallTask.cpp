@@ -95,7 +95,7 @@ void HelixInstallTask::Execute()
 					targetFileName = m_target_folder + "/" + m_new_name;
 				}
 				File::EnsurePath( targetFileName );
-				if(HelixFSFile_Bare::IsNewerThan( sourceFileName, targetFileName )){
+				if(HelixFSFile::IsNewerThan( sourceFileName, targetFileName )){
 					INFO(FL, "%s is newer than %s - installing file.", sourceFileName(), targetFileName() );
 					File::Copy( sourceFileName(), targetFileName() );
 				}
@@ -114,7 +114,7 @@ void HelixInstallTask::CopyFolder(const twine& fromFolder, const twine& toFolder
 			twine sourceFileName( fromFolder + "/" + file );
 			twine targetFileName( toFolder + "/" + file );
 			File::EnsurePath( targetFileName );
-			if(HelixFSFile_Bare::IsNewerThan( sourceFileName, targetFileName )){
+			if(HelixFSFile::IsNewerThan( sourceFileName, targetFileName )){
 				INFO(FL, "%s is newer than %s - installing file.", sourceFileName(), targetFileName() );
 				File::Copy( sourceFileName(), targetFileName() );
 			}

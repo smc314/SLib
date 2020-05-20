@@ -44,6 +44,8 @@ HelixSqldoParam::HelixSqldoParam(xmlNodePtr elem)
 	min.getAttribute( elem, "min" );
 	max.getAttribute( elem, "max" );
 	function.getAttribute( elem, "function" );
+	header.getAttribute( elem, "header" );
+	format.getAttribute( elem, "format" );
 
 	if(type.empty()){
 		type = "twine"; // Default to twine

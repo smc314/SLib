@@ -24,6 +24,7 @@ using namespace SLib;
 #include "HelixSqldoChildVector.h"
 #include "HelixSqldoChildObject.h"
 #include "HelixSqldoSortFunction.h"
+#include "HelixSqldoXlsxFunction.h"
 #include "HelixSqldoMatchFunction.h"
 #include "HelixSqldoValidateFunction.h"
 
@@ -36,7 +37,7 @@ class DLLEXPORT HelixSqldo
 {
 	public:
 		/// Constructor requires a folder and a file
-		HelixSqldo(HelixFSFolder folder, HelixFSFile file);
+		HelixSqldo(HelixFSFolder* folder, HelixFSFile* file);
 
 		/// Standard Copy Constructor
 		HelixSqldo(const HelixSqldo& c);
@@ -68,11 +69,12 @@ class DLLEXPORT HelixSqldo
 		const vector<HelixSqldoChildVector>& ChildVectors();
 		const vector<HelixSqldoChildObject>& ChildObjects();
 		const vector<HelixSqldoSortFunction>& SortFunctions();
+		const vector<HelixSqldoXlsxFunction>& XlsxFunctions();
 		const vector<HelixSqldoMatchFunction>& MatchFunctions();
 		const vector<HelixSqldoValidateFunction>& ValidateFunctions();
 
-		HelixFSFile File();
-		HelixFSFolder Folder();
+		HelixFSFile* File();
+		HelixFSFolder* Folder();
 
 		void ReadSqldo();
 
@@ -102,12 +104,13 @@ class DLLEXPORT HelixSqldo
 		vector< HelixSqldoChildVector > m_child_vectors;
 		vector< HelixSqldoChildObject > m_child_objects;
 		vector< HelixSqldoSortFunction > m_sorts;
+		vector< HelixSqldoXlsxFunction > m_xlsxs;
 		vector< HelixSqldoMatchFunction > m_matches;
 		vector< HelixSqldoValidateFunction > m_validations;
 		map< twine, twine > m_parms;
 		
-		HelixFSFolder m_folder;
-		HelixFSFile m_file;
+		HelixFSFolder* m_folder;
+		HelixFSFile* m_file;
 
 };
 

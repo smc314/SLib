@@ -261,7 +261,7 @@ void HelixWorker::CompileThread()
 		}
 
 		// Find our .obj file and reload it so we have the new size and last modified information
-		HelixFSFile dotOh = task->Folder()->FindFile( task->File()->DotOh() );
+		auto dotOh = task->Folder()->FindFile( task->File()->DotOh() );
 		if(dotOh != nullptr){
 			dotOh->Reload();
 		} else {

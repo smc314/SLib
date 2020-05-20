@@ -29,7 +29,7 @@ class DLLEXPORT HelixCompileTask
 {
 	public:
 		/// Constructor requires a folder and a file
-		HelixCompileTask(HelixFSFolder folder, HelixFSFile file);
+		HelixCompileTask(HelixFSFolder* folder, HelixFSFile* file);
 
 		/// Standard Copy Constructor
 		HelixCompileTask(const HelixCompileTask& c);
@@ -49,8 +49,8 @@ class DLLEXPORT HelixCompileTask
 		/// Retrieves the command line to accomplish this task
 		twine GetCommandLine();
 
-		HelixFSFile File();
-		HelixFSFolder Folder();
+		HelixFSFile* File();
+		HelixFSFolder* Folder();
 
 	private:
 		
@@ -59,8 +59,8 @@ class DLLEXPORT HelixCompileTask
 		twine LogicIncludes(const twine& logicName, bool fromSqldo = false);
 		twine DependentInclude(const twine& ourLogic, const twine& depLogic, bool fromSqldo = false);
 
-		HelixFSFolder m_folder;
-		HelixFSFile m_file;
+		HelixFSFolder* m_folder;
+		HelixFSFile* m_file;
 
 };
 

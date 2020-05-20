@@ -23,7 +23,7 @@ using namespace SLib;
 using namespace Helix::Build;
 
 
-HelixCompileTask::HelixCompileTask(HelixFSFolder folder, HelixFSFile file) 
+HelixCompileTask::HelixCompileTask(HelixFSFolder* folder, HelixFSFile* file) 
 	: m_folder( folder ), m_file( file )
 {
 	EnEx ee(FL, "HelixCompileTask::HelixCompileTask()");
@@ -65,12 +65,12 @@ HelixCompileTask::~HelixCompileTask()
 
 }
 
-HelixFSFile HelixCompileTask::File()
+HelixFSFile* HelixCompileTask::File()
 {
 	return m_file;
 }
 
-HelixFSFolder HelixCompileTask::Folder()
+HelixFSFolder* HelixCompileTask::Folder()
 {
 	return m_folder;
 }

@@ -42,16 +42,16 @@ class DLLEXPORT HelixFS
 		void Load();
 
 		// Finds the first match of the given file name recursively in our folder and all children
-		HelixFSFile FindFile( const twine& fileName );
+		HelixFSFile* FindFile( const twine& fileName );
 
 		// Finds all files that end with the given file type
-		vector<HelixFSFile> FindFilesByType( const twine& fileType );
+		vector<HelixFSFile*> FindFilesByType( const twine& fileType );
 
 		// Finds a top level folder by name
-		HelixFSFolder FindFolder( const twine& folderName );
+		HelixFSFolder* FindFolder( const twine& folderName );
 
 		// Finds a folder by its full path
-		HelixFSFolder FindPath( const twine& folderPath );
+		HelixFSFolder* FindPath( const twine& folderPath );
 
 		// Converts forward to backslash if necessary based on current platform
 		static twine FixPhysical( const twine& path );
@@ -75,8 +75,8 @@ class DLLEXPORT HelixFS
 		/// Standard Assignment Operator
 		HelixFS& operator=(const HelixFS& c) = delete;
 
-		// Our list of top level folders
-		std::vector<HelixFSFolder> m_folders;
+		// Our list of top level folders - we own this list of folders, we'll delete it at the end
+		HelixFSFolder_svect m_folders;
 
 		// Our hbuild cache file
 		sptr<xmlDoc, xmlFreeDoc> m_hbuild_cache;

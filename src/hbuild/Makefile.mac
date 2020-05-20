@@ -36,7 +36,8 @@ DOTOH=
 
 HBUILD_OH=hbuild.o HelixFS.o HelixFSFolder.o HelixFSFile.o HelixBuilder.o HelixWorker.o \
 	HelixCompileTask.o HelixLinkTask.o HelixInstallTask.o HelixSqldoParam.o HelixSqldoMethod.o \
-	HelixSqldoChildVector.o HelixSqldoChildObject.o HelixSqldoSortFunction.o HelixSqldoMatchFunction.o \
+	HelixSqldoChildVector.o HelixSqldoChildObject.o HelixSqldoSortFunction.o HelixSqldoXlsxFunction.o \
+	HelixSqldoMatchFunction.o \
 	HelixSqldo.o HelixGenTask.o HelixJSApiGenTask.o HelixConfig.o HelixSqldoValidateFunction.o \
 	HelixAutoAsset.o HelixExtractStrings.o HelixJSGenTask.o HelixCountLines.o HelixFind.o
 

@@ -28,31 +28,31 @@ namespace Helix {
 namespace Build {
 
 // Forward declar the class so that we can do the using.
-class DLLEXPORT HelixFSFolder_Bare;
-using HelixFSFolder = std::shared_ptr<HelixFSFolder_Bare>;
+class DLLEXPORT HelixFSFolder;
+using HelixFSFolder_svect = std::unique_ptr< std::vector<HelixFSFolder*>, VectorDelete<HelixFSFolder> >;
 
 /** This class represents our helix file system.
   */
-class DLLEXPORT HelixFSFolder_Bare
+class DLLEXPORT HelixFSFolder
 {
 	public:
 		/// Constructor requires a folder name
-		HelixFSFolder_Bare(const twine& folderName);
+		HelixFSFolder(const twine& folderName);
 
 		/// Standard Copy Constructor
-		HelixFSFolder_Bare(const HelixFSFolder& c) = delete;
+		HelixFSFolder(const HelixFSFolder& c) = delete;
 
 		/// Standard Assignment Operator
-		HelixFSFolder_Bare& operator=(const HelixFSFolder_Bare& c) = delete;
+		HelixFSFolder& operator=(const HelixFSFolder& c) = delete;
 
 		/// Standard Move Constructor
-		HelixFSFolder_Bare(const HelixFSFolder_Bare&& c) = delete;
+		HelixFSFolder(const HelixFSFolder&& c) = delete;
 
 		/// Standard Move Assignment Operator
-		HelixFSFolder_Bare& operator=(const HelixFSFolder_Bare&& c) = delete;
+		HelixFSFolder& operator=(const HelixFSFolder&& c) = delete;
 
 		/// Standard Destructor
-		virtual ~HelixFSFolder_Bare();
+		virtual ~HelixFSFolder();
 
 		void Load();
 
@@ -61,17 +61,17 @@ class DLLEXPORT HelixFSFolder_Bare
 		twine PhysicalFolderName() const;
 		bool FromCore() const;
 
-		vector<HelixFSFolder>& SubFolders();
-		vector<HelixFSFile>& Files();
+		vector<HelixFSFolder*>& SubFolders();
+		vector<HelixFSFile*>& Files();
 
 		// Finds the first match of the given file name recursively in our folder and all children
-		HelixFSFile FindFile( const twine& fileName );
+		HelixFSFile* FindFile( const twine& fileName );
 
 		// Finds all files that end with the given file type
-		void FindFilesByType( const twine& fileType, vector<HelixFSFile>& results);
+		void FindFilesByType( const twine& fileType, vector<HelixFSFile*>& results);
 
 		// Finds one of our folders by name - does not recurse
-		HelixFSFolder FindFolder( const twine& folderName );
+		HelixFSFolder* FindFolder( const twine& folderName );
 
 		// Removes a file in our folder by name - if it exists
 		void DeleteFile( const twine& fileName );
@@ -79,11 +79,11 @@ class DLLEXPORT HelixFSFolder_Bare
 
 	private:
 
-		// Our list of files
-		vector<HelixFSFile> m_files;
+		// Our list of files - we own the files, and we'll make sure they are deleted
+		HelixFSFile_svect m_files;
 
-		// Our list of sub-folders
-		vector<HelixFSFolder> m_folders;
+		// Our list of sub-folders - we own the folders, and we'll make sure they are deleted
+		HelixFSFolder_svect m_folders;
 	
 		// Our folder name
 		twine m_name;

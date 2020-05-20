@@ -29,7 +29,7 @@ class DLLEXPORT HelixLinkTask
 {
 	public:
 		/// Constructor requires a folder and a file
-		HelixLinkTask(HelixFSFolder folder);
+		HelixLinkTask(HelixFSFolder* folder);
 
 		/// Standard Copy Constructor
 		HelixLinkTask(const HelixLinkTask& c);
@@ -49,7 +49,7 @@ class DLLEXPORT HelixLinkTask
 		/// Retrieves the command line to accomplish this task
 		twine GetCommandLine();
 
-		HelixFSFolder Folder();
+		HelixFSFolder* Folder();
 
 		bool RequiresLink();
 		twine LinkTarget();
@@ -72,7 +72,7 @@ class DLLEXPORT HelixLinkTask
 
 		twine FixPhysical( const twine& path );
 
-		HelixFSFolder m_folder;
+		HelixFSFolder* m_folder;
 
 };
 

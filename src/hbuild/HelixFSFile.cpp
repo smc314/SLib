@@ -23,64 +23,78 @@ using namespace SLib;
 using namespace Helix::Build;
 
 
-HelixFSFile_Bare::HelixFSFile_Bare(const twine& folderName, const twine& fileName) 
+HelixFSFile::HelixFSFile(const twine& folderName, const twine& fileName) 
 	: m_folder( folderName ), m_file( fileName )
 {
-	EnEx ee(FL, "HelixFSFile_Bare::HelixFSFile_Bare()");
+	EnEx ee(FL, "HelixFSFile::HelixFSFile()");
+
+	if(folderName.empty()){
+		throw AnException(0, FL, "Missing folder name");
+	}
+	if(fileName.empty()){
+		throw AnException(0, FL, "Missing file name");
+	}
+	m_physical_file = "";
 
 	try {
 		File tmp( PhysicalFileName() );
 		m_file_last_modified = tmp.lastModified();
 		m_file_size = tmp.size();
-	} catch(AnException& e){
+	} catch(AnException&){
 		// Means the file doesn't exist
 		m_file_last_modified.SetMinValue();
 		m_file_size = 0;
 	}
 }
 
-HelixFSFile_Bare::~HelixFSFile_Bare()
+HelixFSFile::~HelixFSFile()
 {
-	EnEx ee(FL, "HelixFSFile_Bare::~HelixFSFile_Bare()");
+	EnEx ee(FL, "HelixFSFile::~HelixFSFile()");
 
 }
 
-void HelixFSFile_Bare::Reload()
+void HelixFSFile::Reload()
 {
+	EnEx ee(FL, "HelixFSFile::Reload()");
 	try {
 		File tmp( PhysicalFileName() );
 		m_file_last_modified = tmp.lastModified();
 		m_file_size = tmp.size();
-	} catch(AnException& e){
+	} catch(AnException&){
 		// Means the file doesn't exist
 		m_file_last_modified.SetMinValue();
 		m_file_size = 0;
 	}
 	m_lines.clear();
+	m_deps.clear();
+	m_deps_loaded = false;
+	m_xml_doc = nullptr;
+	m_api_list.clear();
 }
 
-const twine& HelixFSFile_Bare::FileName() const
+const twine& HelixFSFile::FileName() const
 {
 	return m_file;
 }
 
-const twine& HelixFSFile_Bare::FolderName() const
+const twine& HelixFSFile::FolderName() const
 {
 	return m_folder;
 }
 
-long HelixFSFile_Bare::FileSize()
+long HelixFSFile::FileSize()
 {
 	return m_file_size;
 }
 
-Date HelixFSFile_Bare::LastModified()
+Date HelixFSFile::LastModified()
 {
 	return m_file_last_modified;
 }
 
-twine HelixFSFile_Bare::LastFolderName()
+twine HelixFSFile::LastFolderName()
 {
+	EnEx ee(FL, "HelixFSFile::LastFolderName()");
 	auto splits = m_folder.split("/");
 	if(splits.size() == 0){
 		return "";
@@ -89,20 +103,22 @@ twine HelixFSFile_Bare::LastFolderName()
 	}
 }
 
-const twine& HelixFSFile_Bare::PhysicalFileName() const
+const twine& HelixFSFile::PhysicalFileName() const
 {
+	EnEx ee(FL, "HelixFSFile::PhysicalFileName()");
 	if(m_physical_file.empty()){
 		if(m_folder == "root"){
-			m_physical_file = "./" + m_file;
+			m_physical_file.append("./").append(m_file);
 		} else {
-			m_physical_file = "./" + m_folder + "/" + m_file;
+			m_physical_file.append("./").append(m_folder).append("/").append(m_file);
 		}
 	} 
 	return m_physical_file;
 }
 
-const twine& HelixFSFile_Bare::PhysicalDotOh() const
+const twine& HelixFSFile::PhysicalDotOh() const
 {
+	EnEx ee(FL, "HelixFSFile::PhysicalDotOh()");
 	if(m_physical_dotoh.empty()){
 		if(m_folder == "root"){
 			m_physical_dotoh = "./" + DotOh();
@@ -113,8 +129,9 @@ const twine& HelixFSFile_Bare::PhysicalDotOh() const
 	return m_physical_dotoh;
 }
 
-bool HelixFSFile_Bare::FromCore() const
+bool HelixFSFile::FromCore() const
 {
+	EnEx ee(FL, "HelixFSFile::FromCore()");
 	bool useCore = HelixConfig::getInstance().UseCore();
 	if(!useCore){
 		return false; // Not using core, so never comes from core
@@ -127,9 +144,9 @@ bool HelixFSFile_Bare::FromCore() const
 	}
 }
 
-const vector<twine>& HelixFSFile_Bare::Lines()
+const vector<twine>& HelixFSFile::Lines()
 {
-	EnEx ee(FL, "HelixFSFile_Bare::Lines()");
+	EnEx ee(FL, "HelixFSFile::Lines()");
 
 	// If we already have it - just return immediately
 	if(m_lines.size() != 0) return m_lines;
@@ -139,9 +156,9 @@ const vector<twine>& HelixFSFile_Bare::Lines()
 	return m_lines;
 }
 
-vector<pair<twine, twine>>& HelixFSFile_Bare::Apis()
+vector<pair<twine, twine>>& HelixFSFile::Apis()
 {
-	EnEx ee(FL, "HelixFSFile_Bare::Apis()");
+	EnEx ee(FL, "HelixFSFile::Apis()");
 
 	// If we already have it - just return it
 	if(m_api_list.size() != 0){
@@ -162,12 +179,11 @@ vector<pair<twine, twine>>& HelixFSFile_Bare::Apis()
 	return m_api_list;
 }
 
-bool HelixFSFile_Bare::NeedsRebuild()
+bool HelixFSFile::NeedsRebuild()
 {
-	EnEx ee(FL, "HelixFSFile_Bare::NeedsRebuild()");
+	EnEx ee(FL, "HelixFSFile::NeedsRebuild()");
 
 	// First check to see if we are newer than our .o file:
-	vector<twine> splits = m_file.split(".");	
 	if(IsNewerThan( PhysicalDotOh() )){
 		DEBUG(FL, "%s is newer than %s - rebuild required", PhysicalFileName()(), PhysicalDotOh()() );
 		return true; // We are newer than our .o file, no need to check deps, need to build
@@ -184,6 +200,7 @@ bool HelixFSFile_Bare::NeedsRebuild()
 
 	/*
 	// Find our .h file and see if anything it depends on needs to be rebuilt
+	vector<twine> splits = m_file.split(".");	
 	if(splits[1] == "cpp"){
 		twine dothName( splits[0] + ".h" );
 		HelixFSFile doth = FindDep( dothName );
@@ -198,78 +215,30 @@ bool HelixFSFile_Bare::NeedsRebuild()
 	return false;
 }
 
-const vector<HelixFSFile>& HelixFSFile_Bare::Dependencies()
+const vector<HelixFSFile*>& HelixFSFile::Dependencies()
 {
-	EnEx ee(FL, "HelixFSFile_Bare::Dependencies()");
+	EnEx ee(FL, "HelixFSFile::Dependencies()");
 
 	// If we already have it - just return immediately
 	if(m_deps_loaded) return m_deps;
 
-	// Load from cache first
-	//LoadDependenciesFromCache();
 	if(m_deps.size() == 0){
 		LoadDependenciesExplicitly();
+		m_deps_loaded = true;
 	}
 
 	// Now run through our list of explicit dependencies, and add in all of their dependencies to
 	// get both our own explicit dependencies and also our implicit dependencies
-	size_t explicit_count = m_deps.size();
-	for(size_t i = 0; i < explicit_count; i++){
-		AddChildDeps( m_deps[ i ] );
+	for(size_t i = 0; i < m_deps.size(); i++){ // Don't use a range-for, others are changing this as we go
+		AddChildDeps( m_deps[i] );
 	}
 
-	m_deps_loaded = true;
 	return m_deps;
 }
 
-void HelixFSFile_Bare::LoadDependenciesFromCache()
+void HelixFSFile::LoadDependenciesExplicitly()
 {
-	EnEx ee(FL, "HelixFSFile_Bare::LoadDependenciesFromCache()");
-
-	auto cache = HelixFS::getInstance().GetCache();
-	if(cache == nullptr) {
-		printf("Cache not found\n");
-		return;
-	}
-	auto root = xmlDocGetRootElement( cache );
-	if(root == nullptr) {
-		printf("Cache root not found\n");
-		return;
-	}
-	auto deps = XmlHelpers::FindChild( root, "FileDeps" );
-	if(deps == nullptr) {
-		//printf("FileDeps not found\n");
-		return;
-	}
-	auto ourFile = XmlHelpers::FindChildWithAttribute( deps, "File", "Physical", PhysicalFileName()() );
-	if(ourFile == nullptr) {
-		//printf("Our File: %s not found in cache.\n", PhysicalFileName()() );
-		return;
-	}
-
-	Date depsCreated = XmlHelpers::getDateAttr( ourFile, "Created" );
-	File physFile( PhysicalFileName() );
-	if( physFile.lastModified() > depsCreated){
-		//printf("Our File: %s is newer than cache timestamp: %s\n", depsCreated.GetValue("%Y/%m/%d %H:%M:%S")() );
-		return; // Our file is newer than our cache of dependencies.  This invalidates the cache.  Don't read it.
-	}
-
-	// Dependency cache is still up to date.  Read them in:
-	auto depFiles = XmlHelpers::FindChildren( ourFile, "Dependency" );
-	for(auto depFile : depFiles){
-		twine depName( depFile, "name" );
-		//printf("File: %s - loaded Dep %s from cache\n", PhysicalFileName()(), depName() );
-		HelixFSFile dep = FindDep( depName );
-		if(dep != nullptr){
-			AddUniqueDep( dep );
-		}
-	}
-
-}
-
-void HelixFSFile_Bare::LoadDependenciesExplicitly()
-{
-	EnEx ee(FL, "HelixFSFile_Bare::LoadDependenciesExplicitly()");
+	EnEx ee(FL, "HelixFSFile::LoadDependenciesExplicitly()");
 
 	//printf("%s - LoadDependenciesExplicitly\n", FileName()() );
 
@@ -281,51 +250,21 @@ void HelixFSFile_Bare::LoadDependenciesExplicitly()
 			if(tokens.size() != 2) continue; // Don't know hot to deal with this
 			if(tokens[1][0] == '<') continue; // #include of a system file - ignore these
 
-			HelixFSFile dep = FindDep( tokens[1] );
+			auto dep = FindDep( tokens[1] );
 			if(dep != nullptr){
 				AddUniqueDep( dep );
 			}
 		}
 	}
-
-	//SaveExplicitDependenciesToCache();
 }
 
-void HelixFSFile_Bare::SaveExplicitDependenciesToCache()
+void HelixFSFile::AddChildDeps(HelixFSFile* dep)
 {
-	EnEx ee(FL, "HelixFSFile_Bare::SaveExplicitDependenciesToCache()");
+	EnEx ee(FL, "HelixFSFile::AddChildDeps(HelixFSFile* dep)");
 
-	auto cache = HelixFS::getInstance().GetCache();
-	if(cache == nullptr) return;
-	auto root = xmlDocGetRootElement( cache );
-	if(root == nullptr) return;
-	auto deps = XmlHelpers::FindChild( root, "FileDeps" );
-	if(deps == nullptr){
-		deps = xmlNewChild( root, NULL, (const xmlChar*)"FileDeps", NULL);
+	if(dep == nullptr){
+		return; // Handed a nullptr object - skip it
 	}
-	auto ourFile = XmlHelpers::FindChildWithAttribute( deps, "File", "Physical", PhysicalFileName()() );
-	if(ourFile != nullptr) {
-		// Wipe out our node and any children that our file node may already have:
-		xmlUnlinkNode( ourFile );
-		xmlFreeNode( ourFile );
-	}
-
-	// Re-create our node from scratch
-	ourFile = xmlNewChild( deps, NULL, (const xmlChar*)"File", NULL );
-	xmlSetProp( ourFile, (const xmlChar*)"Physical", PhysicalFileName() );
-	Date now;
-	XmlHelpers::setDateAttr( ourFile, "Created", now);
-
-	// Add all of our explicit dependencies
-	for(auto dep : m_deps){
-		auto depNode = xmlNewChild( ourFile, NULL, (const xmlChar*)"Dependency", NULL );
-		xmlSetProp( depNode, (const xmlChar*)"name", dep->FileName() );
-	}
-}
-
-void HelixFSFile_Bare::AddChildDeps(HelixFSFile dep)
-{
-	EnEx ee(FL, "HelixFSFile_Bare::AddChildDeps(HelixFSFile dep)");
 
 	if(dep->PhysicalFileName() == PhysicalFileName()){
 		return; // Child dep is the same as ourself - hit a loop, break out
@@ -339,9 +278,13 @@ void HelixFSFile_Bare::AddChildDeps(HelixFSFile dep)
 	}
 }
 
-bool HelixFSFile_Bare::AddUniqueDep(HelixFSFile dep)
+bool HelixFSFile::AddUniqueDep(HelixFSFile* dep)
 {
-	EnEx ee(FL, "HelixFSFile_Bare::AddUniqueDep(HelixFSFile dep)");
+	EnEx ee(FL, "HelixFSFile::AddUniqueDep(HelixFSFile* dep)");
+
+	if(dep == nullptr){
+		return false; // bad dependency
+	}
 
 	// Check to see if we already have this dependency
 	for(auto file : m_deps){
@@ -357,29 +300,28 @@ bool HelixFSFile_Bare::AddUniqueDep(HelixFSFile dep)
 	return true;
 }
 
-HelixFSFile HelixFSFile_Bare::FindDep(const twine& dependentFile)
+HelixFSFile* HelixFSFile::FindDep(const twine& dependentFile)
 {
-	EnEx ee(FL, "HelixFSFile_Bare::FindDep(const twine& dependentFile)");
+	EnEx ee(FL, "HelixFSFile::FindDep(const twine& dependentFile)");
 
-	HelixFSFile fsFile;
 	// First check in our current folder:
-	HelixFSFolder currentFolder = HelixFS::getInstance().FindPath( m_folder );
-	if(!currentFolder){
+	auto currentFolder = HelixFS::getInstance().FindPath( m_folder );
+	if(currentFolder == nullptr){
 		WARN(FL, "Danger! Current Path (%s) not found in HelixFS.FindPath\n", m_folder() );
-		fsFile = HelixFS::getInstance().FindFile( dependentFile );	
+		return HelixFS::getInstance().FindFile( dependentFile );	
 	} else {
-		fsFile = currentFolder->FindFile( dependentFile ); // Search here first
+		auto fsFile = currentFolder->FindFile( dependentFile ); // Search here first
 		if(!fsFile){
-			fsFile = HelixFS::getInstance().FindFile( dependentFile ); // Search everywhere else
+			return HelixFS::getInstance().FindFile( dependentFile ); // Search everywhere else
+		} else {
+			return fsFile;
 		}
 	}
-	
-	return fsFile;
 }
 
-xmlDocPtr HelixFSFile_Bare::Xml()
+xmlDocPtr HelixFSFile::Xml()
 {
-	EnEx ee(FL, "HelixFSFile_Bare::Xml()");
+	EnEx ee(FL, "HelixFSFile::Xml()");
 
 	// Check to see if we've loaded the doc before - if not, then load it now
 	if(m_xml_doc == nullptr){
@@ -392,18 +334,18 @@ xmlDocPtr HelixFSFile_Bare::Xml()
 	return m_xml_doc;
 }
 
-twine HelixFSFile_Bare::DataObjectName()
+twine HelixFSFile::DataObjectName()
 {
-	EnEx ee(FL, "HelixFSFile_Bare::DataObjectName()");
+	EnEx ee(FL, "HelixFSFile::DataObjectName()");
 
 	xmlNodePtr root = xmlDocGetRootElement( Xml() );
 	twine doName( root, "generateClass" );
 	return doName;
 }
 
-const twine& HelixFSFile_Bare::DotOh() const
+const twine& HelixFSFile::DotOh() const
 {
-	EnEx ee(FL, "HelixFSFile_Bare::DotOh()");
+	EnEx ee(FL, "HelixFSFile::DotOh()");
 
 	if(m_dotoh.empty()){
 		vector<twine> splits = twine(m_file).split(".");
@@ -416,9 +358,9 @@ const twine& HelixFSFile_Bare::DotOh() const
 	return m_dotoh;
 }
 
-bool HelixFSFile_Bare::IsNewerThan(HelixFSFile other)
+bool HelixFSFile::IsNewerThan(HelixFSFile* other)
 {
-	EnEx ee(FL, "HelixFSFile_Bare::IsNewerThan(HelixFSFile other)");
+	EnEx ee(FL, "HelixFSFile::IsNewerThan(HelixFSFile* other)");
 	if(!other){
 		// They don't exist, we're newer
 		return true;
@@ -438,9 +380,9 @@ bool HelixFSFile_Bare::IsNewerThan(HelixFSFile other)
 	}
 }
 
-bool HelixFSFile_Bare::IsNewerThan(const twine& otherFilePath)
+bool HelixFSFile::IsNewerThan(const twine& otherFilePath)
 {
-	EnEx ee(FL, "HelixFSFile_Bare::IsNewerThan(const twine& otherFilePath)");
+	EnEx ee(FL, "HelixFSFile::IsNewerThan(const twine& otherFilePath)");
 
 	// Try to find the other file in our file system first
 	auto otherFile = HelixFS::getInstance().FindFile( otherFilePath );
@@ -465,9 +407,9 @@ bool HelixFSFile_Bare::IsNewerThan(const twine& otherFilePath)
 	}
 }
 
-bool HelixFSFile_Bare::IsNewerThan(const twine& ourPhysicalName, const twine& theirPhysicalName)
+bool HelixFSFile::IsNewerThan(const twine& ourPhysicalName, const twine& theirPhysicalName)
 {
-	EnEx ee(FL, "HelixFSFile_Bare::IsNewerThan(const twine& ourPhysicalName, const twine& theirPhysicalName)");
+	EnEx ee(FL, "HelixFSFile::IsNewerThan(const twine& ourPhysicalName, const twine& theirPhysicalName)");
 
 	auto ourFSFile = HelixFS::getInstance().FindFile( ourPhysicalName );
 	if(ourFSFile){

@@ -57,7 +57,7 @@ class DLLEXPORT HelixExtractStrings
 		void FindAllLayoutFiles( );
 		void ProcessFile( const twine& fileName );
 		void FindAllCPPFiles();
-		void ProcessCPPFile ( HelixFSFile file );
+		void ProcessCPPFile ( HelixFSFile* file );
 		void FindCPPStaticLabel( const twine& line );
 		void FindCPPStaticLabelInKey( const twine& line, const twine& key );
 		void HandleLayoutNode( xmlNodePtr node );

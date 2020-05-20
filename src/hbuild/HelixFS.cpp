@@ -50,48 +50,48 @@ void HelixFS::Load()
 	EnEx ee(FL, "HelixFS::Load()");
 
 	// Clear out everything we might have loaded and reload from scratch
-	m_folders.clear();
+	m_folders = HelixFSFolder_svect( new std::vector<HelixFSFolder*>() );
 
 	// Hard code our top level folders
-	auto root = std::make_shared<HelixFSFolder_Bare>( "root" ); root->Load(); m_folders.push_back( root );
+	auto root = new HelixFSFolder( "root" ); root->Load(); m_folders->push_back( root );
 	if(HelixConfig::getInstance().UseCore() == false){
 		// Load these folders only when not using a core project helper
 		//auto build = std::make_shared<HelixFSFolder_Bare>( "build" ); 
 		//build->Load(); m_folders.push_back( build );
-		auto client = std::make_shared<HelixFSFolder_Bare>( "client" ); 
-		client->Load(); m_folders.push_back( client );
-		auto glob = std::make_shared<HelixFSFolder_Bare>( "glob" ); 
-		glob->Load(); m_folders.push_back( glob );
-		auto server = std::make_shared<HelixFSFolder_Bare>( "server" ); 
-		server->Load(); m_folders.push_back( server );
+		auto client = new HelixFSFolder( "client" ); 
+		client->Load(); m_folders->push_back( client );
+		auto glob = new HelixFSFolder( "glob" ); 
+		glob->Load(); m_folders->push_back( glob );
+		auto server = new HelixFSFolder( "server" ); 
+		server->Load(); m_folders->push_back( server );
 	} else {
 		// Load client, glob, server, logic/util, logic/admin from core because we need to do dependency
 		// checking and c# code generation from them
 		auto coreFolder = HelixConfig::getInstance().CoreFolder();
-		auto client = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/client" ); 
-		client->Load(); m_folders.push_back( client );
-		auto glob = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/glob" ); 
-		glob->Load(); m_folders.push_back( glob );
-		auto server = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/server" ); 
-		server->Load(); m_folders.push_back( server );
-		auto admin = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/logic/admin" ); 
-		admin->Load(); m_folders.push_back( admin );
-		auto util = std::make_shared<HelixFSFolder_Bare>( coreFolder + "/server/c/logic/util" ); 
-		util->Load(); m_folders.push_back( util );
+		auto client = new HelixFSFolder( coreFolder + "/server/c/client" ); 
+		client->Load(); m_folders->push_back( client );
+		auto glob = new HelixFSFolder( coreFolder + "/server/c/glob" ); 
+		glob->Load(); m_folders->push_back( glob );
+		auto server = new HelixFSFolder( coreFolder + "/server/c/server" ); 
+		server->Load(); m_folders->push_back( server );
+		auto admin = new HelixFSFolder( coreFolder + "/server/c/logic/admin" ); 
+		admin->Load(); m_folders->push_back( admin );
+		auto util = new HelixFSFolder( coreFolder + "/server/c/logic/util" ); 
+		util->Load(); m_folders->push_back( util );
 	}
 
 	// Load our own local logic folder
-	auto logic = std::make_shared<HelixFSFolder_Bare>( "logic" ); logic->Load(); m_folders.push_back( logic );
+	auto logic = new HelixFSFolder( "logic" ); logic->Load(); m_folders->push_back( logic );
 
 	// Also load the logic folder for all external repos that we reference
 	for(auto& repoName : HelixConfig::getInstance().LogicRepos() ){
-		auto external_logic = std::make_shared<HelixFSFolder_Bare>( "../../../" + repoName + "/server/c/logic" );
+		auto external_logic = new HelixFSFolder( "../../../" + repoName + "/server/c/logic" );
 		external_logic->Load();
-		m_folders.push_back( external_logic );
+		m_folders->push_back( external_logic );
 	}
 }
 
-HelixFSFile HelixFS::FindFile(const twine& fileName)
+HelixFSFile* HelixFS::FindFile(const twine& fileName)
 {
 	twine searchName;
 	if(fileName.startsWith( "../" )){
@@ -120,8 +120,8 @@ HelixFSFile HelixFS::FindFile(const twine& fileName)
 	}
 
 	// Search our list of folders one by one for the first match of the file name
-	for(auto folder : m_folders){
-		HelixFSFile ret = folder->FindFile( fileName );
+	for(auto folder : *m_folders){
+		auto ret = folder->FindFile( fileName );
 		if(ret){
 			return ret;
 		}
@@ -131,20 +131,20 @@ HelixFSFile HelixFS::FindFile(const twine& fileName)
 	return nullptr;
 }
 
-vector<HelixFSFile> HelixFS::FindFilesByType( const twine& fileType )
+vector<HelixFSFile*> HelixFS::FindFilesByType( const twine& fileType )
 {
-	vector<HelixFSFile> ret;
-	for(auto folder : m_folders){
+	vector<HelixFSFile*> ret;
+	for(auto folder : *m_folders){
 		folder->FindFilesByType( fileType, ret );
 	}
 	
 	return ret;
 }
 
-HelixFSFolder HelixFS::FindFolder(const twine& folderName)
+HelixFSFolder* HelixFS::FindFolder(const twine& folderName)
 {
 	// Search our list of sub-folders
-	for(auto folder : m_folders){
+	for(auto folder : *m_folders){
 		if(folder->FolderName() == folderName){
 			return folder;
 		}
@@ -154,26 +154,29 @@ HelixFSFolder HelixFS::FindFolder(const twine& folderName)
 	return nullptr;
 }
 
-HelixFSFolder HelixFS::FindPath(const twine& folderPath)
+HelixFSFolder* HelixFS::FindPath(const twine& folderPath)
 {
 	EnEx ee(FL, "HelixFS::FindPath(const twine& folderPath)");
 
 	twine path( folderPath );
 
 	// See which of our top level folders best matches the given path
-	HelixFSFolder topFolder = nullptr;
-	for(auto folder : m_folders){
+	HelixFSFolder* topFolder = nullptr;
+	for(auto folder : *m_folders){
+		//DEBUG(FL,"FindPath comparing target(%s) to root folder(%s)", folderPath(),folder->FolderName()() );
 		if(path.startsWith( folder->FolderName() )){
 			topFolder = folder;
 			break;
 		}
 	}
 	if(topFolder == nullptr){
+		//DEBUG(FL, "FindPath root folder not found for target(%s)", folderPath() );
 		return nullptr;
 	}
 
 	if(path.length() == topFolder->FolderName().length()){
 		// Exact match, just return topFolder
+		//DEBUG(FL, "FindPath root folder match for target(%s)", folderPath() );
 		return topFolder;
 	}
 
@@ -183,18 +186,31 @@ HelixFSFolder HelixFS::FindPath(const twine& folderPath)
 		path = path.substr( 1 ); // remove the leading slash
 	}
 
-	vector<twine> pathSplits = path.split("/");
+	auto pathSplits = path.split("/");
 	if(pathSplits.size() == 0){
+		//DEBUG(FL, "FindPath pathSplits == 0");
 		return nullptr;
 	}
 
 	// Start with the top level folder first:
-	HelixFSFolder currentFolder = topFolder->FindFolder( pathSplits[0] );
-	if(currentFolder == nullptr) return nullptr;
+	auto currentFolder = topFolder->FindFolder( pathSplits[0] );
+	if(currentFolder == nullptr) {
+		//DEBUG(FL, "FindPath could not find child folder %s in root folder %s", pathSplits[0](), topFolder->FolderName()() );
+		return nullptr;
+	}
+	if(pathSplits.size() == 1){
+		return currentFolder; // Already found it - there's only 1 subfolder in the path
+	} else {
+		pathSplits.erase( pathSplits.begin() ); // we've already looked this one up
+	}
 
-	for(size_t i = 1; i < pathSplits.size(); i++){
-		HelixFSFolder subFolder = currentFolder->FindFolder( pathSplits[i] );
-		if(!subFolder) return nullptr;
+	// Walk through the remaining path items
+	for(auto& pathItem : pathSplits){
+		auto subFolder = currentFolder->FindFolder( pathItem );
+		if(!subFolder) {
+			DEBUG(FL, "FindPath: Leaf node (%s) not found for target path %s", pathItem(), folderPath() );
+			return nullptr;
+		}
 		currentFolder = subFolder;
 	}
 
@@ -238,7 +254,7 @@ twine HelixFS::OurRepo()
 	pwd.replace( '\\', '/' ); // Normalize all path separators to forward-slash
 #endif
 
-	vector<twine> splits = pwd.split( "/" );
+	auto splits = pwd.split( "/" );
 	// We live in the folder blah/blah/blah/reponame/server/c folder  We want size - 3 as the reponame
 	if(splits.size() < 3){
 		throw AnException(0, FL, "Cannot determine our repo - path must have at least 3 components: %s", pwd() );

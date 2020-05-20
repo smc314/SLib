@@ -22,23 +22,28 @@ using namespace SLib;
 using namespace Helix::Build;
 
 
-HelixFSFolder_Bare::HelixFSFolder_Bare(const twine& folderName) : m_name( folderName )
+HelixFSFolder::HelixFSFolder(const twine& folderName) : m_name( folderName )
 {
-	EnEx ee(FL, "HelixFSFolder_Bare::HelixFSFolder_Bare(const twine& folderName)");
+	EnEx ee(FL, "HelixFSFolder::HelixFSFolder(const twine& folderName)");
 
-	vector<twine> splits = m_name.split("/");	
-	m_last_name = splits[ splits.size() - 1 ];
+	m_files = HelixFSFile_svect( new std::vector<HelixFSFile*>() );
+	m_folders = HelixFSFolder_svect( new std::vector<HelixFSFolder*>() );
+
+	auto splits = m_name.split("/");	
+	if(splits.size() > 0){
+		m_last_name = splits[ splits.size() - 1 ];
+	}
 }
 
-HelixFSFolder_Bare::~HelixFSFolder_Bare()
+HelixFSFolder::~HelixFSFolder()
 {
-	EnEx ee(FL, "HelixFSFolder_Bare::~HelixFSFolder_Bare()");
+	EnEx ee(FL, "HelixFSFolder::~HelixFSFolder()");
 
 }
 
-void HelixFSFolder_Bare::Load()
+void HelixFSFolder::Load()
 {
-	EnEx ee(FL, "HelixFSFolder_Bare::Load()");
+	EnEx ee(FL, "HelixFSFolder::Load()");
 
 	// Pick up all of our files:
 	auto files = File::listFiles( PhysicalFolderName() );
@@ -53,8 +58,8 @@ void HelixFSFolder_Bare::Load()
 			file.endsWith( ".obj" ) ||
 			file.endsWith( ".o" )
 		){
-			auto fsFile = std::make_shared<HelixFSFile_Bare>( m_name, file );
-			m_files.push_back( fsFile );
+			auto fsFile = new HelixFSFile( m_name, file );
+			m_files->push_back( fsFile );
 		}
 	}
 
@@ -65,18 +70,18 @@ void HelixFSFolder_Bare::Load()
 	// Pick up all of our sub-folders
 	for(auto& folder : File::listFolders( PhysicalFolderName() )){
 		if(folder == "." || folder == ".." || folder.startsWith( "." )) continue; // Ignore these
-		auto fsFolder = std::make_shared<HelixFSFolder_Bare>( m_name + "/" + folder );
+		dptr<HelixFSFolder>fsFolder( new HelixFSFolder( m_name + "/" + folder ) );
 		fsFolder->Load();
-		m_folders.push_back( fsFolder );
+		m_folders->push_back( fsFolder.release() );
 	}
 }
 
-const twine& HelixFSFolder_Bare::FolderName() const
+const twine& HelixFSFolder::FolderName() const
 {
 	return m_name;
 }
 
-twine HelixFSFolder_Bare::PhysicalFolderName() const
+twine HelixFSFolder::PhysicalFolderName() const
 {
 	if(m_name == "root"){
 		return "./";
@@ -85,7 +90,7 @@ twine HelixFSFolder_Bare::PhysicalFolderName() const
 	}
 }
 
-bool HelixFSFolder_Bare::FromCore() const
+bool HelixFSFolder::FromCore() const
 {
 	bool useCore = HelixConfig::getInstance().UseCore();
 	if(!useCore){
@@ -99,36 +104,32 @@ bool HelixFSFolder_Bare::FromCore() const
 	}
 }
 
-const twine& HelixFSFolder_Bare::LastName() const
+const twine& HelixFSFolder::LastName() const
 {
 	return m_last_name;
 }
 
-vector<HelixFSFolder>& HelixFSFolder_Bare::SubFolders()
+vector<HelixFSFolder*>& HelixFSFolder::SubFolders()
 {
-	return m_folders;
+	return *m_folders;
 }
 
-vector<HelixFSFile>& HelixFSFolder_Bare::Files()
+vector<HelixFSFile*>& HelixFSFolder::Files()
 {
-	return m_files;
+	return *m_files;
 }
 
-HelixFSFile HelixFSFolder_Bare::FindFile(const twine& fileName)
+HelixFSFile* HelixFSFolder::FindFile(const twine& fileName)
 {
-	EnEx ee(FL, "HelixFSFolder_Bare::FindFile(const twine& fileName)");
+	EnEx ee(FL, "HelixFSFolder::FindFile(const twine& fileName)");
 
 	// Check the files that we own first:
-	for(auto file : m_files){
-		if(file->FileName() == fileName){
-			return file;
-		}
-	}
+	for(auto file : *m_files) if(file->FileName() == fileName) return file;
 
 	// Search our list of sub-folders
-	for(auto folder : m_folders){
-		HelixFSFile ret = folder->FindFile( fileName );
-		if(ret){
+	for(auto folder : *m_folders){
+		auto ret = folder->FindFile( fileName );
+		if(ret != nullptr){
 			return ret;
 		}
 	}
@@ -137,26 +138,26 @@ HelixFSFile HelixFSFolder_Bare::FindFile(const twine& fileName)
 	return nullptr;
 }
 
-void HelixFSFolder_Bare::FindFilesByType(const twine& fileType, vector<HelixFSFile>& results)
+void HelixFSFolder::FindFilesByType(const twine& fileType, vector<HelixFSFile*>& results)
 {
-	EnEx ee(FL, "HelixFSFolder_Bare::FindFilesByType(const twine& fileType, vector<HelixFSFile>& results)");
+	EnEx ee(FL, "HelixFSFolder::FindFilesByType(const twine& fileType, vector<HelixFSFile*>& results)");
 
 	// Check the files that we own first:
-	for(auto file : m_files){
+	for(auto file : *m_files){
 		if(file->FileName().endsWith(fileType)){
 			results.push_back( file );
 		}
 	}
 
 	// Search our list of sub-folders
-	for(auto folder : m_folders){
+	for(auto folder : *m_folders){
 		folder->FindFilesByType( fileType, results );
 	}
 }
 
-HelixFSFolder HelixFSFolder_Bare::FindFolder(const twine& folderName)
+HelixFSFolder* HelixFSFolder::FindFolder(const twine& folderName)
 {
-	EnEx ee(FL, "HelixFSFolder_Bare::FindFolder(const twine& folderName)");
+	EnEx ee(FL, "HelixFSFolder::FindFolder(const twine& folderName)");
 
 	//printf("Looking for %s in %s\n", folderName(), m_name() );
 
@@ -170,7 +171,7 @@ HelixFSFolder HelixFSFolder_Bare::FindFolder(const twine& folderName)
 	//printf("Search is %s\n", search() );
 
 	// Search our list of sub-folders
-	for(auto folder : m_folders){
+	for(auto folder : *m_folders){
 		//printf("Checking sub folder (%s) == search (%s)", folder.FolderName()(), search() );
 		if(folder->FolderName() == search){
 			//printf("...yes\n");
@@ -183,15 +184,16 @@ HelixFSFolder HelixFSFolder_Bare::FindFolder(const twine& folderName)
 	return nullptr;
 }
 
-void HelixFSFolder_Bare::DeleteFile(const twine& fileName)
+void HelixFSFolder::DeleteFile(const twine& fileName)
 {
-	EnEx ee(FL, "HelixFSFolder_Bare::DeleteFile(const twine& fileName)");
+	EnEx ee(FL, "HelixFSFolder::DeleteFile(const twine& fileName)");
 
 	// Check to see if we have the file:
-	for(size_t i = 0; i < m_files.size(); i++){
-		if(m_files[i]->FileName() == fileName){
+	for(size_t i = 0; i < m_files->size(); i++){
+		if(m_files->at(i)->FileName() == fileName){
 			DEBUG(FL, "Removing FSFile Reference: %s/%s", m_name(), fileName() );
-			m_files.erase( m_files.begin() + i ); // Erase the vector element
+			delete m_files->at(i); // Delete the object
+			m_files->erase( m_files->begin() + i ); // Erase the vector element
 			break;
 		}
 	}

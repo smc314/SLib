@@ -7,6 +7,7 @@
 	Authors: Steven M. Cherry
 
 *************************************************************************** */
+#include <signal.h>
 
 #include <AnException.h>
 #include <Log.h>
@@ -36,6 +37,9 @@ Date m_end_date;
 twine m_platform;
 std::vector<twine> m_targets;
 
+static bool in_sighandler = false;
+void sighandler(int param);
+
 void handleAll();
 void handleClean();
 void handleTest( int argIndex );
@@ -54,8 +58,76 @@ void handleTestGen(int argIndex);
 void testDep();
 void CopyCore();
 void describe();
+int internalMain(int argc, char**argv);
 
-int main (int argc, char** argv)
+#ifdef _WIN32
+LONG WINAPI OurCrashHandler(EXCEPTION_POINTERS* /*Exception Info*/);
+#endif
+
+int main(int argc, char** argv)
+{
+	// Set up our signal handlers to catch and gracefully terminate if something goes wrong
+	signal( SIGABRT, sighandler);
+	signal( SIGFPE, sighandler);
+	signal( SIGILL, sighandler);
+	signal( SIGINT, sighandler);
+	signal( SIGSEGV, sighandler);
+	signal( SIGTERM, sighandler);
+
+#ifdef _WIN32
+	::SetUnhandledExceptionFilter(OurCrashHandler);
+#endif
+
+	return internalMain( argc, argv );
+}
+
+#ifdef _WIN32
+LONG WINAPI OurCrashHandler(EXCEPTION_POINTERS* ep)
+{
+	sighandler(SIGSEGV);
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+#endif
+
+/** This is our signal handler.  It is used to catch all signals that may be
+ *  sent for this program.  This will dump our logs and then
+ *  ensure that everything shuts down properly.
+ */
+void sighandler(int param)
+{
+	char* signame;
+	switch(param){
+		case SIGABRT: signame = (char*)"SIGABRT"; break;
+		case SIGFPE: signame = (char*)"SIGFPE"; break;
+		case SIGILL: signame = (char*)"SIGILL"; break;
+		case SIGINT: signame = (char*)"SIGINT"; break;
+		case SIGSEGV: signame = (char*)"SIGSEGV"; break;
+		case SIGTERM: signame = (char*)"SIGTERM"; break;
+		default: signame = (char*)"UNKNOWN";
+	}
+
+	if(in_sighandler){
+		// We're getting called again.  Something is going wrong during
+		// shutdown.  Log this to the console and exit.
+		printf("%s: called recursively.  Error in signal handler and shutdown!\n", signame);
+		if(param == SIGABRT){
+			// just return from this method - that will allow the usual abort process to go through
+			return;
+		}
+		// otherwise - raise the abort ourselves.
+		abort();
+	}
+	in_sighandler = true; // watch for recursive calls to this method.
+
+	PANIC(FL, "%s called.  Flushing and closing logs and shutting down hbuild.", signame);
+	printf("%s: called.  Flushing and closing logs and shutting down hbuild.\n", signame);
+	EnEx::PrintStackTrace( 0 ); // dump our stack trace to the Panic channel.
+	EnEx::PrintStackTrace( ); // dump our stack trace to stdout
+	printf("%s: Program shutdown complete.\n", signame);
+	exit(0);
+}
+
+int internalMain (int argc, char** argv)
 {
 	m_start_date.SetCurrent();
 
@@ -157,6 +229,22 @@ int main (int argc, char** argv)
 		auto duration = m_end_date - m_start_date;
 		printf("%s\n", e.Msg());
 		printf("%s\n", e.Stack());
+		printf("============================================================================\n");
+		printf("== %s (%ds) hbuild complete - with errors\n", m_end_date.GetValue()(), duration.Sec() );
+		printf("============================================================================\n");
+		return 1; // Errors
+	} catch(std::exception& e){
+		m_end_date.SetCurrent();
+		auto duration = m_end_date - m_start_date;
+		printf("%s\n", e.what());
+		printf("============================================================================\n");
+		printf("== %s (%ds) hbuild complete - with errors\n", m_end_date.GetValue()(), duration.Sec() );
+		printf("============================================================================\n");
+		return 1; // Errors
+	} catch(...){
+		m_end_date.SetCurrent();
+		auto duration = m_end_date - m_start_date;
+		printf("Unknown exception caught\n");
 		printf("============================================================================\n");
 		printf("== %s (%ds) hbuild complete - with errors\n", m_end_date.GetValue()(), duration.Sec() );
 		printf("============================================================================\n");
@@ -374,13 +462,13 @@ void handleTestGen(int argIndex )
 		printf("Generating test for %s in logic/%s/test/\n", forDO(), logic() );
 
 		twine path = "logic/" + logic;
-		HelixFSFolder folder = HelixFS::getInstance().FindPath( path );
+		auto folder = HelixFS::getInstance().FindPath( path );
 		if(!folder){
 			WARN(FL, "Unknown target path: %s", path() );
 			return;
 		}
 		twine fileName = forDO + ".sql.xml";
-		HelixFSFile sqldoFile = folder->FindFile( fileName );
+		auto sqldoFile = folder->FindFile( fileName );
 		if(!sqldoFile){
 			WARN(FL, "Unknown target data object: %s/%s", path(), fileName() );
 			return;

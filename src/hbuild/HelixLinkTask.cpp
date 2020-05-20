@@ -24,7 +24,7 @@ using namespace SLib;
 using namespace Helix::Build;
 
 
-HelixLinkTask::HelixLinkTask(HelixFSFolder folder) : m_folder( folder )
+HelixLinkTask::HelixLinkTask(HelixFSFolder* folder) : m_folder( folder )
 {
 	EnEx ee(FL, "HelixLinkTask::HelixLinkTask()");
 
@@ -63,7 +63,7 @@ HelixLinkTask::~HelixLinkTask()
 
 }
 
-HelixFSFolder HelixLinkTask::Folder()
+HelixFSFolder* HelixLinkTask::Folder()
 {
 	return m_folder;
 }
@@ -230,22 +230,22 @@ bool HelixLinkTask::RequiresLink()
 	if(m_folder->FolderName().endsWith("glob") ){
 		HelixWorker::getInstance().WaitForCompilers();
 		twine globLinkTarget( LinkTarget() );
-		HelixFSFolder logicUtil = HelixFS::getInstance().FindPath( "logic/util" );
+		auto logicUtil = HelixFS::getInstance().FindPath( "logic/util" );
 		if(logicUtil){
-			vector<HelixFSFile> cppFiles;
+			vector<HelixFSFile*> cppFiles;
 			logicUtil->FindFilesByType(".cpp", cppFiles);
 			for(auto file : cppFiles){
-				if(HelixFSFile_Bare::IsNewerThan( file->PhysicalDotOh(), globLinkTarget )){
+				if(HelixFSFile::IsNewerThan( file->PhysicalDotOh(), globLinkTarget )){
 					return true; // Found a .o that is newer than our link target.  Re-link required
 				}
 			}
 		}
-		HelixFSFolder logicAdmin = HelixFS::getInstance().FindPath( "logic/admin" );
+		auto logicAdmin = HelixFS::getInstance().FindPath( "logic/admin" );
 		if(logicAdmin){
-			vector<HelixFSFile> cppFiles;
+			vector<HelixFSFile*> cppFiles;
 			logicAdmin->FindFilesByType(".cpp", cppFiles);
 			for(auto file : cppFiles){
-				if(HelixFSFile_Bare::IsNewerThan( file->PhysicalDotOh(), globLinkTarget )){
+				if(HelixFSFile::IsNewerThan( file->PhysicalDotOh(), globLinkTarget )){
 					return true; // Found a .o that is newer than our link target.  Re-link required
 				}
 			}

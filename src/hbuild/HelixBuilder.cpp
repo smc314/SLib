@@ -49,7 +49,7 @@ void HelixBuilder::Build( const twine& folderPath )
 
 	// Some special cases
 	if(folderPath == "HelixMain" || folderPath == "HelixDaemon" || folderPath == "HelixTest"){
-		dptr<HelixLinkTask> lt = new HelixLinkTask( std::make_shared<HelixFSFolder_Bare>(folderPath)  );
+		dptr<HelixLinkTask> lt = new HelixLinkTask( new HelixFSFolder(folderPath)  ); // Memory leak of Folder
 		if(lt->RequiresLink()){
 			HelixWorker::getInstance().Add( lt.release() );
 		}
@@ -57,7 +57,7 @@ void HelixBuilder::Build( const twine& folderPath )
 	}
 
 
-	HelixFSFolder folder = HelixFS::getInstance().FindPath( folderPath );
+	auto folder = HelixFS::getInstance().FindPath( folderPath );
 	if(!folder){
 		WARN(FL, "Unknown target build path: %s", folderPath() );
 		return;
@@ -74,15 +74,17 @@ void HelixBuilder::Build( const twine& folderPath )
 #else
 		if(folderPath == "server" && file->FileName() == "HelixSvc.cpp") continue; // Skip this one
 #endif
+		DEBUG(FL, "Checking File %s/%s", folderPath(), file->FileName()() );
 		if( (file->FileName().endsWith(".c") || file->FileName().endsWith(".cpp")) && file->NeedsRebuild( )){
 			HelixWorker::getInstance().Add( new HelixCompileTask( folder, file ) );
 			relinkRequired = true;
 		}
 	}
 
+	DEBUG(FL, "Checking Test %s", folderPath() );
 	if(HelixConfig::getInstance().IncludeTest()){
 		// Check for a test sub-folder
-		HelixFSFolder test = folder->FindFolder( "test" );
+		auto test = folder->FindFolder( "test" );
 		if(test){
 			for(auto file : test->Files()){
 				if( (file->FileName().endsWith(".c") || file->FileName().endsWith(".cpp")) && file->NeedsRebuild( )){
@@ -94,7 +96,8 @@ void HelixBuilder::Build( const twine& folderPath )
 	}
 
 	// Check for a sqldo sub-folder
-	HelixFSFolder sqldo = folder->FindFolder( "sqldo" );
+	DEBUG(FL, "Checking Sqldo %s", folderPath() );
+	auto sqldo = folder->FindFolder( "sqldo" );
 	if(sqldo){
 		for(auto file : sqldo->Files()){
 			// Check to see if this is an orphan file by looking for the sql.xml file in the parent folder:
@@ -112,11 +115,13 @@ void HelixBuilder::Build( const twine& folderPath )
 		}
 	}
 
+	DEBUG(FL, "Checking Link %s", folderPath() );
 	dptr<HelixLinkTask> linkTask = new HelixLinkTask( folder );
 	if(relinkRequired || linkTask->RequiresLink()){
 		HelixWorker::getInstance().Add( linkTask.release() );
 	}
 
+	DEBUG(FL, "Done Checking folder %s", folderPath() );
 }
 
 void HelixBuilder::Clean( const twine& folderPath )
@@ -138,7 +143,7 @@ void HelixBuilder::Clean( const twine& folderPath )
 		return;
 	}
 
-	HelixFSFolder folder = HelixFS::getInstance().FindPath( folderPath );
+	auto folder = HelixFS::getInstance().FindPath( folderPath );
 	if(!folder){
 		WARN(FL, "Unknown target build path: %s", folderPath() );
 		return;
@@ -160,7 +165,7 @@ void HelixBuilder::Clean( const twine& folderPath )
 	CleanAllRuntime( folder->PhysicalFolderName() );
 
 	// Check for a test sub-folder
-	HelixFSFolder test = folder->FindFolder( "test" );
+	auto test = folder->FindFolder( "test" );
 	if(test){
 		for(auto file : test->Files()){
 			if( file->FileName().endsWith(".cpp") ){
@@ -172,7 +177,7 @@ void HelixBuilder::Clean( const twine& folderPath )
 	}
 
 	// Check for a sqldo sub-folder
-	HelixFSFolder sqldo = folder->FindFolder( "sqldo" );
+	auto sqldo = folder->FindFolder( "sqldo" );
 	if(sqldo){
 		for(auto file : sqldo->Files()){
 			// Check to see if this is an orphan file by looking for the sql.xml file in the parent folder:
@@ -375,11 +380,11 @@ void HelixBuilder::GenerateSqldo(bool forceRegen)
 	EnEx ee(FL, "HelixBuilder::GenerateSqldo(bool forceRegen)");
 
 	// Find all .sql.xml files
-	vector<HelixFSFile> allSqldo = HelixFS::getInstance().FindFilesByType( ".sql.xml" );
+	auto allSqldo = HelixFS::getInstance().FindFilesByType( ".sql.xml" );
 
 	twine currentFolderName;
-	HelixFSFolder currentFolder = nullptr;
-	HelixFSFolder currentSqldoFolder = nullptr;
+	HelixFSFolder* currentFolder = nullptr;
+	HelixFSFolder* currentSqldoFolder = nullptr;
 	for(auto file : allSqldo){
 		if(currentFolderName != file->FolderName()){
 			// Look up the folder so we can access more details
@@ -390,7 +395,7 @@ void HelixBuilder::GenerateSqldo(bool forceRegen)
 			currentSqldoFolder = currentFolder->FindFolder( "sqldo" );
 			if(!currentSqldoFolder){
 				currentFolder->SubFolders().push_back( 
-					std::make_shared<HelixFSFolder_Bare>( currentFolder->FolderName() + "/sqldo") 
+					new HelixFSFolder( currentFolder->FolderName() + "/sqldo") 
 				);
 				currentSqldoFolder = currentFolder->FindFolder( "sqldo" );
 				if(!currentSqldoFolder){
@@ -405,7 +410,7 @@ void HelixBuilder::GenerateSqldo(bool forceRegen)
 		twine doName( file->DataObjectName() );
 		
 		// Check our sql.xml file against the sqldo/cpp file
-		HelixFSFile sqldoFile = currentSqldoFolder->FindFile( doName + ".cpp" );
+		auto sqldoFile = currentSqldoFolder->FindFile( doName + ".cpp" );
 		if(forceRegen){
 			DEBUG(FL, "Data Object: %s - forcing regeneration.", file->PhysicalFileName()() );
 			HelixWorker::getInstance().Add( new HelixGenTask( currentSqldoFolder, file ) );
@@ -447,7 +452,7 @@ void HelixBuilder::GenerateJSApi()
 
 }
 
-void HelixBuilder::UpdateHelixPdfGenProj(vector<HelixFSFile>& allSqldo)
+void HelixBuilder::UpdateHelixPdfGenProj(std::vector<HelixFSFile*>& allSqldo)
 {
 	EnEx ee(FL, "HelixBuilder::UpdateHelixPdfGenProj(vector<HelixFSFile>& allSqldo)");
 
@@ -503,11 +508,11 @@ void HelixBuilder::CleanSqldo()
 	INFO(FL, "Cleaning Sqldo" );
 
 	// Find all .sql.xml files
-	vector<HelixFSFile> allSqldo = HelixFS::getInstance().FindFilesByType( ".sql.xml" );
+	auto allSqldo = HelixFS::getInstance().FindFilesByType( ".sql.xml" );
 
 	twine currentFolderName;
-	HelixFSFolder currentFolder;
-	HelixFSFolder currentSqldoFolder;
+	HelixFSFolder* currentFolder = nullptr;
+	HelixFSFolder* currentSqldoFolder = nullptr;
 	for(auto file : allSqldo){
 		if(currentFolderName != file->FolderName()){
 			// Look up the folder so we can access more details
@@ -518,7 +523,7 @@ void HelixBuilder::CleanSqldo()
 			currentSqldoFolder = currentFolder->FindFolder( "sqldo" );
 			if(!currentSqldoFolder){
 				currentFolder->SubFolders().push_back( 
-					std::make_shared<HelixFSFolder_Bare>( currentFolder->FolderName() + "/sqldo") 
+					new HelixFSFolder( currentFolder->FolderName() + "/sqldo") 
 				);
 				currentSqldoFolder = currentFolder->FindFolder( "sqldo" );
 				if(!currentSqldoFolder){

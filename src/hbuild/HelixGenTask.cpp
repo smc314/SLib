@@ -24,7 +24,7 @@ using namespace SLib;
 using namespace Helix::Build;
 
 
-HelixGenTask::HelixGenTask(HelixFSFolder folder, HelixFSFile file) 
+HelixGenTask::HelixGenTask(HelixFSFolder* folder, HelixFSFile* file) 
 	: m_folder( folder ), m_file( file ), m_sqldo( folder, file )
 {
 	EnEx ee(FL, "HelixGenTask::HelixGenTask()");
@@ -66,12 +66,12 @@ HelixGenTask::~HelixGenTask()
 
 }
 
-HelixFSFile HelixGenTask::File()
+HelixFSFile* HelixGenTask::File()
 {
 	return m_file;
 }
 
-HelixFSFolder HelixGenTask::Folder()
+HelixFSFolder* HelixGenTask::Folder()
 {
 	return m_folder;
 }

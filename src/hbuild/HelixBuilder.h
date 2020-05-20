@@ -58,7 +58,7 @@ class DLLEXPORT HelixBuilder
 
 		/// Use this to Generate the data objects from sql.xml files if necessary
 		void GenerateSqldo(bool forceRegen = false);
-		void UpdateHelixPdfGenProj( vector<HelixFSFile>& allSqldo );
+		void UpdateHelixPdfGenProj( std::vector<HelixFSFile*>& allSqldo );
 		void GenerateJSApi();
 
 		/// Use this to Clean out the data objects from sql.xml files

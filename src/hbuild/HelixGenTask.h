@@ -30,7 +30,7 @@ class DLLEXPORT HelixGenTask
 {
 	public:
 		/// Constructor requires a folder and a file
-		HelixGenTask(HelixFSFolder folder, HelixFSFile file);
+		HelixGenTask(HelixFSFolder* folder, HelixFSFile* file);
 
 		/// Standard Copy Constructor
 		HelixGenTask(const HelixGenTask& c);
@@ -50,15 +50,15 @@ class DLLEXPORT HelixGenTask
 		/// Triggers the generation of all artifacts produced from our input file
 		void Generate();
 
-		HelixFSFile File();
-		HelixFSFolder Folder();
+		HelixFSFile* File();
+		HelixFSFolder* Folder();
 
 	protected:
 
 	private:
 		
-		HelixFSFolder m_folder;
-		HelixFSFile m_file;
+		HelixFSFolder* m_folder;
+		HelixFSFile* m_file;
 		HelixSqldo m_sqldo;
 
 };

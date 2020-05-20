@@ -1123,6 +1123,10 @@ twine& twine::insert(size_t p, const char* c)
 	if(c == NULL){
 		return *this; // nothing to insert
 	}
+	if(m_data_size == 0){
+		// If we don't have any existing data - then set our data to the input
+		return set( c );
+	}
 
 	size_t csize = strlen(c);
 	if(csize > MAX_INPUT_SIZE){

@@ -96,7 +96,7 @@ void HelixExtractStrings::FindAllLayoutFiles()
 	vector<twine> files;
 	try {
 		files = File::listFiles(start);
-	} catch (AnException& e){
+	} catch (AnException&){
 		// Exceptions here simply mean the folder was empty
 	}
 	for(int i = 0; i < (int)files.size(); i++){
@@ -307,7 +307,7 @@ void HelixExtractStrings::OutputStaticLabel( const twine& staticLabel )
 	m_staticLabels.push_back( staticLabel );
 }
 
-void HelixExtractStrings::ProcessCPPFile( HelixFSFile file ) 
+void HelixExtractStrings::ProcessCPPFile( HelixFSFile* file ) 
 {
 	try {
 		if(file->FileName().endsWith("ExtractStrings.cpp")) return; // Skip ourself
