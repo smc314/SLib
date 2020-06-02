@@ -191,13 +191,21 @@ twine HelixCompileTask::CC(const twine& tpl)
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// 64-bit mac
 	// ///////////////////////////////////////////////////////////////////////////////////
-	return "g++ -std=c++14 -c -g -Wall -D_REENTRANT -fPIC -O2 -I/usr/local/opt/openssl/include -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+	if(m_file->FileName().endsWith(".c")){
+		return "gcc -c -g -Wall -D_REENTRANT -fPIC -O2 -I/usr/local/opt/openssl/include -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+	} else {
+		return "g++ -std=c++14 -c -g -Wall -D_REENTRANT -fPIC -O2 -I/usr/local/opt/openssl/include -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+	}
 
 #elif __linux__
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// 64-bit linux
 	// ///////////////////////////////////////////////////////////////////////////////////
-	return "g++ -std=c++14 -c -g -Wall -D_REENTRANT -fPIC -O2 -rdynamic -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+	if(m_file->FileName().endsWith(".c")){
+		return "gcc -c -g -Wall -D_REENTRANT -fPIC -O2 -rdynamic -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+	} else {
+		return "g++ -std=c++14 -c -g -Wall -D_REENTRANT -fPIC -O2 -rdynamic -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+	}
 
 #else
 	throw AnException(0, FL, "Unknown compile environment.");
