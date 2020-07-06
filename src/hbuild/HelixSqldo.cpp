@@ -610,7 +610,8 @@ twine HelixSqldo::GenSqlXml(const twine& dbFile, const twine& tableName, const t
 twine HelixSqldo::GenCRUDDeleteHeader(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "Delete" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.Delete.Header.tmpl", parms );
@@ -619,7 +620,8 @@ twine HelixSqldo::GenCRUDDeleteHeader(const twine& logic, const twine& objName)
 twine HelixSqldo::GenCRUDDeleteBody(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "Delete" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.Delete.Body.tmpl", parms );
@@ -628,7 +630,8 @@ twine HelixSqldo::GenCRUDDeleteBody(const twine& logic, const twine& objName)
 twine HelixSqldo::GenCRUDGetAllHeader(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "GetAll" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.GetAll.Header.tmpl", parms );
@@ -637,7 +640,8 @@ twine HelixSqldo::GenCRUDGetAllHeader(const twine& logic, const twine& objName)
 twine HelixSqldo::GenCRUDGetAllBody(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "GetAll" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.GetAll.Body.tmpl", parms );
@@ -646,7 +650,8 @@ twine HelixSqldo::GenCRUDGetAllBody(const twine& logic, const twine& objName)
 twine HelixSqldo::GenCRUDGetOneHeader(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "GetOne" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.GetOne.Header.tmpl", parms );
@@ -655,7 +660,8 @@ twine HelixSqldo::GenCRUDGetOneHeader(const twine& logic, const twine& objName)
 twine HelixSqldo::GenCRUDGetOneBody(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "GetOne" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.GetOne.Body.tmpl", parms );
@@ -664,7 +670,8 @@ twine HelixSqldo::GenCRUDGetOneBody(const twine& logic, const twine& objName)
 twine HelixSqldo::GenCRUDGetPagedHeader(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "GetPaged" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.GetPaged.Header.tmpl", parms );
@@ -673,7 +680,8 @@ twine HelixSqldo::GenCRUDGetPagedHeader(const twine& logic, const twine& objName
 twine HelixSqldo::GenCRUDGetPagedBody(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "GetPaged" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.GetPaged.Body.tmpl", parms );
@@ -682,7 +690,8 @@ twine HelixSqldo::GenCRUDGetPagedBody(const twine& logic, const twine& objName)
 twine HelixSqldo::GenCRUDUpdateHeader(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "Update" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.Update.Header.tmpl", parms );
@@ -691,7 +700,8 @@ twine HelixSqldo::GenCRUDUpdateHeader(const twine& logic, const twine& objName)
 twine HelixSqldo::GenCRUDUpdateBody(const twine& logic, const twine& objName)
 {
 	map< twine, twine > parms;
-	parms[ "CLASSNAME" ] = objName;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "Update" + objName;
 	parms[ "PACKAGE" ] = logic;
 
 	return loadTmpl( "CRUD.Update.Body.tmpl", parms );
