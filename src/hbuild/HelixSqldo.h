@@ -36,6 +36,9 @@ namespace Build {
 class DLLEXPORT HelixSqldo
 {
 	public:
+		/// Default Constructor
+		HelixSqldo();
+
 		/// Constructor requires a folder and a file
 		HelixSqldo(HelixFSFolder* folder, HelixFSFile* file);
 
@@ -88,6 +91,17 @@ class DLLEXPORT HelixSqldo
 		twine GenJSBody(const twine& app);
 		twine GenCPPTestHeader(bool includeCrud, bool includePage);
 		twine GenCPPTestBody(bool includeCrud, bool includePage);
+		twine GenSqlXml(const twine& dbFile, const twine& tableName, const twine& logic, const twine& objName );
+		twine GenCRUDDeleteHeader( const twine& logic, const twine& objName );
+		twine GenCRUDDeleteBody( const twine& logic, const twine& objName );
+		twine GenCRUDGetAllHeader( const twine& logic, const twine& objName );
+		twine GenCRUDGetAllBody( const twine& logic, const twine& objName );
+		twine GenCRUDGetOneHeader( const twine& logic, const twine& objName );
+		twine GenCRUDGetOneBody( const twine& logic, const twine& objName );
+		twine GenCRUDGetPagedHeader( const twine& logic, const twine& objName );
+		twine GenCRUDGetPagedBody( const twine& logic, const twine& objName );
+		twine GenCRUDUpdateHeader( const twine& logic, const twine& objName );
+		twine GenCRUDUpdateBody( const twine& logic, const twine& objName );
 
 		static twine loadTmpl( const twine& tmplName, map<twine, twine>& vars );
 		static twine replaceVars( const twine& tmplName, size_t lineIdx, twine line, map<twine, twine>& vars );

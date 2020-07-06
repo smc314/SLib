@@ -1,0 +1,52 @@
+/* ***************************************************************************
+
+   Copyright (c): 2008 - 2015 Hericus Software, LLC.
+
+   License: The MIT License (MIT)
+
+   Authors: Steven M. Cherry
+
+*************************************************************************** */
+
+#ifndef ${CLASSNAME}_H
+#define ${CLASSNAME}_H
+
+#include <xmlinc.h>
+#include <twine.h>
+using namespace SLib;
+
+#include "ActionClass.h"
+using namespace Helix::Glob;
+
+namespace Helix {
+namespace Logic {
+namespace ${PACKAGE} {
+
+class DLLEXPORT ${CLASSNAME} : public ActionClass
+{
+	public:
+		/// Standard Constructor
+		${CLASSNAME}(xmlNodePtr action);
+
+		/// Standard Copy Constructor
+		${CLASSNAME}(const ${CLASSNAME}& c);
+
+		/// Standard Copy operator
+		${CLASSNAME}& operator=(const ${CLASSNAME}& c);
+
+		/// Standard Destructor
+		virtual ~${CLASSNAME}();
+
+		/// We implement the ExecuteRequest method
+		virtual void ExecuteRequest(IOConn& ioc);
+
+	private:
+
+		// Registers us with the global factory map:
+		static ActionClassRegister<${CLASSNAME}> reg;
+
+};
+
+}}} // End of Namespace definitions
+
+#endif // ${CLASSNAME}_H Defined

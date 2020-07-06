@@ -24,6 +24,12 @@ using namespace SLib;
 using namespace Helix::Build;
 
 
+HelixSqldo::HelixSqldo() : m_folder( nullptr ), m_file( nullptr )
+{
+	EnEx ee(FL, "HelixSqldo::HelixSqldo()");
+
+}
+
 HelixSqldo::HelixSqldo(HelixFSFolder* folder, HelixFSFile* file) 
 	: m_folder( folder ), m_file( file )
 {
@@ -548,6 +554,148 @@ twine HelixSqldo::GenJSBody(const twine& app)
 	return output;
 }
 
+twine HelixSqldo::GenSqlXml(const twine& dbFile, const twine& tableName, const twine& logic, const twine& objName)
+{
+	m_class_name = objName;
+
+	twine dbFilePath = File::PathCombine( "logic", dbFile );
+	if(!File::Exists( dbFilePath )){
+		throw AnException(0, FL, "Could not find db.xml file: %s", dbFilePath() );
+	}
+
+	sptr<xmlDoc, xmlFreeDoc> dbDoc = xmlParseFile( dbFilePath() );
+	if(dbDoc == nullptr){
+		throw AnException(0, FL, "Error parsing file as xml: %s", dbFilePath() );
+	}
+
+	xmlNodePtr root = xmlDocGetRootElement( dbDoc );
+	xmlNodePtr tables = XmlHelpers::FindChild( root, "Tables" );
+	if(tables == nullptr){
+		throw AnException(0, FL, "No Tables found in db.xml file: %s", dbFilePath() );
+	}
+	xmlNodePtr table = XmlHelpers::FindChildWithAttribute( tables, "Table", "name", tableName() );
+	if(table == nullptr){
+		throw AnException(0, FL, "No Table named %s found in db.xml file: %s", tableName(), dbFilePath() );
+	}
+
+	m_all_params.clear();
+	for(auto n : XmlHelpers::FindChildren( table, "Column" ) ){
+		HelixSqldoParam p;
+		p.name.getAttribute( n, "name" );
+		p.type.getAttribute( n, "systype" );
+		p.TranslateDBTypes(); // Some translation of systype to sqldo type:
+		m_all_params[ p.name ] = p;
+	}
+
+	map< twine, twine > parms;
+	parms[ "shortName" ] = m_class_name;
+	parms[ "shortPackage" ] = logic;
+
+	HelixSqldoMethod method;
+
+	twine output;
+	output.append( loadTmpl( "SqlDO.start.tmpl", parms ) );
+	output.append( method.GenInsertSql( logic, tableName, m_all_params ) );
+	if(method.IsIdGuid( m_all_params )){
+		output.append( method.GenInsertWithIdSql( logic, tableName, m_all_params ) );
+	}
+	output.append( method.GenUpdateSql( logic, tableName, m_all_params ) );
+	output.append( method.GenDeleteSql( logic, tableName, m_all_params ) );
+	output.append( method.GenSelectSql( logic, tableName, m_all_params ) );
+
+	output.append( loadTmpl( "SqlDO.finish.tmpl", parms ) );
+	return output;
+}
+
+twine HelixSqldo::GenCRUDDeleteHeader(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.Delete.Header.tmpl", parms );
+}
+
+twine HelixSqldo::GenCRUDDeleteBody(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.Delete.Body.tmpl", parms );
+}
+
+twine HelixSqldo::GenCRUDGetAllHeader(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.GetAll.Header.tmpl", parms );
+}
+
+twine HelixSqldo::GenCRUDGetAllBody(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.GetAll.Body.tmpl", parms );
+}
+
+twine HelixSqldo::GenCRUDGetOneHeader(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.GetOne.Header.tmpl", parms );
+}
+
+twine HelixSqldo::GenCRUDGetOneBody(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.GetOne.Body.tmpl", parms );
+}
+
+twine HelixSqldo::GenCRUDGetPagedHeader(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.GetPaged.Header.tmpl", parms );
+}
+
+twine HelixSqldo::GenCRUDGetPagedBody(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.GetPaged.Body.tmpl", parms );
+}
+
+twine HelixSqldo::GenCRUDUpdateHeader(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.Update.Header.tmpl", parms );
+}
+
+twine HelixSqldo::GenCRUDUpdateBody(const twine& logic, const twine& objName)
+{
+	map< twine, twine > parms;
+	parms[ "CLASSNAME" ] = objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "CRUD.Update.Body.tmpl", parms );
+}
 
 twine HelixSqldo::loadTmpl(const twine& tmplName, map<twine, twine>& vars)
 {

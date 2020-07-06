@@ -1,0 +1,45 @@
+	<ValidateFunction name="Validate">
+		<Comment>
+			This is a sample validation function, with all of the field level validations disabled.  This can
+			serve as an example of the types of validation functions that can be built.  Simply change the
+			names of the nodes below from FakeField to Field.
+		</Comment>
+		<FakeField name="Description" type="length" min="5" max="30"/>
+		<FakeField name="Distance" type="nonzero"/>
+		<FakeField name="Children" type="childArray"/>
+	</ValidateFunction>
+
+	<SortFunction name="FirstSort">
+		<Comment>
+			This is a sample sorting function with all of the comparison fields disabled.  This can
+			serve as an example of the types of sorting that can be built with this.  Simply change the
+			names of the nodes below from FakeField to Field.
+		</Comment>
+		<FakeField name="Name"/>
+		<FakeField name="CreatedDate" desc="true"/>
+		<FakeField name="Id"/>
+	</SortFunction>
+
+	<SortFunction name="FirstMatch">
+		<Comment>
+			This is a sample matching function with all of the comparison fields disabled.  This can
+			serve as an example of the types of matching that can be built with this.  Simply change the
+			names of the nodes below from FakeField to Field.
+		</Comment>
+		<FakeField name="Name" type="contains"/>
+		<FakeField name="Description" type="starts"/>
+		<FakeField name="Value" type="ends"/>
+	</SortFunction>
+
+	<SortFunction name="XlsxFormat">
+		<Comment>
+			This is a sample Xlsx format function with all of the fields disabled.  This can
+			serve as an example of the types of formatting that can be built with this.  Simply change the
+			names of the nodes below from FakeField to Field.
+		</Comment>
+		<FakeField name="Name" header="The Name" format="XLSX_STYLE_ITALIC"/>
+		<FakeField name="Description" header="Descriptive Text"/>
+		<FakeField name="Id" header="Identifier" format="XLSX_STYLE_BACKGROUND_RED"/>
+	</SortFunction>
+
+</SQLXml>

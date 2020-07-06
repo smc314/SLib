@@ -1,0 +1,8 @@
+	<SqlStatement methodName="deleteById" target="odbc" methodType="DELETE">
+		<Comment>deletes a single row by PK from the table ${tableName}</Comment>
+		<Sql>
+			delete from ${tableName} where Id = ?
+		</Sql>
+		<Input name="Id" type="guid"/>
+	</SqlStatement>
+

@@ -1,0 +1,12 @@
+	<SqlStatement methodName="insert" target="odbc" ${methodAndOutput}>
+		<Comment>Inserts a single row into the table ${tableName}</Comment>
+		<Sql>
+			insert into ${tableName}( 
+				${insertColNames}
+			) values ( 
+				${insertColValues}
+			)
+		</Sql>
+${insertInputs}
+	</SqlStatement>
+

@@ -236,3 +236,242 @@ twine HelixSqldoMethod::GenCSBody(const twine& className)
 	return HelixSqldo::loadTmpl( tmplName, BuildStatementParms(className) );
 }
 
+bool HelixSqldoMethod::IsIdGuid(std::map<twine, HelixSqldoParam>& params) 
+{
+	if(params.count("Id") == 0) return false;
+	else if(params["Id"].type == "guid") return true;
+	else return false;
+}
+
+bool HelixSqldoMethod::IsCreatedColumn(const twine& name) 
+{
+	if(name == "CreatedBy" ||
+		name == "CreatedDate" ||
+		name == "DateCreated"
+	){
+		return true;
+	}
+	return false;
+}
+
+twine HelixSqldoMethod::GetValueForName(const twine& logic, const twine& name) 
+{
+	if(name == "CreatedBy" ||
+		name == "ModifiedBy" ||
+		name == "LastUpdatedBy"
+	){
+		if(logic == "project"){
+			return "'${userGUID}'";
+		} else {
+			return "${userid}";
+		}
+	} else if( name == "CreatedDate" ||
+		name == "DateCreated" ||
+		name == "LastUpdated" ||
+		name == "ModifiedDate"
+	){
+		return "GETDATE()";
+	}
+	return "?"; // Default is to just use ? to mark the input
+
+}
+
+twine HelixSqldoMethod::GenInsertSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params) 
+{
+	EnEx ee(FL, "HelixSqldo::GenInsertSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params)");
+
+	map<twine, twine> tmpl_params;
+	if(IsIdGuid(params)){
+		tmpl_params["methodAndOutput"] = "methodType=\"INSERTGUID\" outputCol=\"Id\"";
+	} else {
+		tmpl_params["methodAndOutput"] = "methodType=\"INSERT\"";
+	}
+	tmpl_params["tableName"] = tableName;
+
+	twine names;
+	twine values;
+	twine inputs;
+
+	int count = 0;
+	for(auto& entry : params){
+		if(entry.first == "Id" || entry.first == "ID") continue; // Don't include Id values in the insert
+		if(count > 0){
+			names.append(", ");
+			values.append(", ");
+		}
+		if( (count + 1) % 6 == 0 ){ // new line every 6 columns
+			names.append("\n\t\t\t\t");
+			values.append("\n\t\t\t\t");
+		}
+
+		names += entry.first;
+		twine valueForName( GetValueForName( logic, entry.first ) );
+		values += valueForName;
+
+		if(valueForName == "?"){
+			twine tmp; 
+			tmp.format("\t\t<Input name=\"%s\" type=\"%s\"/>\n", 
+				entry.second.NormalizeName()(),
+				entry.second.type()
+			);
+			inputs.append( tmp );
+		}
+
+		count ++;
+	}
+	tmpl_params["insertColNames"] = names;
+	tmpl_params["insertColValues"] = values;
+	tmpl_params["insertInputs"] = inputs;
+
+	return HelixSqldo::loadTmpl( "SqlDO.insert.tmpl", tmpl_params );
+
+}
+
+twine HelixSqldoMethod::GenInsertWithIdSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params) 
+{
+	EnEx ee(FL, "HelixSqldo::GenInsertWithIdSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params)");
+
+	map<twine, twine> tmpl_params;
+	tmpl_params["tableName"] = tableName;
+
+	twine names;
+	twine values;
+	twine inputs;
+
+	int count = 0;
+	for(auto& entry : params){
+		if(count > 0){
+			names.append(", ");
+			values.append(", ");
+		}
+		if( (count + 1) % 6 == 0 ){ // new line every 6 columns
+			names.append("\n\t\t\t\t");
+			values.append("\n\t\t\t\t");
+		}
+
+		names += entry.first;
+		twine valueForName( GetValueForName( logic, entry.first ) );
+		values += valueForName;
+
+		if(valueForName == "?"){
+			twine tmp; 
+			tmp.format("\t\t<Input name=\"%s\" type=\"%s\"/>\n", 
+				entry.second.NormalizeName()(),
+				entry.second.type()
+			);
+			inputs.append( tmp );
+		}
+
+		count ++;
+	}
+	tmpl_params["insertColNames"] = names;
+	tmpl_params["insertColValues"] = values;
+	tmpl_params["insertInputs"] = inputs;
+
+	return HelixSqldo::loadTmpl( "SqlDO.insertWithId.tmpl", tmpl_params );
+
+}
+
+twine HelixSqldoMethod::GenUpdateSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params) 
+{
+	EnEx ee(FL, "HelixSqldo::GenUpdateSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params)");
+
+	map<twine, twine> tmpl_params;
+	tmpl_params["tableName"] = tableName;
+	tmpl_params["updateWhereValues"] = "Id = ?";
+
+	twine names;
+	twine inputs;
+
+	int count = 0;
+	for(auto& entry : params){
+		if(entry.first == "Id" || entry.first == "ID") continue; // Don't include Id values in the insert
+		if(IsCreatedColumn( entry.first )) continue; // Don't include created by or created date columns
+		if(count > 0){
+			names.append(",\n");
+		}
+		names.append("\t\t\t\t");
+
+		names += entry.first;
+		names += " = ";
+		twine valueForName( GetValueForName( logic, entry.first ) );
+		names += valueForName;
+
+		if(valueForName == "?"){
+			twine tmp; 
+			tmp.format("\t\t<Input name=\"%s\" type=\"%s\"/>\n", 
+				entry.second.NormalizeName()(),
+				entry.second.type()
+			);
+			inputs.append( tmp );
+		}
+
+		count ++;
+	}
+	// Add in the Id field in the Input list
+	if(IsIdGuid( params )){
+		inputs.append( "\t\t<Input name=\"Id\" type=\"guid\"/>\n" );
+	} else {
+		inputs.append( "\t\t<Input name=\"Id\" type=\"int\"/>\n" );
+	}
+		
+	tmpl_params["updateColNames"] = names;
+	tmpl_params["updateInputs"] = inputs;
+
+	return HelixSqldo::loadTmpl( "SqlDO.update.tmpl", tmpl_params );
+
+}
+
+twine HelixSqldoMethod::GenDeleteSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params) 
+{
+	EnEx ee(FL, "HelixSqldo::GenDeleteSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params)");
+
+	map<twine, twine> tmpl_params;
+	tmpl_params["tableName"] = tableName;
+
+	return HelixSqldo::loadTmpl( "SqlDO.delete.tmpl", tmpl_params );
+
+}
+
+twine HelixSqldoMethod::GenSelectSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params) 
+{
+	EnEx ee(FL, "HelixSqldo::GenSelectSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params)");
+
+	map<twine, twine> tmpl_params;
+	tmpl_params["tableName"] = tableName;
+
+	twine names;
+	twine simpleNames;
+	twine outputs;
+
+	int count = 0;
+	for(auto& entry : params){
+		if(count > 0){
+			names.append(", ");
+			simpleNames.append(", ");
+		}
+		if( (count + 1) % 4 == 0 ){ // new line every 3 columns
+			names.append("\n\t\t\t\t");
+			simpleNames.append("\n\t\t\t\t");
+		}
+
+		names += tableName + "." + entry.first;
+		simpleNames += entry.first;
+
+		twine tmp; 
+		tmp.format("\t\t<Output name=\"%s\" type=\"%s\"/>\n", 
+			entry.second.NormalizeName()(),
+			entry.second.type()
+		);
+		outputs.append( tmp );
+
+		count ++;
+	}
+	tmpl_params["selectColNames"] = names;
+	tmpl_params["selectSimpleColNames"] = simpleNames;
+	tmpl_params["selectOutputs"] = outputs;
+
+	return HelixSqldo::loadTmpl( "SqlDO.select.tmpl", tmpl_params );
+
+}
+

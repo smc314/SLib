@@ -13,13 +13,7 @@ void ${shortName}_PageExecution( IOConn* ioc )
 
 	// Make sure that Row Id values line up with where they are in the returned list of data
 	for(size_t i = 0; i < v->size(); i++){
-		xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}", "/logic/ttvx/GetPaged${shortName}" );
-		pageTracker.CurrentId = v->at(i)->Id;
-		pageTracker.createXmlNode( root );
-		getPagedApi.ExecuteRequest( *ioc );
-		auto id_check = PageTracker::readXmlChildren( ioc->getResponseRoot() );
-		REQUIRE(id_check->size() != 0);
-		REQUIRE(id_check->at(0)->RowForCurrentId == i);
+		REQUIRE(v->at(i)->RowNumber == pageTracker.FirstRow + i); // Ensure RowNumber's are sequential
 	}
 
 	// Run a count query
@@ -39,13 +33,7 @@ void ${shortName}_PageExecution( IOConn* ioc )
 
 	// Make sure that Row Id values line up with where they are in the returned list of data
 	for(size_t i = 0; i < v3->size(); i++){
-		xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetPaged${shortName}", "/logic/ttvx/GetPaged${shortName}" );
-		pageTracker.CurrentId = v3->at(i)->Id;
-		pageTracker.createXmlNode( root );
-		getPagedApi.ExecuteRequest( *ioc );
-		auto id_check = PageTracker::readXmlChildren( ioc->getResponseRoot() );
-		REQUIRE(id_check->size() != 0);
-		REQUIRE(id_check->at(0)->RowForCurrentId == i);
+		REQUIRE(v3->at(i)->RowNumber == pageTracker.FirstRow + i); // Ensure RowNumber's are sequential
 	}
 
 	// Run a filtered count query

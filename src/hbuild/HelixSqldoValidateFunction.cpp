@@ -41,6 +41,10 @@ twine HelixSqldoValidateFunction::GenCPPHeader(const twine& className)
 {
 	EnEx ee(FL, "HelixSqldo::GenCPPHeader(const twine& className)");
 
+	if(fields.size() == 0){
+		return "";
+	}
+
 	return	
 		"\t\t/** This is used to validate instances of " + className + " in a standard way.\n"
 		"\t\t  */\n"
@@ -53,6 +57,10 @@ twine HelixSqldoValidateFunction::GenCPPHeader(const twine& className)
 twine HelixSqldoValidateFunction::GenCPPBody(const twine& className) 
 {
 	EnEx ee(FL, "HelixSqldo::GenCPPBody(const twine& className)");
+
+	if(fields.size() == 0){
+		return "";
+	}
 
 	twine ret;
 

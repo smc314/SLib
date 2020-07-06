@@ -30,6 +30,7 @@ using namespace SLib;
 #include "HelixCountLines.h"
 #include "HelixFind.h"
 #include "HelixJSGenTask.h"
+#include "HelixSqldo.h"
 using namespace Helix::Build;
 
 Date m_start_date;
@@ -55,6 +56,8 @@ void handleStrings(bool displayBanner = true);
 void handleFind(const twine& searchString, bool displayBanner = true);
 void handleLines(bool displayBanner = true);
 void handleTestGen(int argIndex);
+void handleSqldoGen(int argIndex);
+void handleCrudGen(int argIndex);
 void testDep();
 void CopyCore();
 void describe();
@@ -209,6 +212,14 @@ int internalMain (int argc, char** argv)
 					handleTestGen( (int)i );
 					break; // All the rest of the arguments belong to the test command
 				}
+				else if(targ == "sqldogen") {
+					handleSqldoGen( (int)i );
+					break; // All the rest of the arguments belong to the test command
+				}
+				else if(targ == "crudgen") {
+					handleCrudGen( (int)i );
+					break; // All the rest of the arguments belong to the test command
+				}
 				else if(targ == "?") describe();
 				else if(targ == "help") describe();
 				else if(targ == "-?") describe();
@@ -289,8 +300,17 @@ void describe()
 	printf("             logic=... - specifies which logic folder to use\n");
 	printf("             api=... - specifies which server API to generate tests for\n");
 	printf("             do=... - specifies which server Data Object to generate full crud/paging tests for\n");
-	printf("             crud=true/false - specifies whether crud testing is generated\n");
-	printf("             page=true/false - specifies which page testing is generated\n");
+	printf("             crud=true/false - specifies whether crud testing is generated (true by default)\n");
+	printf("             page=true/false - specifies whether page testing is generated (true by default)\n");
+	printf("== sqldogen - creates a .sql.xml file with the following options\n");
+	printf("             db=... - specifies which db.xml file to read\n");
+	printf("             table=... - specifies which table in the db.xml file to pull the structure from\n");
+	printf("             logic=... - specifies which logic folder to use\n");
+	printf("             do=... - specifies which server Data Object to generate\n");
+	printf("== crudgen - creates a set of CRUD files  with the following options\n");
+	printf("             logic=... - specifies which logic folder to use\n");
+	printf("             do=... - specifies which server Data Object to generate\n");
+	printf("             page=true/false - specifies whether paging is generated (true by default)\n");
 	printf("\n");
 	printf("== If no target is specified, the 'all' target is invoked.\n");
 	printf("\n");
@@ -484,6 +504,138 @@ void handleTestGen(int argIndex )
 		printf("Writing Test Body to: %s\n", testBody() );
 		File::writeToFile( testBody, sqldo.GenCPPTestBody( forCrud != "false", forPage != "false" ) );
 	}
+}
+
+void handleCrudGen(int argIndex )
+{
+	printf("============================================================================\n");
+	printf("== CRUD Generation Target - Build\n");
+	printf("============================================================================\n");
+
+	twine logic; // Picks up argument: logic=ttvx 
+	twine forDO; // Picks up argument do=ITOStatus
+	twine forPage; // Picks up argument page=true
+	
+	for(size_t i = argIndex; i < m_targets.size(); i++){
+		auto splits = m_targets[i].split("=");
+		if(splits[0] == "logic"){
+			logic = splits[1];
+		} else if(splits[0] == "do"){
+			forDO = splits[1];
+		} else if(splits[0] == "page"){
+			forPage = splits[1];
+		}
+	}
+
+	if(logic.empty()){
+		throw AnException(0, FL, "logic=... parameter required for crudgen option");
+	}
+	if(forDO.empty()){
+		throw AnException(0, FL, "do=... parameter required for crudgen option");
+	}
+
+	printf("Generating CRUD for %s in logic/%s/\n", forDO(), logic() );
+
+	HelixSqldo sqldo;
+	twine fileName; 
+	twine path = File::PathCombine( "logic", logic );
+
+	fileName.format("Delete%s.h", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::EnsurePath( fileName ); // Only need to do this once
+	File::writeToFile( fileName, sqldo.GenCRUDDeleteHeader( logic, forDO ) );
+
+	fileName.format("Delete%s.cpp", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenCRUDDeleteBody( logic, forDO ) );
+
+	fileName.format("GetAll%s.h", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenCRUDGetAllHeader( logic, forDO ) );
+
+	fileName.format("GetAll%s.cpp", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenCRUDGetAllBody( logic, forDO ) );
+
+	fileName.format("GetOne%s.h", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenCRUDGetOneHeader( logic, forDO ) );
+
+	fileName.format("GetOne%s.cpp", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenCRUDGetOneBody( logic, forDO ) );
+
+	fileName.format("Update%s.h", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenCRUDUpdateHeader( logic, forDO ) );
+
+	fileName.format("Update%s.cpp", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenCRUDUpdateBody( logic, forDO ) );
+
+	if(forPage != "false"){
+		fileName.format("GetPaged%s.h", forDO() );
+		fileName = File::PathCombine( path, fileName );
+		File::writeToFile( fileName, sqldo.GenCRUDGetPagedHeader( logic, forDO ) );
+
+		fileName.format("GetPaged%s.cpp", forDO() );
+		fileName = File::PathCombine( path, fileName );
+		File::writeToFile( fileName, sqldo.GenCRUDGetPagedBody( logic, forDO ) );
+	}
+}
+
+void handleSqldoGen(int argIndex)
+{
+	printf("============================================================================\n");
+	printf("== SqlDO Generation Target - Build\n");
+	printf("============================================================================\n");
+
+	/*
+	printf("== sqldogen - creates a .sql.xml file with the following options\n");
+	printf("             db=... - specifies which db.xml file to read\n");
+	printf("             table=... - specifies which table in the db.xml file to pull the structure from\n");
+	printf("             logic=... - specifies which logic folder to use\n");
+	printf("             do=... - specifies which server Data Object to generate\n");
+	*/
+
+	twine forDB; // Picks up argument: db=...
+	twine forTable; // Picks up argument: table=...
+	twine logic; // Picks up argument: logic=ttvx 
+	twine forDO; // Picks up argument do=ITOStatus
+	
+	for(size_t i = argIndex; i < m_targets.size(); i++){
+		auto splits = m_targets[i].split("=");
+		if(splits[0] == "logic"){
+			logic = splits[1];
+		} else if(splits[0] == "db"){
+			forDB = splits[1];
+		} else if(splits[0] == "do"){
+			forDO = splits[1];
+		} else if(splits[0] == "table"){
+			forTable = splits[1];
+		}
+	}
+
+	if(forDB.empty()){
+		throw AnException(0, FL, "db=... parameter required for sqldogen option");
+	}
+	if(forTable.empty()){
+		throw AnException(0, FL, "table=... parameter required for sqldogen option");
+	}
+	if(logic.empty()){
+		throw AnException(0, FL, "logic=... parameter required for sqldogen option");
+	}
+	if(forDO.empty()){
+		throw AnException(0, FL, "do=... parameter required for sqldogen option");
+	}
+
+	twine sqlFileName = forDO + ".sql.xml";
+	twine fullPath = File::PathCombine( "logic", File::PathCombine( logic, sqlFileName ) );
+	File::EnsurePath( fullPath );
+
+	HelixSqldo sqldo;
+	printf("Generating sqldo in %s\n", fullPath() );
+	File::writeToFile( fullPath, sqldo.GenSqlXml( forDB, forTable, logic, forDO ) );
 }
 
 void handleGen(bool displayBanner)

@@ -1,0 +1,106 @@
+/* ***************************************************************************
+
+   Copyright (c): 2008 - 2015 Hericus Software, LLC.
+
+   License: The MIT License (MIT)
+
+   Authors: Steven M. Cherry
+
+*************************************************************************** */
+
+#include "TheMain.h"
+#include "OdbcObj.h"
+using namespace Helix::Glob;
+
+#include "${CLASSNAME}.h"
+using namespace Helix::Logic::${PACKAGE};
+
+#include "Statics.h"
+using namespace Helix::Logic::util;
+
+#include <Log.h>
+#include <dptr.h>
+#include <File.h>
+#include <EnEx.h>
+#include <AnException.h>
+#include <XmlHelpers.h>
+using namespace SLib;
+
+// Include local data objects here
+#include "${OBJNAME}.h"
+
+// This adds us to the global ActionClass Registry:
+ActionClassRegister<${CLASSNAME}> ${CLASSNAME}::reg("${CLASSNAME}", 1, "/logic/${PACKAGE}/${CLASSNAME}");
+
+// Used for auto generating the API on the javascript side:
+// LOGICCODEGEN API=/logic/${PACKAGE}/${CLASSNAME} Input=${OBJNAME}
+
+${CLASSNAME}::${CLASSNAME}(xmlNodePtr action)
+{
+	EnEx ee(FL, "${CLASSNAME}::${CLASSNAME}(xmlNodePtr action)");
+	
+}
+
+${CLASSNAME}::${CLASSNAME}(const ${CLASSNAME}& c)
+{
+	EnEx ee(FL, "${CLASSNAME}::${CLASSNAME}(const ${CLASSNAME}& c)");
+
+}
+
+${CLASSNAME}& ${CLASSNAME}::operator=(const ${CLASSNAME}& c)
+{
+	EnEx ee(FL, "${CLASSNAME}::operator=(const ${CLASSNAME}& c)");
+
+	return *this;
+}
+
+${CLASSNAME}::~${CLASSNAME}()
+{
+	EnEx ee(FL, "${CLASSNAME}::~${CLASSNAME}()");
+
+}
+
+void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
+{
+	// The "true" parameter at the end here indicates to the entry/exit timing
+	// mechanism that it should copy this thread's stats to the global collection.
+	// This should not be done everywhere, but is appropriate to do at this point.
+	EnEx ee(FL, "${CLASSNAME}::ExecuteRequest(IOConn& ioc)", true);
+
+	// Set up the response document name
+	ioc.initializeResponseDocument("${CLASSNAME}");
+
+	// Pick up the input object from the request document
+	${OBJNAME} local( XmlHelpers::FindChild( ioc.GetRequestRoot(), ${OBJNAME}::Name()() ) );
+
+	// Use the static method to retrieve the object so that we work like everyone else
+	dptr<${OBJNAME}> ret; ret = ${CLASSNAME}::Get${OBJNAME}( ioc, local.Id );
+
+	// Add the selected object to the response document
+	ret->createXmlNode( ioc.getResponseRoot() );
+
+	// Send the response back to the caller and close the connection.
+	ioc.SendReturn();
+	ioc.Close();
+}
+
+${OBJNAME}* ${CLASSNAME}::Get${OBJNAME}(IOConn& ioc, const twine& byId)
+{
+	EnEx ee(FL, "${CLASSNAME}::Get${OBJNAME}(IOConn& ioc, const twine& byId)");
+
+	// Read from our default database - change this to get data from elsewhere
+	OdbcObj& db = *ioc.getDBConnection();
+
+	auto vect = ${OBJNAME}::selectById( db, byId );
+	if(vect->size() == 0) Statics::ThrowUnknownRecord( "${OBJNAME}", byId );
+
+	// Make a copy of the first object in the vector to return to the caller
+	dptr<${OBJNAME}> ret(vect->at(0)); vect->erase(vect->begin()); // ret now owns the ${OBJNAME} object
+
+	// If anything else needs to be added to the object like child vectors, calculations, 
+	// or anything like that, do it here
+
+
+	return ret.release(); // Caller must take ownership of this object
+}
+

@@ -1,0 +1,151 @@
+/* ***************************************************************************
+
+   Copyright (c): 2008 - 2015 Hericus Software, LLC.
+
+   License: The MIT License (MIT)
+
+   Authors: Steven M. Cherry
+
+*************************************************************************** */
+
+#include "TheMain.h"
+#include "OdbcObj.h"
+using namespace Helix::Glob;
+
+#include "${CLASSNAME}.h"
+using namespace Helix::Logic::${PACKAGE};
+
+#include "Statics.h"
+#include "Replication.h"
+using namespace Helix::Logic::util;
+
+#include "UpdateMessage.h"
+using namespace Helix::Logic::admin;
+
+#include <Log.h>
+#include <dptr.h>
+#include <File.h>
+#include <EnEx.h>
+#include <AnException.h>
+#include <XmlHelpers.h>
+using namespace SLib;
+
+// Include local data objects here
+#include "${OBJNAME}.h"
+#include "GetOne${OBJNAME}.h"
+
+// This adds us to the global ActionClass Registry:
+ActionClassRegister<${CLASSNAME}> ${CLASSNAME}::reg("${CLASSNAME}", 1, 
+	"/logic/${PACKAGE}/Insert${OBJNAME}",
+	"/logic/${PACKAGE}/${CLASSNAME}"
+);
+
+// Used for auto generating the API on the javascript side:
+// LOGICCODEGEN API=/logic/${PACKAGE}/Insert${OBJNAME} Input=${OBJNAME}
+// LOGICCODEGEN API=/logic/${PACKAGE}/${CLASSNAME} Input=${OBJNAME}
+
+${CLASSNAME}::${CLASSNAME}(xmlNodePtr action)
+{
+	EnEx ee(FL, "${CLASSNAME}::${CLASSNAME}(xmlNodePtr action)");
+	
+}
+
+${CLASSNAME}::${CLASSNAME}(const ${CLASSNAME}& c)
+{
+	EnEx ee(FL, "${CLASSNAME}::${CLASSNAME}(const ${CLASSNAME}& c)");
+
+}
+
+${CLASSNAME}& ${CLASSNAME}::operator=(const ${CLASSNAME}& c)
+{
+	EnEx ee(FL, "${CLASSNAME}::operator=(const ${CLASSNAME}& c)");
+
+	return *this;
+}
+
+${CLASSNAME}::~${CLASSNAME}()
+{
+	EnEx ee(FL, "${CLASSNAME}::~${CLASSNAME}()");
+
+}
+
+void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
+{
+	// The "true" parameter at the end here indicates to the entry/exit timing
+	// mechanism that it should copy this thread's stats to the global collection.
+	// This should not be done everywhere, but is appropriate to do at this point.
+	EnEx ee(FL, "${CLASSNAME}::ExecuteRequest(IOConn& ioc)", true);
+
+	// How were we called?
+	bool doingInsert = false;
+	if(strcmp((const char*)ioc.GetRequestRoot()->name, "Insert${OBJNAME}") == 0){
+		doingInsert = true;
+	}
+
+	// Set up the response document name
+	if(doingInsert){
+		ioc.initializeResponseDocument("Insert${OBJNAME}");
+	} else {
+		ioc.initializeResponseDocument("Update${OBJNAME}");
+	}
+
+	// Pick up the input object from the request document
+	${OBJNAME} local( XmlHelpers::FindChild( ioc.GetRequestRoot(), ${OBJNAME}::Name()() ) );
+
+	ExecuteInLine( ioc, local, doingInsert );
+
+	// Send the updated object back to the caller
+	local.createXmlNode( ioc.getResponseRoot() );
+
+	// If you want to use the GetOne${OBJNAME} version to pull back the full object, then do this:
+	// dptr<${OBJNAME}> ret; ret = GetOne${OBJNAME}::Get${OBJNAME}( ioc, local.Id );
+	// ret->createXmlNode( ioc.getResponseRoot() );
+
+	// Send the response back to the caller and close the connection.
+	ioc.SendReturn();
+	ioc.Close();
+
+	// After we've returned to the client, check to see if we need to
+	// replicate this information to another server
+	Replication::Replicate( ioc, &local );
+}
+
+void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, ${OBJNAME}& local, bool doingInsert)
+{
+	EnEx ee(FL, "${CLASSNAME}::ExecuteInLine(IOConn& ioc, ${OBJNAME}& local, bool doingInsert)");
+
+	// Do any type of input validation here - try to use the sql.xml ValidateFunction generated functions
+	local.Validate();
+
+	// Read from our default database - change this to get data from elsewhere
+	OdbcObj& db = *ioc.getDBConnection();
+
+	// Start a transaction in case we need to handle delete's of multiple records
+	Transaction trans(db); // Transaction will be rolled back when this object goes out of scope
+	Replication::CheckUpdate( ioc, db, local, doingInsert ); // Verify Id exists for update
+
+	twine msg;
+	if(doingInsert){
+		Replication::HandleInsert( db, local ); // Choose between insert and insertWithId for us
+		msg.format("Insert ${OBJNAME} Id(%s) Name (%s)", local.Id(), local.FIXME() );
+
+		// Insert any other records required here
+
+	} else {
+		// First thing to do for updates is to run the optimistic concurrency check
+		Statics::OptimisticConcurrencyCheck( ioc, db, "FIXMETableName", local.Id, local.ModifiedDate );
+
+		${OBJNAME}::update( db, local );
+
+		// Update any other records here
+
+		msg.format("Update ${OBJNAME} Id(%s) Name (%s)", local.Id(), local.FIXME() );
+	}
+
+	// Log the activity - within the transaction
+	UpdateMessage::InsertMessage(ioc, "/logic/${PACKAGE}/${CLASSNAME}", msg );
+
+	// Commit the transaction:
+	trans.CommitAndEnd();
+}
+

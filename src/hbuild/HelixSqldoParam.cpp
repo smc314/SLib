@@ -73,6 +73,47 @@ bool HelixSqldoParam::MatchesType(const HelixSqldoParam& p)
 	return false; // Types don't match
 }
 
+void HelixSqldoParam::TranslateDBTypes()
+{
+	if(type == "uniqueidentifier") type = "guid";
+	if(type == "datetime") type = "Timestamp";
+	if(type == "bit") type = "int";
+	if(type == "char") type = "twine";
+	if(type == "varchar") type = "twine";
+	if(type == "nvarchar") type = "twine";
+}
+
+twine HelixSqldoParam::NormalizeName() const
+{
+	if(name.size() == 0) return ""; // Bail out early
+
+	twine ret( name ); // make a copy to work on
+
+	// Replace Invalid Characters with a space
+	for(size_t i = 0; i < ret.size(); i++) if(isalnum( ret[i] ) == 0) ret[i] = ' ';
+
+	// CamelCase based on spaces
+	for(size_t i = 0; i < ret.size(); i++){
+		if(ret[i] == ' '){
+			ret.erase(i, 1);
+			if(ret.size() >= i){
+				ret.ucase( i );
+			}
+			i--; // adjust the loop counter
+		}
+	}
+
+	// Uppercase the first letter
+	ret.ucase( 0 );
+
+	// If it ends with ID, convert to Id
+	if(ret.endsWith( "ID" )){
+		ret.lcase( ret.size() - 1 );
+	}
+	
+	return ret;
+}
+
 twine HelixSqldoParam::CPPType() const
 {
 	if(type == "int" || type == "autogen") return "intptr_t";

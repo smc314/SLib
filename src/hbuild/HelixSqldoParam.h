@@ -60,6 +60,9 @@ class DLLEXPORT HelixSqldoParam
 		twine JSXmlSet(const twine& app) const;
 		twine JSClone(const twine& app) const;
 
+		twine NormalizeName() const;
+		void TranslateDBTypes();
+
 		twine name;
 		twine type;
 		bool isInput;

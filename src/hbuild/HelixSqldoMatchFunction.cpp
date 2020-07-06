@@ -41,6 +41,10 @@ twine HelixSqldoMatchFunction::GenCPPHeader(const twine& className)
 {
 	EnEx ee(FL, "HelixSqldo::GenCPPHeader(const twine& className)");
 
+	if(fields.size() == 0){
+		return "";
+	}
+
 	return	
 		"\t\t/** This is used to compare instances of " + className + " in a standard way.\n"
 		"\t\t  * This works with FilterDataVector from Statics.h\n"
@@ -54,6 +58,10 @@ twine HelixSqldoMatchFunction::GenCPPHeader(const twine& className)
 twine HelixSqldoMatchFunction::GenCPPBody(const twine& className) 
 {
 	EnEx ee(FL, "HelixSqldo::GenCPPBody(const twine& className)");
+
+	if(fields.size() == 0){
+		return "";
+	}
 
 	twine ret;
 

@@ -1,0 +1,10 @@
+	<SqlStatement methodName="update" target="odbc" methodType="UPDATE">
+		<Comment>updates a single row by PK in the table ${tableName}</Comment>
+		<Sql>
+			update ${tableName} set
+${updateColNames}
+			where ${updateWhereValues}
+		</Sql>
+${updateInputs}
+	</SqlStatement>
+

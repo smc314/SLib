@@ -41,6 +41,10 @@ twine HelixSqldoXlsxFunction::GenCPPHeader(const twine& className)
 {
 	EnEx ee(FL, "HelixSqldo::GenCPPHeader(const twine& className)");
 
+	if(fields.size() == 0){
+		return "";
+	}
+
 	return 
 		"\t\t/** This is used to create Excel documents from vectors of " + className + " in a standard way.\n"
 		"\t\t  * This produces an object that will create Excel xlsx format files.  The caller must take ownership\n"
@@ -54,6 +58,10 @@ twine HelixSqldoXlsxFunction::GenCPPHeader(const twine& className)
 twine HelixSqldoXlsxFunction::GenCPPBody(const twine& className) 
 {
 	EnEx ee(FL, "HelixSqldo::GenCPPBody(const twine& className)");
+
+	if(fields.size() == 0){
+		return "";
+	}
 
 	twine ret;
 

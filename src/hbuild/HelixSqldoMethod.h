@@ -35,6 +35,15 @@ class DLLEXPORT HelixSqldoMethod
 		twine GenCPPBody(const twine& className);
 		twine GenCSBody(const twine& className);
 
+		twine GetValueForName( const twine& logic, const twine& name );
+		bool IsIdGuid(std::map<twine, HelixSqldoParam>& params);
+		bool IsCreatedColumn(const twine& name);
+		twine GenInsertSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params);
+		twine GenInsertWithIdSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params);
+		twine GenUpdateSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params);
+		twine GenDeleteSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params);
+		twine GenSelectSql(const twine& logic, const twine& tableName, std::map<twine, HelixSqldoParam>& params);
+
 		map<twine, twine>& BuildStatementParms(const twine& className);
 		twine FlattenSql();
 		bool HasAutoGen();

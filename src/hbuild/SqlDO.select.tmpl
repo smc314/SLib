@@ -1,0 +1,81 @@
+	<SqlStatement methodName="selectAll" target="odbc" methodType="SELECTTOXML">
+		<Comment>Retrieves all rows from the table ${tableName}</Comment>
+		<Sql>
+			select ${selectColNames}
+			from ${tableName}
+			order by ${tableName}.Id
+		</Sql>
+${selectOutputs}
+	</SqlStatement>
+
+	<SqlStatement methodName="selectById" target="odbc" methodType="SELECTTOXML">
+		<Comment>Retrieves a single row from the table ${tableName} by PK</Comment>
+		<Sql>
+			select ${selectColNames}
+			from ${tableName}
+			where ${tableName}.Id = ?
+		</Sql>
+${selectOutputs}
+		<Input name="Id" type="guid"/>
+	</SqlStatement>
+
+	<SqlStatement methodName="pagingSql_RowNumber" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql>ROW_NUMBER() over (order by ${SortBy}) - 1 as RowNumber</Sql>
+		<Output name="RowNumber" type="int"/>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_InnerColumns" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql>${selectColNames}</Sql>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_FromJoin" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql>from ${tableName}</Sql>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_AdminJoin" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql/>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_NormalJoin" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql/>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_SuperJoin" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql/>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_AdminWhere" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql/>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_NormalWhere" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql/>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_SuperWhere" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql/>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_Filter" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql>
+			${tableName}.Description COLLATE Latin1_General_CI_AS LIKE ${Contains} -- FIXME, Just an example
+	</Sql>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_OuterColumns" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql>RowNumber, ${selectSimpleColNames}
+		</Sql>
+		<Output name="RowNumber" type="int"/>
+${selectOutputs}
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_Extra" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql/>
+	</SqlStatement>
+	<SqlStatement methodName="pagingSql_Count" methodType="SELECTTOXML" target="odbc" outputCol="">
+		<Comment>Part of the paging sql for ${tableName}</Comment>
+		<Sql>select count( distinct ${tableName}.Id )</Sql>
+		<Output name="RowCount" type="int"/>
+	</SqlStatement>
+
