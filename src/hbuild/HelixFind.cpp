@@ -95,6 +95,14 @@ void HelixFind::FindInCPPAndH()
 		FindInLines( file->PhysicalFileName(), file->Lines() );
 	}
 
+	for(auto file : HelixFS::getInstance().FindFilesByType( ".sql" ) ){
+		FindInLines( file->PhysicalFileName(), file->Lines() );
+	}
+
+	for(auto file : HelixFS::getInstance().FindFilesByType( ".db.xml" ) ){
+		FindInLines( file->PhysicalFileName(), file->Lines() );
+	}
+
 }
 
 void HelixFind::FindInSqlDo()
