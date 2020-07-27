@@ -142,10 +142,60 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, ${OBJNAME}& local, bool doingInser
 		msg.format("Update ${OBJNAME} Id(%s) Name (%s)", local.Id(), local.FIXME() );
 	}
 
+	// Handle any child vectors
+	HandleFIXMEs( ioc, local );
+
 	// Log the activity - within the transaction
 	UpdateMessage::InsertMessage(ioc, "/logic/${PACKAGE}/${CLASSNAME}", msg );
 
 	// Commit the transaction:
 	trans.CommitAndEnd();
+}
+
+void ${CLASSNAME}::HandleFIXMEs(IOConn& ioc, ${OBJNAME}& local)
+{
+	EnEx ee(FL, "${CLASSNAME}::HandleFIXMEs(IOConn& ioc, ${OBJNAME}& local)");
+
+	OdbcObj& db = *ioc.getDBConnection();
+
+	// Pull up the existing list of child objects
+	auto existing = FIXMEs::selectAllFor${OBJNAME}( db, local.Id );
+
+	// Walk the input records - if they don't exist - insert, if they do - update
+	for(auto input : *local.FIXMEs){
+		bool found = false;
+		if(input->Id.isZeroGuidOrEmpty() == false){
+			for(auto exist : *existing){
+				if(Statics::IdMatch(exist->Id , input->Id)){
+					found = true;
+					break;
+				}
+			}
+		}
+		if(!found){
+			// Insert a new record
+			input->FIXMEId = local.Id; // copy our id into the record
+			Replication::HandleInsert( db, *input );
+		} else {
+			// Update the existing record
+			input->FIXMEId = local.Id; // Make sure of this
+			FIXME::update( db, *input );
+		}
+	}
+
+	// Do the reverse and walk the existing to compare against the input - delete any not found in input list
+	for(auto exist : *existing){
+		bool found = false;
+		for(auto input : *local.FIXMEs){
+			if(Statics::IdMatch(exist->Id , input->Id)){
+				found = true;
+				break;
+			}
+		}
+		if(!found){
+			// Delete the existing record - user has deleted it
+			FIXME::deleteById( db, exist->Id );
+		}
+	}
 }
 

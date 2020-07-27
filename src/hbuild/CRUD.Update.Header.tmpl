@@ -48,6 +48,9 @@ class DLLEXPORT ${CLASSNAME} : public ActionClass
 
 	private:
 
+		/// Use this to handle updating child objects for the ${OBJNAME} parent
+		void HandleFIXMEs(IOConn& ioc, ${OBJNAME}& local);
+
 		// Registers us with the global factory map:
 		static ActionClassRegister<${CLASSNAME}> reg;
 
