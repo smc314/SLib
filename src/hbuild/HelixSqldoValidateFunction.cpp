@@ -76,7 +76,7 @@ twine HelixSqldoValidateFunction::GenCPPBody(const twine& className)
 					"\t// Validate minimum length\n"
 					"\tif(" + field.name + ".length() < " + field.min + "){\n"
 					"\t\tthrow AnException(EXCEPTION_HANDLED_VALIDATION, FL,\n"
-					"\t\t\t\"" + className + " - " + field.name + " must be longer than " + field.min +
+					"\t\t\t\"" + className + " - " + field.name + " must be at least " + field.min +
 					" characters.\"\n"
 					"\t\t);\n"
 					"\t}\n"
@@ -88,7 +88,7 @@ twine HelixSqldoValidateFunction::GenCPPBody(const twine& className)
 					"\t// Validate maximum length\n"
 					"\tif(" + field.name + ".length() > " + field.max + "){\n"
 					"\t\tthrow AnException(EXCEPTION_HANDLED_VALIDATION, FL,\n"
-					"\t\t\t\"" + className + " - " + field.name + " must be less than " + field.max +
+					"\t\t\t\"" + className + " - " + field.name + " must be no more than " + field.max +
 					" characters.\"\n"
 					"\t\t);\n"
 					"\t}\n"
@@ -101,6 +101,16 @@ twine HelixSqldoValidateFunction::GenCPPBody(const twine& className)
 				"\tif(" + field.name + " == 0){\n"
 				"\t\tthrow AnException(EXCEPTION_HANDLED_VALIDATION, FL,\n"
 				"\t\t\t\"" + className + " - " + field.name + " must not be zero.\"\n"
+				"\t\t);\n"
+				"\t}\n"
+				"\n"
+			);
+		} else if(field.type == "nonzeroid"){
+			ret.append(
+				"\t// Validate nonzero guid field\n"
+				"\tif(" + field.name + ".isZeroGuidOrEmpty() == true){\n"
+				"\t\tthrow AnException(EXCEPTION_HANDLED_VALIDATION, FL,\n"
+				"\t\t\t\"" + className + " - " + field.name + " must not be empty.\"\n"
 				"\t\t);\n"
 				"\t}\n"
 				"\n"
