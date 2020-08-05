@@ -115,6 +115,12 @@ twine HelixSqldoValidateFunction::GenCPPBody(const twine& className)
 				"\t}\n"
 				"\n"
 			);
+		} else if(field.type == "numeric"){
+			ret.append(
+				"\t// Validate numeric twine field\n"
+				"\t" + field.name + " = Statics::VerifyNumeric( " + field.name + " );\n"
+				"\n"
+			);
 		} else if(field.type == "childArray"){
 			ret.append(
 				"\t// Validate child array objects\n"
