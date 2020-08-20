@@ -8,11 +8,25 @@ using namespace Helix::Logic::${shortPackage};
 
 ${shortName} ${shortName}_CreateTestObj1()
 {
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+	OdbcObj& db = *ioc->getDBConnection(); // use this for any lookups required
+
 	${shortName} ret;
 	// Fill out the details of the object here
 
 ${TestPopulateMemberData}
 
+	// If you need to populate child objects you can follow this pattern
+	/*
+	// Add a few children
+	for(size_t i = 0; i < 10; i++){
+		auto c = new FIXMEChildObjectName();
+		c->FIXMEValue = something;
+		ret.FIXMEChildVectorName->push_back( c );
+	}
+	*/
+
+	ret.Validate(); // Make sure everything is good
 	return ret;
 }
 
@@ -23,6 +37,7 @@ ${shortName} ${shortName}_CreateTestObj2()
 
 	// Adjust anything here to make it different
 
+	ret.Validate(); // Make sure everything is good
 	return ret;
 }
 
@@ -33,14 +48,39 @@ ${shortName} ${shortName}_CreateTestObj3()
 
 	// Adjust anything here to make it different
 
+	ret.Validate(); // Make sure everything is good
 	return ret;
 }
 
 void ${shortName}_ModifyObject(${shortName}& obj)
 {
+	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
+	OdbcObj& db = *ioc->getDBConnection(); // use this for any lookups required
+
 	// Make any modifications to the data to prepare for an Update test
 	// e.g:
 	// obj.Description += " - Update";
+
+	// If you have child vectors, you can follow this pattern to test both the
+	// delete of existing children and the insert of new ones
+	/*
+	// Remove some children
+	REQUIRE(obj.FIXMEChildVectorName->size() > 5);
+	for(size_t i = 0; i < 5; i++){
+		delete obj.FIXMEChildVectorName->at( 0 ); // delete the object itself
+		obj.FIXMEChildVectorName->erase( obj.FIXMEChildVectorName->begin() ); // remove the object from the vector
+	}
+
+	// Add a few more children
+	for(size_t i = 0; i < 10; i++){
+		auto c = new FIXMEChildObjectName();
+		c->FIXMEValue = something;
+		obj.FIXMEChildVectorName->push_back( c );
+	}
+	*/
+
+	obj.Validate(); // Make sure everything is good
+
 }
 
 void ${shortName}_CompareWithoutId(${shortName}& obj1, ${shortName}& obj2, bool compareChildren)
@@ -49,7 +89,21 @@ void ${shortName}_CompareWithoutId(${shortName}& obj1, ${shortName}& obj2, bool 
 ${TestRequireCompareWithoutId}
 
 	if(compareChildren){
-		// Compare any child objects here
+		// Compare any child objects here using the following pattern
+		/*
+		REQUIRE(obj1.FIXMEChildVectorName->size() == obj2.FIXMEChildVectorName->size());
+		for(auto c1 : *obj1.FIXMEChildVectorName){
+			FIXMEChildObjectName* c2 = nullptr;
+			for(auto c : *obj2.FIXMEChildVectorName){
+				if(c->FIXMEUniqueId == c1->FIXMEUniqueId){
+					c2 = c;
+					break;
+				}
+			}
+			REQUIRE(c2 != nullptr);
+			REQUIRE(c1->FIXMEOtherFieldToCompare == c2->FIXMEOtherFieldToCompare);
+		}
+		*/
 
 	}
 }

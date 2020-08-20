@@ -39,6 +39,7 @@ HBUILD_OH=hbuild.o HelixFS.o HelixFSFolder.o HelixFSFile.o HelixBuilder.o HelixW
 	HelixSqldoChildVector.o HelixSqldoChildObject.o HelixSqldoSortFunction.o HelixSqldoXlsxFunction.o \
 	HelixSqldoMatchFunction.o \
 	HelixSqldo.o HelixGenTask.o HelixJSApiGenTask.o HelixConfig.o HelixSqldoValidateFunction.o \
+	HelixSqldoMapFunction.o \
 	HelixAutoAsset.o HelixExtractStrings.o HelixJSGenTask.o HelixCountLines.o HelixFind.o
 
 all: $(HBUILD_OH)
