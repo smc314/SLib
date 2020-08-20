@@ -44,4 +44,10 @@
 		<FakeField name="Id" header="Identifier" format="XLSX_STYLE_BACKGROUND_RED"/>
 	</SortFunction>
 
+	<!-- Include this if you need to access any of the fields in this object from a CannedEmail
+		or other situation where you need a std::map<twine, twine> containing all of the fields
+		in this object.
+	-->
+	<MapFunction name="GetMap"/>
+
 </SQLXml>
