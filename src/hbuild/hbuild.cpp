@@ -58,6 +58,7 @@ void handleLines(bool displayBanner = true);
 void handleTestGen(int argIndex);
 void handleSqldoGen(int argIndex);
 void handleCrudGen(int argIndex);
+void handleRepGen(int argIndex);
 void testDep();
 void CopyCore();
 void describe();
@@ -220,6 +221,10 @@ int internalMain (int argc, char** argv)
 					handleCrudGen( (int)i );
 					break; // All the rest of the arguments belong to the test command
 				}
+				else if(targ == "repgen") {
+					handleRepGen( (int)i );
+					break; // All the rest of the arguments belong to the test command
+				}
 				else if(targ == "?") describe();
 				else if(targ == "help") describe();
 				else if(targ == "-?") describe();
@@ -311,6 +316,9 @@ void describe()
 	printf("             logic=... - specifies which logic folder to use\n");
 	printf("             do=... - specifies which server Data Object to generate\n");
 	printf("             page=true/false - specifies whether paging is generated (true by default)\n");
+	printf("== repgen -  creates a set of Bulk Replication files with the following options\n");
+	printf("             logic=... - specifies which logic folder to use\n");
+	printf("             do=... - specifies which server Data Object to generate\n");
 	printf("\n");
 	printf("== If no target is specified, the 'all' target is invoked.\n");
 	printf("\n");
@@ -582,6 +590,55 @@ void handleCrudGen(int argIndex )
 		fileName = File::PathCombine( path, fileName );
 		File::writeToFile( fileName, sqldo.GenCRUDGetPagedBody( logic, forDO ) );
 	}
+}
+
+void handleRepGen(int argIndex )
+{
+	printf("============================================================================\n");
+	printf("== Replication Generation Target - Build\n");
+	printf("============================================================================\n");
+
+	twine logic; // Picks up argument: logic=ttvx 
+	twine forDO; // Picks up argument do=ITOStatus
+	
+	for(size_t i = argIndex; i < m_targets.size(); i++){
+		auto splits = m_targets[i].split("=");
+		if(splits[0] == "logic"){
+			logic = splits[1];
+		} else if(splits[0] == "do"){
+			forDO = splits[1];
+		}
+	}
+
+	if(logic.empty()){
+		throw AnException(0, FL, "logic=... parameter required for repgen option");
+	}
+	if(forDO.empty()){
+		throw AnException(0, FL, "do=... parameter required for repgen option");
+	}
+
+	printf("Generating Bulk Replication for %s::%s in logic/rep\n", logic(), forDO() );
+
+	HelixSqldo sqldo;
+	twine fileName; 
+	twine path( "logic/rep" );
+
+	fileName.format("BulkReplicateSend%s.h", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::EnsurePath( fileName ); // Only need to do this once
+	File::writeToFile( fileName, sqldo.GenRepSendHeader( logic, forDO ) );
+
+	fileName.format("BulkReplicateSend%s.cpp", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenRepSendBody( logic, forDO ) );
+
+	fileName.format("BulkReplicateRecv%s.h", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenRepRecvHeader( logic, forDO ) );
+
+	fileName.format("BulkReplicateRecv%s.cpp", forDO() );
+	fileName = File::PathCombine( path, fileName );
+	File::writeToFile( fileName, sqldo.GenRepRecvBody( logic, forDO ) );
 }
 
 void handleSqldoGen(int argIndex)

@@ -105,6 +105,11 @@ class DLLEXPORT HelixSqldo
 		twine GenCRUDUpdateHeader( const twine& logic, const twine& objName );
 		twine GenCRUDUpdateBody( const twine& logic, const twine& objName );
 
+		twine GenRepSendHeader( const twine& logic, const twine& objName );
+		twine GenRepSendBody( const twine& logic, const twine& objName );
+		twine GenRepRecvHeader( const twine& logic, const twine& objName );
+		twine GenRepRecvBody( const twine& logic, const twine& objName );
+
 		static twine loadTmpl( const twine& tmplName, map<twine, twine>& vars );
 		static twine replaceVars( const twine& tmplName, size_t lineIdx, twine line, map<twine, twine>& vars );
 

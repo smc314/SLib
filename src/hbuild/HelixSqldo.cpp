@@ -718,6 +718,46 @@ twine HelixSqldo::GenCRUDUpdateBody(const twine& logic, const twine& objName)
 	return loadTmpl( "CRUD.Update.Body.tmpl", parms );
 }
 
+twine HelixSqldo::GenRepSendHeader( const twine& logic, const twine& objName )
+{
+	map< twine, twine > parms;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "BulkReplicateSend" + objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "BulkReplicate.Send.Header.tmpl", parms );
+}
+
+twine HelixSqldo::GenRepSendBody( const twine& logic, const twine& objName )
+{
+	map< twine, twine > parms;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "BulkReplicateSend" + objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "BulkReplicate.Send.Body.tmpl", parms );
+}
+
+twine HelixSqldo::GenRepRecvHeader( const twine& logic, const twine& objName )
+{
+	map< twine, twine > parms;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "BulkReplicateRecv" + objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "BulkReplicate.Recv.Header.tmpl", parms );
+}
+
+twine HelixSqldo::GenRepRecvBody( const twine& logic, const twine& objName )
+{
+	map< twine, twine > parms;
+	parms[ "OBJNAME" ] = objName;
+	parms[ "CLASSNAME" ] = "BulkReplicateRecv" + objName;
+	parms[ "PACKAGE" ] = logic;
+
+	return loadTmpl( "BulkReplicate.Recv.Body.tmpl", parms );
+}
+
 twine HelixSqldo::loadTmpl(const twine& tmplName, map<twine, twine>& vars)
 {
 	if(!File::Exists("../../../3rdParty/bin/" + tmplName)){
