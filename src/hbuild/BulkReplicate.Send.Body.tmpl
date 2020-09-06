@@ -114,10 +114,11 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 			// Clear out the Xml Document - create a new one
 			req = Replication::StartDoc("BulkReplicateRecv${OBJNAME}");
 			root = xmlDocGetRootElement( req );
+			count = 0;
 		}
 	}
 
-	if(errorCount <= 10){
+	if(count > 0 && errorCount <= 10){
 		// Send any last items to SSP
 		try {
 			Replication::PushToSSP( ssp, "/logic/rep/BulkReplicateRecv${OBJNAME}", req );
