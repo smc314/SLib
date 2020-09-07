@@ -8,6 +8,17 @@
 ${selectOutputs}
 	</SqlStatement>
 
+	<SqlStatement methodName="selectAllRecentlyChanged" target="odbc" methodType="SELECTTOXML">
+		<Comment>Retrieves all rows from the table ${tableName} that have changed recently</Comment>
+		<Sql>
+			select Id
+			from ${tableName}
+			where ModifiedDate &gt; ?
+		</Sql>
+		<Output name="Id" type="guid"/>
+		<Input name="TargetDate" type="Timestamp"/>
+	</SqlStatement>
+
 	<SqlStatement methodName="selectById" target="odbc" methodType="SELECTTOXML">
 		<Comment>Retrieves a single row from the table ${tableName} by PK</Comment>
 		<Sql>

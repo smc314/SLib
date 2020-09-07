@@ -44,7 +44,7 @@ class DLLEXPORT ${CLASSNAME} : public ActionClass
 		virtual void ExecuteRequest(IOConn& ioc);
 
 		/// This method allows local callers to access our functionality directly
-		virtual void ExecuteInLine(IOConn& ioc, SSPApi* ssp);
+		virtual void ExecuteInLine(IOConn& ioc, SSPApi* ssp, bool recentlyChangedOnly, int batchSize);
 
 	private:
 

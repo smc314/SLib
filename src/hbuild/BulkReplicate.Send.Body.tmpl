@@ -36,10 +36,14 @@ using namespace SLib;
 using namespace Helix::Logic::${PACKAGE};
 
 // This adds us to the global ActionClass Registry:
-ActionClassRegister<${CLASSNAME}> ${CLASSNAME}::reg("${CLASSNAME}", 1, "/logic/rep/${CLASSNAME}");
+ActionClassRegister<${CLASSNAME}> ${CLASSNAME}::reg("${CLASSNAME}", 1, 
+	"/logic/rep/${CLASSNAME}",
+	"/logic/rep/${CLASSNAME}Recent"
+);
 
 // Used for auto generating the API on the javascript side:
 // LOGICCODEGEN API=/logic/rep/${CLASSNAME} Input=NULL
+// LOGICCODEGEN API=/logic/rep/${CLASSNAME}Recent Input=NULL
 
 ${CLASSNAME}::${CLASSNAME}(xmlNodePtr action)
 {
@@ -73,18 +77,28 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 	// This should not be done everywhere, but is appropriate to do at this point.
 	EnEx ee(FL, "${CLASSNAME}::ExecuteRequest(IOConn& ioc)", true);
 
+	// How were we called?
+	bool doingRecent = false;
+	if(strcmp((const char*)ioc.GetRequestRoot()->name, "${CLASSNAME}Recent") == 0){
+		doingRecent = true;
+	}
+
 	// Set up the response document name
-	ioc.initializeResponseDocument("${CLASSNAME}");
+	if(doingRecent){
+		ioc.initializeResponseDocument("${CLASSNAME}Recent");
+	} else {
+		ioc.initializeResponseDocument("${CLASSNAME}");
+	}
 
 	SSPApi ssp;
-	ExecuteInLine( ioc, &ssp );
+	ExecuteInLine( ioc, &ssp, doingRecent, 500 );
 
 	// Send the response back to the caller and close the connection.
 	ioc.SendReturn();
 	ioc.Close();
 }
 
-void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp)
+void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp, bool recentlyChangedOnly, int batchSize)
 {
 	EnEx ee(FL, "${CLASSNAME}::ExecuteInLine(IOConn& ioc)");
 
@@ -101,7 +115,13 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp)
 
 	// Read from our default database - change this to get data from elsewhere
 	OdbcObj& db = *ioc.getDBConnection();
-	auto summary_vect = ${OBJNAME}::selectAll( db );
+	${OBJNAME}_svect summary_vect;
+	if(recentlyChangedOnly){
+		Date yesterday; yesterday.AddDay( -1 );
+		summary_vect = ${OBJNAME}::selectAllRecentlyChanged( db, yesterday );
+	} else {
+		summary_vect = ${OBJNAME}::selectAll( db );
+	}
 
 	Timer t;
 	int total = 0;
@@ -113,7 +133,7 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp)
 		fullObj->createXmlNode( root );
 		count ++;
 		total ++;
-		if(count == 100){ // Send 100 objects in each batch
+		if(count == batchSize){ // Send out the batch
 			try {
 				Replication::PushToSSP( *ssp, "/logic/rep/BulkReplicateRecv${OBJNAME}", req );
 			} catch (AnException&){
