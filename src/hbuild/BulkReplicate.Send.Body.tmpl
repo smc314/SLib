@@ -104,6 +104,7 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc)
 	auto summary_vect = ${OBJNAME}::selectAll( db );
 
 	Timer t;
+	int total = 0;
 	int count = 0;
 	int errorCount = 0;
 	t.Start();
@@ -111,6 +112,7 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc)
 		dptr<${OBJNAME}> fullObj( GetOne${OBJNAME}::Get${OBJNAME}( ioc, o->Id ) );
 		fullObj->createXmlNode( root );
 		count ++;
+		total ++;
 		if(count == 100){ // Send 100 objects in each batch
 			try {
 				Replication::PushToSSP( ssp, "/logic/rep/BulkReplicateRecv${OBJNAME}", req );
@@ -138,7 +140,7 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc)
 	}
 
 	t.Finish();
-	twine msg; msg.format("${CLASSNAME} - Pushed %d Records in %f seconds.", count, t.Duration() );
+	twine msg; msg.format("${CLASSNAME} - Pushed %d Records in %f seconds.", total, t.Duration() );
 	UpdateMessage::InsertMessage(db, "/logic/rep/${CLASSNAME}", msg );
 }
 
