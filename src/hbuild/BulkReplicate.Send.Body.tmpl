@@ -76,14 +76,15 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 	// Set up the response document name
 	ioc.initializeResponseDocument("${CLASSNAME}");
 
-	ExecuteInLine( ioc );
+	SSPApi ssp;
+	ExecuteInLine( ioc, &ssp );
 
 	// Send the response back to the caller and close the connection.
 	ioc.SendReturn();
 	ioc.Close();
 }
 
-void ${CLASSNAME}::ExecuteInLine(IOConn& ioc)
+void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp)
 {
 	EnEx ee(FL, "${CLASSNAME}::ExecuteInLine(IOConn& ioc)");
 
@@ -93,7 +94,6 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc)
 		ioc.Close();
 		return;
 	}
-	SSPApi ssp;
 
 	// Set up the xml request document manually by using the replication helper methods
 	sptr<xmlDoc, xmlFreeDoc> req( Replication::StartDoc("BulkReplicateRecv${OBJNAME}") );
@@ -115,7 +115,7 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc)
 		total ++;
 		if(count == 100){ // Send 100 objects in each batch
 			try {
-				Replication::PushToSSP( ssp, "/logic/rep/BulkReplicateRecv${OBJNAME}", req );
+				Replication::PushToSSP( *ssp, "/logic/rep/BulkReplicateRecv${OBJNAME}", req );
 			} catch (AnException&){
 				errorCount ++;
 				if(errorCount > 10){
@@ -134,7 +134,7 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc)
 	if(count > 0 && errorCount <= 10){
 		// Send any last items to SSP
 		try {
-			Replication::PushToSSP( ssp, "/logic/rep/BulkReplicateRecv${OBJNAME}", req );
+			Replication::PushToSSP( *ssp, "/logic/rep/BulkReplicateRecv${OBJNAME}", req );
 		} catch (AnException&){
 		}
 	}

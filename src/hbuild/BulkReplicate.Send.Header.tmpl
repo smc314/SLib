@@ -18,6 +18,9 @@ using namespace SLib;
 #include "ActionClass.h"
 using namespace Helix::Glob;
 
+#include "Replication.h"
+using namespace Helix::Logic::util;
+
 namespace Helix {
 namespace Logic {
 namespace rep {
@@ -41,7 +44,7 @@ class DLLEXPORT ${CLASSNAME} : public ActionClass
 		virtual void ExecuteRequest(IOConn& ioc);
 
 		/// This method allows local callers to access our functionality directly
-		virtual void ExecuteInLine(IOConn& ioc);
+		virtual void ExecuteInLine(IOConn& ioc, SSPApi* ssp);
 
 	private:
 
