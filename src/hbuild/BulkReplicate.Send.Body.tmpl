@@ -76,6 +76,17 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 	// Set up the response document name
 	ioc.initializeResponseDocument("${CLASSNAME}");
 
+	ExecuteInLine( ioc );
+
+	// Send the response back to the caller and close the connection.
+	ioc.SendReturn();
+	ioc.Close();
+}
+
+void ${CLASSNAME}::ExecuteInLine(IOConn& ioc)
+{
+	EnEx ee(FL, "${CLASSNAME}::ExecuteInLine(IOConn& ioc)");
+
 	if(!Replication::AreWeInternalAirTime()){
 		// We're not interal AirTime
 		ioc.SendReturn();
@@ -129,9 +140,5 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 	t.Finish();
 	twine msg; msg.format("${CLASSNAME} - Pushed %d Records in %f seconds.", count, t.Duration() );
 	UpdateMessage::InsertMessage(db, "/logic/rep/${CLASSNAME}", msg );
-
-	// Send the response back to the caller and close the connection.
-	ioc.SendReturn();
-	ioc.Close();
 }
 

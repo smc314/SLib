@@ -40,6 +40,9 @@ class DLLEXPORT ${CLASSNAME} : public ActionClass
 		/// We implement the ExecuteRequest method
 		virtual void ExecuteRequest(IOConn& ioc);
 
+		/// This method allows local callers to access our functionality directly
+		virtual void ExecuteInLine(IOConn& ioc);
+
 	private:
 
 		// Registers us with the global factory map:
