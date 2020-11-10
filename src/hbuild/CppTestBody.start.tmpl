@@ -25,9 +25,9 @@ TEST_CASE( "${shortName}_Setup", "[Logic_${shortPackage}][${shortName}][${shortN
 		auto v = ${shortName}::selectAll( db );
 		if(v->size() == 0){
 			// Create some values
-			${shortName}::insert( db, ${shortName}_CreateTestObj1() );
-			${shortName}::insert( db, ${shortName}_CreateTestObj2() );
-			${shortName}::insert( db, ${shortName}_CreateTestObj3() );
+			${shortName} val1 = ${shortName}_CreateTestObj1(); ${shortName}::insert( db, val1 );
+			${shortName} val2 = ${shortName}_CreateTestObj1(); ${shortName}::insert( db, val2 );
+			${shortName} val3 = ${shortName}_CreateTestObj1(); ${shortName}::insert( db, val3 );
 		}
 
 		// Check it again:

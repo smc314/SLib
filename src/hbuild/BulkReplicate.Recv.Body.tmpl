@@ -77,8 +77,12 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 	// Pick up the input objects from the request document
 	auto v = ${OBJNAME}::readXmlChildren( ioc.GetRequestRoot() );
 	for(auto o : *v){
-		Update${OBJNAME} updater( nullptr ); // xmlNodePtr passed in is not used
-		updater.ExecuteInLine( ioc, *o, false );
+		try {
+			Update${OBJNAME} updater( nullptr ); // xmlNodePtr passed in is not used
+			updater.ExecuteInLine( ioc, *o, false );
+		} catch (AnException& e){
+			WARN(FL, "Bulk Replication Error: %s", e.Msg() );
+		}
 	}
 
 	// Send the response back to the caller and close the connection.

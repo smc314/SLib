@@ -90,10 +90,9 @@ TEST_CASE( "${shortName}_Api_GetAll", "[Logic_${shortPackage}][${shortName}][${s
 {
 	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
 
-	OdbcObj& db = *ioc->getDBConnection();
 	try {
 		// Pull up the list of data objects
-		xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetAll${shortName}", "/logic/${shortPackage}/GetAll${shortName}" );
+		TestStatics::ResetRequest( ioc, "GetAll${shortName}", "/logic/${shortPackage}/GetAll${shortName}" );
 		GetAll${shortName} getAllApi( nullptr );
 		getAllApi.ExecuteRequest( *ioc );
 
@@ -113,7 +112,6 @@ TEST_CASE( "${shortName}_Api_GetOne", "[Logic_${shortPackage}][${shortName}][${s
 {
 	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
 
-	OdbcObj& db = *ioc->getDBConnection();
 	try {
 		// Pull up the list of data objects
 		xmlNodePtr root = TestStatics::ResetRequest( ioc, "GetAll${shortName}", "/logic/${shortPackage}/GetAll${shortName}" );
@@ -148,7 +146,6 @@ TEST_CASE( "${shortName}_Api_CRUD", "[Logic_${shortPackage}][${shortName}][${sho
 {
 	dptr<IOConn> ioc( TestStatics::GetNormalConn() );
 
-	OdbcObj& db = *ioc->getDBConnection();
 	try {
 		${shortName} test1( ${shortName}_CreateTestObj1() );
 

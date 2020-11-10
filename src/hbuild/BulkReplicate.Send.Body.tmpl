@@ -15,6 +15,9 @@ using namespace Helix::Glob;
 #include "${CLASSNAME}.h"
 using namespace Helix::Logic::rep;
 
+#include "ATStatics.h"
+using namespace Helix::Logic::atshared;
+
 #include "Statics.h"
 #include "Replication.h"
 using namespace Helix::Logic::util;
@@ -37,13 +40,11 @@ using namespace Helix::Logic::${PACKAGE};
 
 // This adds us to the global ActionClass Registry:
 ActionClassRegister<${CLASSNAME}> ${CLASSNAME}::reg("${CLASSNAME}", 1, 
-	"/logic/rep/${CLASSNAME}",
-	"/logic/rep/${CLASSNAME}Recent"
+	"/logic/rep/${CLASSNAME}"
 );
 
 // Used for auto generating the API on the javascript side:
 // LOGICCODEGEN API=/logic/rep/${CLASSNAME} Input=NULL
-// LOGICCODEGEN API=/logic/rep/${CLASSNAME}Recent Input=NULL
 
 ${CLASSNAME}::${CLASSNAME}(xmlNodePtr action)
 {
@@ -77,30 +78,19 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 	// This should not be done everywhere, but is appropriate to do at this point.
 	EnEx ee(FL, "${CLASSNAME}::ExecuteRequest(IOConn& ioc)", true);
 
-	// How were we called?
-	bool doingRecent = false;
-	if(strcmp((const char*)ioc.GetRequestRoot()->name, "${CLASSNAME}Recent") == 0){
-		doingRecent = true;
-	}
-
-	// Set up the response document name
-	if(doingRecent){
-		ioc.initializeResponseDocument("${CLASSNAME}Recent");
-	} else {
-		ioc.initializeResponseDocument("${CLASSNAME}");
-	}
+	ioc.initializeResponseDocument("${CLASSNAME}");
 
 	SSPApi ssp;
-	ExecuteInLine( ioc, &ssp, doingRecent, 500 );
+	ExecuteInLine( ioc, &ssp );
 
 	// Send the response back to the caller and close the connection.
 	ioc.SendReturn();
 	ioc.Close();
 }
 
-void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp, bool recentlyChangedOnly, int batchSize)
+void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp, int batchSize)
 {
-	EnEx ee(FL, "${CLASSNAME}::ExecuteInLine(IOConn& ioc)");
+	EnEx ee(FL, "${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp, int batchSize)");
 
 	if(!Replication::AreWeInternalAirTime()){
 		// We're not interal AirTime
@@ -109,19 +99,41 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp, bool recentlyChangedO
 		return;
 	}
 
-	// Set up the xml request document manually by using the replication helper methods
-	sptr<xmlDoc, xmlFreeDoc> req( Replication::StartDoc("BulkReplicateRecv${OBJNAME}") );
-	auto root = xmlDocGetRootElement( req );
-
 	// Read from our default database - change this to get data from elsewhere
 	OdbcObj& db = *ioc.getDBConnection();
-	${OBJNAME}_svect summary_vect;
-	if(recentlyChangedOnly){
-		Date yesterday; yesterday.AddDay( -1 );
-		summary_vect = ${OBJNAME}::selectAllRecentlyChanged( db, yesterday );
-	} else {
-		summary_vect = ${OBJNAME}::selectAll( db );
+
+	// Reach out to sSP to get a list of existing Id's that are on the SSP side
+	sptr<xmlDoc, xmlFreeDoc> idReq = Replication::StartDoc( "BulkReplicateGetExistingIds" );
+	auto root = xmlDocGetRootElement( idReq );
+	RepUtils ru; ru.TargetObject = "${OBJNAME}";
+	ru.createXmlNode( root );
+	xmlDocPtr idResp = ssp->SendMsg( "/logic/rep/BulkReplicateGetExistingIds", idReq );
+	auto ssp_idv = RepUtils::readXmlChildren( xmlDocGetRootElement( idResp ) );
+	twine sql( "select Id from ${OBJNAME}s" );
+	auto local_idv = RepUtils::selectIdList( db, sql, false, false );
+
+	// Figure out which Id's we have locally that are not yet out in SSP
+	auto mv = ATStatics::FindMissing( local_idv.get(), ssp_idv.get() );
+	${OBJNAME}_svect summary_vect( new vector<${OBJNAME}*>() );
+	for(auto m: *mv){
+		${OBJNAME}* missing = new ${OBJNAME}();
+		missing->Id = m->Id;
+		summary_vect->push_back( missing );
 	}
+
+	// Pull up everything locally that has changed recently
+	Date yesterday; yesterday.AddDay( -1 );
+	auto cv = ${OBJNAME}::selectAllRecentlyChanged( db, yesterday );
+
+	// Move them over to the summary vector
+	while(cv->size() != 0){
+		summary_vect->push_back( cv->at(0) );
+		cv->erase( cv->begin() );
+	}
+
+	// Set up the xml request document manually by using the replication helper methods
+	sptr<xmlDoc, xmlFreeDoc> req( Replication::StartDoc("BulkReplicateRecv${OBJNAME}") );
+	root = xmlDocGetRootElement( req );
 
 	Timer t;
 	int total = 0;
@@ -160,7 +172,6 @@ void ${CLASSNAME}::ExecuteInLine(IOConn& ioc, SSPApi* ssp, bool recentlyChangedO
 	}
 
 	t.Finish();
-	twine msg; msg.format("${CLASSNAME} - Pushed %d Records in %f seconds.", total, t.Duration() );
-	UpdateMessage::InsertMessage(db, "/logic/rep/${CLASSNAME}", msg );
+	WARN(FL, "${CLASSNAME} - Pushed %d Records in %f seconds.", total, t.Duration() );
 }
 
