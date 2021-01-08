@@ -62,6 +62,7 @@ class DLLEXPORT HelixLinkTask
 		twine LinkMain( const twine& bin, const twine& outLib);
 		twine ObjList( const twine& folder );
 		twine BinLib( const twine& bin, const twine& libName);
+		twine AddApache( const twine& tpl );
 
 		static twine ObjExt();
 		static twine LibExt();

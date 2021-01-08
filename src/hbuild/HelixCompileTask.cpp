@@ -97,6 +97,13 @@ twine HelixCompileTask::GetCommandLine()
 		cmd.append(CC(tpl4) + 
 			"-I../logic/util -I../logic/util/sqldo -I ../logic/admin -I ../logic/admin/sqldo "
 		);
+		if(m_file->FileName().startsWith( "Apache" )){
+#ifdef _WIN32
+			cmd.append( "-DSHARED_MODULE -I" + tpl4 + "/Apache24/include " );
+#else
+			return ""; // Skip this one on linux for now
+#endif
+		}
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName() == "server"){
 #ifdef _WIN32

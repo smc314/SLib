@@ -79,6 +79,13 @@ twine HelixLinkTask::GetCommandLine()
 	} else if(m_folder->FolderName() == "logic/admin"){
 		// Nothing to do - logic/admin gets linked into helix glob.
 	} else if(m_folder->FolderName() == "glob"){
+		bool globHasApache = false;
+		auto globFiles = m_folder->Files();
+		for(auto globFile : globFiles){
+			if(globFile->FileName().startsWith( "Apache" )){
+				globHasApache = true;
+			}
+		}
 		twine tp( "../../../../3rdParty/" );
 		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && " +
 			Link("../bin/", "libhelix.glob") +
@@ -86,6 +93,10 @@ twine HelixLinkTask::GetCommandLine()
 			ObjList( "../logic/util/" ) + ObjList( "../logic/util/sqldo/" ) +
 			ObjList( "../logic/admin/" ) + ObjList( "../logic/admin/sqldo/" ) +
 			LinkLibs1( tp );
+
+		if(globHasApache){
+			cmd += AddApache( tp );
+		}
 
 	} else if(m_folder->FolderName() == "server"){
 		// Nothing to do
@@ -420,6 +431,59 @@ twine HelixLinkTask::LinkLibs4( const twine& tpl )
 	// 64-bit linux
 	// ///////////////////////////////////////////////////////////////////////////////
 	return LinkLibs1( tpl );
+
+#else
+	throw AnException(0, FL, "Unknown link environment.");
+#endif
+
+}
+
+twine HelixLinkTask::AddApache( const twine& tpl )
+{
+#ifdef _WIN32
+#	ifdef _X86_
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 32-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	throw AnException(0, FL, "Linking on 32-bit Windows not yet supported");
+
+#	else
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit windows
+	// ///////////////////////////////////////////////////////////////////////////////
+	twine win3pl = FixPhysical( tpl );
+	return " " + 
+		win3pl + "Apache24\\lib\\libhttpd.lib " +
+		win3pl + "Apache24\\lib\\libapr-1.lib " +
+		win3pl + "Apache24\\lib\\libaprutil-1.lib "
+	;
+
+#	endif
+#elif __APPLE__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit mac
+	// ///////////////////////////////////////////////////////////////////////////////
+	return " ";
+	/* Not ready on mac yet
+	+ 
+		tpl + "Apache24/lib/libhttpd.so " +
+		tpl + "Apache24/lib/libapr-1.so " +
+		tpl + "Apache24/lib/libaprutil-1.so " 
+	;
+	*/
+
+#elif __linux__
+	// ///////////////////////////////////////////////////////////////////////////////
+	// 64-bit linux
+	// ///////////////////////////////////////////////////////////////////////////////
+	return " ";
+	/* Not ready on linux yet
+	 + 
+		tpl + "Apache24/lib/libhttpd.so " +
+		tpl + "Apache24/lib/libapr-1.so " +
+		tpl + "Apache24/lib/libaprutil-1.so " 
+	;
+	*/
 
 #else
 	throw AnException(0, FL, "Unknown link environment.");

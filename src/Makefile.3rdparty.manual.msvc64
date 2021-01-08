@@ -140,6 +140,11 @@ qx:
 	$(CURL) http://www.helixsdk.org/qooxdoo-5.0.1-sdk.zip
 	$(UNZIP) -q qooxdoo-5.0.1-sdk.zip
 
+apache:
+	rm -rf Apache24
+	$(CURL) http://www.helixsdk.org/HelixApache24Win64.zip
+	$(UNZIP) -q HelixApache24Win64.zip
+
 
 
 
