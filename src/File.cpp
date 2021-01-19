@@ -622,6 +622,63 @@ twine File::PathCombine(const twine& prefix, const twine& suffix)
 	return ret;
 }
 
+twine File::NormalizePath( const twine& path )
+{
+	EnEx ee("File::NormalizePath(const twine& path)");
+
+	// We parse up the path to be able to manipulate it and put it back together
+	//printf("NormalizePath: input path --%s--\n", path() );
+	vector<twine> segments = path.tokenize( "/\\" ); // Split up on forward and back slash
+	//for(auto& seg : segments) printf("NormalizePath: segment --%s--\n", seg() );
+
+	twine startingPath;
+
+	// What kind of path prefix did we have?
+	if(path.length() >= 2 && path[0] == '/' && path[1] != '/' ) { // Unix style absolute path
+		startingPath = "/";
+	} else if( path.length() >= 2 && path[1] == ':' ){ // Windows style absolute path
+		startingPath = segments[0];
+		segments.erase( segments.begin() ); // remove the first segment - it's in startingPath
+	} else if( path.length() >= 2 && path[0] == '\\' && path[1] == '\\'){ // Windows style network path
+		startingPath = "//";
+	} else if( path.length() >= 2 && path[0] == '/' && path[1] == '/'){ // Windows style network path
+		startingPath = "//";
+	} else {
+		startingPath = ".";
+	}
+	//printf("NormalizePath: startingPath --%s--\n", startingPath() );
+
+	size_t limit = segments.size();
+
+	// Walk all of the segments to remove any empty parts, and handle any ../ portions
+	for(int i = 0; i < limit; i++){
+		if(segments[i].length() == 0 || segments[i] == "."){
+			segments.erase( segments.begin() + i ); // remove these
+			i -= 1;
+			continue;
+		}
+
+		if(segments[i] == ".."){
+			if(i == 0){ // We're at the beginning of the path - can go backwards from here
+				throw AnException(0, FL, "Invalid path: %s", path() );
+			}
+			segments.erase( segments.begin() + i ); // erase the ..			
+			segments.erase( segments.begin() + i - 1); // erase the one before it
+			i -= 2; // adjust the loop pointer
+			continue;
+		}
+	}
+
+	// Now combine all of the segments together with the starting path
+	for(auto& seg : segments) {
+		startingPath = PathCombine( startingPath, seg );
+		//printf("NormalizePath: added seg: --%s-- for new startingPath --%s--\n", seg(), startingPath() );
+	}
+
+	// Return the full path
+	return startingPath;
+}
+
 twine File::Pwd()
 {
 	EnEx ee("File::Pwd()");
