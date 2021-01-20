@@ -628,6 +628,7 @@ twine File::NormalizePath( const twine& path )
 
 	// We parse up the path to be able to manipulate it and put it back together
 	DEBUG(FL, "NormalizePath: input path --%s--", path() );
+	//printf("NormalizePath: input path --%s--\n", path() );
 
 	vector<twine> segments = path.tokenize( "/\\" ); // Split up on forward and back slash
 	//for(auto& seg : segments) printf("NormalizePath: segment --%s--\n", seg() );
@@ -649,10 +650,8 @@ twine File::NormalizePath( const twine& path )
 	}
 	//printf("NormalizePath: startingPath --%s--\n", startingPath() );
 
-	size_t limit = segments.size();
-
 	// Walk all of the segments to remove any empty parts, and handle any ../ portions
-	for(int i = 0; i < limit; i++){
+	for(int i = 0; i < segments.size(); i++){
 		if(segments[i].length() == 0 || segments[i] == "."){
 			segments.erase( segments.begin() + i ); // remove these
 			i -= 1;
