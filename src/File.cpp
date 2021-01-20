@@ -627,7 +627,8 @@ twine File::NormalizePath( const twine& path )
 	EnEx ee("File::NormalizePath(const twine& path)");
 
 	// We parse up the path to be able to manipulate it and put it back together
-	//printf("NormalizePath: input path --%s--\n", path() );
+	DEBUG(FL, "NormalizePath: input path --%s--", path() );
+
 	vector<twine> segments = path.tokenize( "/\\" ); // Split up on forward and back slash
 	//for(auto& seg : segments) printf("NormalizePath: segment --%s--\n", seg() );
 
