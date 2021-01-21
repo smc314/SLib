@@ -84,6 +84,7 @@ twine HelixLinkTask::GetCommandLine()
 		for(auto globFile : globFiles){
 			if(globFile->FileName().startsWith( "Apache" )){
 				globHasApache = true;
+				break;
 			}
 		}
 		twine tp( "../../../../3rdParty/" );
@@ -440,55 +441,15 @@ twine HelixLinkTask::LinkLibs4( const twine& tpl )
 
 twine HelixLinkTask::AddApache( const twine& tpl )
 {
-#ifdef _WIN32
-#	ifdef _X86_
-	// ///////////////////////////////////////////////////////////////////////////////
-	// 32-bit windows
-	// ///////////////////////////////////////////////////////////////////////////////
-	throw AnException(0, FL, "Linking on 32-bit Windows not yet supported");
+	twine apacheLib;
+	auto libs = HelixConfig::getInstance().ApacheLibs();
+	if(libs.size() == 0) return apacheLib; // empty
 
-#	else
-	// ///////////////////////////////////////////////////////////////////////////////
-	// 64-bit windows
-	// ///////////////////////////////////////////////////////////////////////////////
-	twine win3pl = FixPhysical( tpl );
-	return " " + 
-		win3pl + "Apache24\\lib\\libhttpd.lib " +
-		win3pl + "Apache24\\lib\\libapr-1.lib " +
-		win3pl + "Apache24\\lib\\libaprutil-1.lib "
-	;
+	for(auto& lib : libs){
+		apacheLib.append( lib + " " );
+	}
 
-#	endif
-#elif __APPLE__
-	// ///////////////////////////////////////////////////////////////////////////////
-	// 64-bit mac
-	// ///////////////////////////////////////////////////////////////////////////////
-	return " ";
-	/* Not ready on mac yet
-	+ 
-		tpl + "Apache24/lib/libhttpd.so " +
-		tpl + "Apache24/lib/libapr-1.so " +
-		tpl + "Apache24/lib/libaprutil-1.so " 
-	;
-	*/
-
-#elif __linux__
-	// ///////////////////////////////////////////////////////////////////////////////
-	// 64-bit linux
-	// ///////////////////////////////////////////////////////////////////////////////
-	return " ";
-	/* Not ready on linux yet
-	 + 
-		tpl + "Apache24/lib/libhttpd.so " +
-		tpl + "Apache24/lib/libapr-1.so " +
-		tpl + "Apache24/lib/libaprutil-1.so " 
-	;
-	*/
-
-#else
-	throw AnException(0, FL, "Unknown link environment.");
-#endif
-
+	return apacheLib;
 }
 
 twine HelixLinkTask::LinkLibs5()

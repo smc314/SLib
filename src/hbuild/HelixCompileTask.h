@@ -58,6 +58,7 @@ class DLLEXPORT HelixCompileTask
 		twine CC(const twine& tpl);
 		twine LogicIncludes(const twine& logicName, bool fromSqldo = false);
 		twine DependentInclude(const twine& ourLogic, const twine& depLogic, bool fromSqldo = false);
+		twine AddApache();
 
 		HelixFSFolder* m_folder;
 		HelixFSFile* m_file;

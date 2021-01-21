@@ -169,3 +169,58 @@ bool HelixConfig::IncludeTest( )
 {
 	return m_include_test;
 }
+
+vector<twine> HelixConfig::ApacheIncludes()
+{
+	vector<twine> ret;
+	auto node = XmlHelpers::FindChild( xmlDocGetRootElement( m_config ), "Apache" );
+	if(node == nullptr) return ret;
+
+#ifdef _WIN32
+	twine platform = "WIN32";
+#elif __APPLE__
+	twine platform = "MAC";
+#elif __linux__
+	twine platform = "LINUX";
+#else
+	throw AnException(0, FL, "Unknown build platform");
+#endif
+
+	auto incs = XmlHelpers::FindChildren( node, "Include" );
+	for(auto inc : incs){
+		twine incName( inc, "name" );
+		twine platName( inc, "platform" );
+		if(platName == platform && incName.empty() == false){
+			ret.push_back(incName);
+		}
+	}
+	return ret;
+}
+
+vector<twine> HelixConfig::ApacheLibs()
+{
+	vector<twine> ret;
+	auto node = XmlHelpers::FindChild( xmlDocGetRootElement( m_config ), "Apache" );
+	if(node == nullptr) return ret;
+
+#ifdef _WIN32
+	twine platform = "WIN32";
+#elif __APPLE__
+	twine platform = "MAC";
+#elif __linux__
+	twine platform = "LINUX";
+#else
+	throw AnException(0, FL, "Unknown build platform");
+#endif
+
+	auto libs = XmlHelpers::FindChildren( node, "Lib" );
+	for(auto lib : libs){
+		twine libName( lib, "name" );
+		twine platName( lib, "platform" );
+		if(platName == platform && libName.empty() == false){
+			ret.push_back(libName);
+		}
+	}
+	return ret;
+}
+

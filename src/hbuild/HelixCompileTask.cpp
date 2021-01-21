@@ -98,11 +98,7 @@ twine HelixCompileTask::GetCommandLine()
 			"-I../logic/util -I../logic/util/sqldo -I ../logic/admin -I ../logic/admin/sqldo "
 		);
 		if(m_file->FileName().startsWith( "Apache" )){
-#ifdef _WIN32
-			cmd.append( "-DSHARED_MODULE -I" + tpl4 + "/Apache24/include " );
-#else
-			return ""; // Skip this one on linux for now
-#endif
+			cmd.append( AddApache() );
 		}
 		cmd.append( m_file->FileName() );
 	} else if(m_file->FolderName() == "server"){
@@ -287,4 +283,17 @@ twine HelixCompileTask::DependentInclude(const twine& ourLogic, const twine& dep
 
 	// Include the dependent logic folder and the dependent logic sqldo folder
 	return prefix + " " + prefix + "/sqldo ";
+}
+
+twine HelixCompileTask::AddApache()
+{
+	twine apacheInclude;
+	auto incs = HelixConfig::getInstance().ApacheIncludes();
+	if(incs.size() == 0) return apacheInclude; // empty
+
+	apacheInclude = "-DSHARED_MODULE ";
+	for(auto& inc : incs){
+		apacheInclude.append( "-I" + inc + " " );
+	}
+	return apacheInclude;
 }

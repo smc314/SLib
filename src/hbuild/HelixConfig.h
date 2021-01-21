@@ -74,6 +74,12 @@ class DLLEXPORT HelixConfig
 		/// Returns whether the tests should be included or not
 		bool IncludeTest( );
 
+		/// Returns a list of apache includes 
+		vector<twine> ApacheIncludes();
+
+		/// Returns a list of apache libraries
+		vector<twine> ApacheLibs();
+
 	private:
 		/// Standard Constructor
 		HelixConfig();
