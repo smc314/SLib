@@ -72,6 +72,15 @@ twine HelixLinkTask::GetCommandLine()
 {
 	EnEx ee(FL, "HelixLinkTask::GetCommandLine()");
 
+	bool globHasApache = false;
+	auto globFiles = m_folder->Files();
+	for(auto globFile : globFiles){
+		if(globFile->FileName().startsWith( "Apache" )){
+			globHasApache = true;
+			break;
+		}
+	}
+
 	twine cmd;
 
 	if(m_folder->FolderName() == "logic/util"){
@@ -79,14 +88,6 @@ twine HelixLinkTask::GetCommandLine()
 	} else if(m_folder->FolderName() == "logic/admin"){
 		// Nothing to do - logic/admin gets linked into helix glob.
 	} else if(m_folder->FolderName() == "glob"){
-		bool globHasApache = false;
-		auto globFiles = m_folder->Files();
-		for(auto globFile : globFiles){
-			if(globFile->FileName().startsWith( "Apache" )){
-				globHasApache = true;
-				break;
-			}
-		}
 		twine tp( "../../../../3rdParty/" );
 		cmd = "cd " + FixPhysical(m_folder->PhysicalFolderName()) + " && " +
 			Link("../bin/", "libhelix.glob") +
@@ -140,6 +141,10 @@ twine HelixLinkTask::GetCommandLine()
 			FixPhysical("../server/HelixMain") + ObjExt() + 
 			BinLib( ".", "helix.glob" ) +
 			LinkLibs4( tp );
+
+		if(globHasApache){
+			cmd += AddApache( tp );
+		}
 
 	} else if(m_folder->FolderName() == "HelixTest" ){
 		if(HelixConfig::getInstance().IncludeTest() == false){
