@@ -290,7 +290,7 @@ twine HelixLinkTask::LinkLibs1( const twine& tpl )
 		+ win3pl + "lib\\libcurl.lib "
 		+ win3pl + "lib\\libiconv.lib "
 		+ win3pl + "lib\\libhpdf.lib "
-		"ws2_32.lib odbc32.lib rpcrt4.lib Advapi32.lib";
+		"ws2_32.lib odbc32.lib rpcrt4.lib Advapi32.lib ";
 #	endif
 #elif __APPLE__
 	// ///////////////////////////////////////////////////////////////////////////////
