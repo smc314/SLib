@@ -73,11 +73,14 @@ twine HelixLinkTask::GetCommandLine()
 	EnEx ee(FL, "HelixLinkTask::GetCommandLine()");
 
 	bool globHasApache = false;
-	auto globFiles = m_folder->Files();
-	for(auto globFile : globFiles){
-		if(globFile->FileName().startsWith( "Apache" )){
-			globHasApache = true;
-			break;
+	auto globFolder = HelixFS::getInstance().FindFolder( "glob" );
+	if(globFolder != nullptr){
+		auto globFiles = globFolder->Files();
+		for(auto globFile : globFiles){
+			if(globFile->FileName().startsWith( "Apache" )){
+				globHasApache = true;
+				break;
+			}
 		}
 	}
 
@@ -181,6 +184,10 @@ twine HelixLinkTask::GetCommandLine()
 		}
 
 		cmd += LinkLibs4( tp );
+
+		if(globHasApache){
+			cmd += AddApache( tp );
+		}
 
 	} else if(m_folder->FolderName() == "HelixDaemon"){
 		cmd = "cd " + FixPhysical("./bin") + " && " +
