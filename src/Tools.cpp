@@ -241,7 +241,7 @@ vector<twine> Tools::RunCommand(const twine& cmd, vector<twine> args, const twin
 	stStartupInfo.hStdError = GetStdHandle( STD_ERROR_HANDLE );
 
 	// Prepare command line arguments and start the proc
-	twine cmdLine = cmd;
+	twine cmdLine = "\"" + cmd + "\"";
 	for(size_t i = 0; i < args.size(); i++){
 		cmdLine.append( " \"" );
 		cmdLine.append( args[ i ] );
