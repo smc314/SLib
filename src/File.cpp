@@ -734,9 +734,9 @@ twine File::Pwd()
 	ret.reserve( 4096 );
 	char* checkptr;
 #ifdef _WIN32
-	checkptr = _getcwd( ret.data(), (int)ret.size() );
+	checkptr = _getcwd( ret.data(), (int)ret.capacity() );
 #else
-	checkptr = getcwd( ret.data(), ret.size() );
+	checkptr = getcwd( ret.data(), ret.capacity() );
 #endif
 	if(checkptr == NULL){
 		if(errno == EINVAL){
