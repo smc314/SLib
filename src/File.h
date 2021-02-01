@@ -174,6 +174,12 @@ class DLLEXPORT File
 		/// Normalize a path by converting all separators to forward slashes, and removing any .. segments
 		static twine NormalizePath( const twine& path );
 
+		/// Returns just the file name portion of a path
+		static twine FileName( const twine& path );
+
+		/// Returns just the directory portion of a path
+		static twine Directory( const twine& path );
+
 		/// Use this to determine the current working directory
 		static twine Pwd();
 

@@ -679,6 +679,53 @@ twine File::NormalizePath( const twine& path )
 	return startingPath;
 }
 
+twine File::FileName( const twine& path)
+{
+	EnEx ee("File::FileName( const twine& path)");
+
+	if(path.empty()){
+		return path; // nothing to do
+	}
+
+	// First normalize the path:
+	twine normalPath( NormalizePath( path ) );
+
+	// Then find the last segment:
+	size_t lastSlash = normalPath.rfind( "/" );
+	if(lastSlash == TWINE_NOT_FOUND){
+		return path; // No path separators found
+	}
+
+	if(lastSlash == (normalPath.size() - 1)){
+		return ""; // No file name after the last slash
+	}
+
+	// Return whatever is after the last slash
+	return normalPath.substr( lastSlash + 1 );
+}
+
+twine File::Directory( const twine& path)
+{
+	EnEx ee("File::Directory( const twine& path)");
+
+	if(path.empty()){
+		return path; // nothing to do
+	}
+
+	// First normalize the path:
+	twine normalPath( NormalizePath( path ) );
+
+	// Then find the last segment:
+	size_t lastSlash = normalPath.rfind( "/" );
+	if(lastSlash == TWINE_NOT_FOUND){
+		return ""; // No path separators found
+	}
+
+	// erase from the last slash to the end
+	normalPath.erase( lastSlash );
+	return normalPath;
+}
+
 twine File::Pwd()
 {
 	EnEx ee("File::Pwd()");
