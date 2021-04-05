@@ -205,6 +205,11 @@ const vector<HelixSqldoMapFunction>& HelixSqldo::MapFunctions()
 	return m_maps;
 }
 
+const vector<HelixSqldoSearchFunction>& HelixSqldo::SearchFunctions()
+{
+	return m_searchs;
+}
+
 void HelixSqldo::ReadSqldo()
 {
 	m_all_params.clear();
@@ -216,6 +221,7 @@ void HelixSqldo::ReadSqldo()
 	m_matches.clear();
 	m_validations.clear();
 	m_maps.clear();
+	m_searchs.clear();
 	m_parms.clear();
 
 	xmlNodePtr root = xmlDocGetRootElement( m_file->Xml() );
@@ -249,6 +255,9 @@ void HelixSqldo::ReadSqldo()
 	}
 	for(auto n : XmlHelpers::FindChildren( root, "MapFunction" ) ){
 		m_maps.push_back( HelixSqldoMapFunction( n ) );
+	}
+	for(auto n : XmlHelpers::FindChildren( root, "SearchFunction" ) ){
+		m_searchs.push_back( HelixSqldoSearchFunction( n ) );
 	}
 
 	// Gather up our list of unique input/output parameters
@@ -424,6 +433,10 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 		childObjectIncludes.append( "\n#include \"Xlsx.h\"\nusing namespace Helix::Logic::xlsxwriter;\n\n" );
 	}
 
+	if(m_searchs.size() > 0){
+		childObjectIncludes.append( "\n#include \"SearchField.h\"\nusing namespace Helix::Logic::util;\n\n" );
+	}
+
 	m_parms[ "ChildObjectIncludes" ] = childObjectIncludes;
 	m_parms[ "DefineDataMembers" ] = defineDataMembers;
 	m_parms[ "C#DefineDataMembers" ] = defineCSDataMembers;
@@ -458,6 +471,7 @@ twine HelixSqldo::GenCPPHeader()
 	for(auto& match : m_matches) output.append( match.GenCPPHeader(m_class_name) );
 	for(auto& valid : m_validations) output.append( valid.GenCPPHeader(m_class_name) );
 	for(auto& map : m_maps) output.append( map.GenCPPHeader(m_class_name) );
+	for(auto& search : m_searchs) output.append( search.GenCPPHeader(m_class_name) );
 	output.append( loadTmpl( "CppObjHeader99.tmpl", BuildObjectParms() ) );
 	return output;
 }
@@ -472,6 +486,7 @@ twine HelixSqldo::GenCPPBody()
 	for(auto& match : m_matches) output.append( match.GenCPPBody(m_class_name) );
 	for(auto& valid : m_validations) output.append( valid.GenCPPBody(m_class_name) );
 	for(auto& map : m_maps) output.append( map.GenCPPBody(m_class_name, m_all_params) );
+	for(auto& search : m_searchs) output.append( search.GenCPPBody(m_class_name, m_all_params) );
 	return output;
 }
 
