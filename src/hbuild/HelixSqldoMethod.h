@@ -46,6 +46,7 @@ class DLLEXPORT HelixSqldoMethod
 
 		map<twine, twine>& BuildStatementParms(const twine& className);
 		twine FlattenSql();
+		static twine FlattenSql( const twine& inputSql );
 		bool HasAutoGen();
 		bool HasIntInput();
 		bool HasFloatInput();

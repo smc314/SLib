@@ -42,6 +42,7 @@ HelixSqldoSearchField::HelixSqldoSearchField(xmlNodePtr elem)
 	if(type.empty()){
 		type = "Contains"; // Default to a contains search
 	}
+	subSql = XmlHelpers::getTextNodeValue( elem );
 }
 
 twine HelixSqldoSearchField::NormalizeName() const

@@ -18,6 +18,7 @@
 using namespace SLib;
 
 #include "HelixSqldoSearchFunction.h"
+#include "HelixSqldoMethod.h"
 using namespace Helix::Build;
 
 
@@ -68,6 +69,7 @@ twine HelixSqldoSearchFunction::GenCPPBody(const twine& className, map<twine, He
 			"\tSearchField* sf_" + sf.name + " = new SearchField();\n"
 			"\tsf_" + sf.name + "->name = \"" + sf.name + "\";\n"
 			"\tsf_" + sf.name + "->sql = \"" + sf.sql + "\";\n"
+			"\tsf_" + sf.name + "->subSql = \"" + HelixSqldoMethod::FlattenSql( sf.subSql ) + "\";\n"
 			"\tsf_" + sf.name + "->type = \"" + sf.type + "\";\n"
 			"\tsf_" + sf.name + "->alias1 = \"" + sf.alias1 + "\";\n"
 			"\tsf_" + sf.name + "->alias2 = \"" + sf.alias2 + "\";\n"

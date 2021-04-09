@@ -144,9 +144,16 @@ bool HelixSqldoMethod::HasFloatInput()
 twine HelixSqldoMethod::FlattenSql() 
 {
 	EnEx ee(FL, "HelixSqldo::FlattenSql()");
+	
+	return FlattenSql( sql );
+}
+
+twine HelixSqldoMethod::FlattenSql(const twine& inputSql) 
+{
+	EnEx ee(FL, "HelixSqldo::FlattenSql(const twine& inputSql)");
 
 	// Split into lines so that we can handle comment processing
-	vector<twine> lines = sql.split('\n');
+	vector<twine> lines = inputSql.split('\n');
 	twine uncommentedSQL;
 	for(size_t i = 0; i < lines.size(); i++){
 		size_t cmtIdx = lines[i].find("--");
@@ -164,7 +171,6 @@ twine HelixSqldoMethod::FlattenSql()
 	uncommentedSQL.replace('\r', ' ');
 	uncommentedSQL.rtrim().ltrim();
 	return uncommentedSQL;
-
 }
 
 twine HelixSqldoMethod::GenCPPHeader(const twine& className) 

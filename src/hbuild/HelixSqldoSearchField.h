@@ -33,6 +33,7 @@ class DLLEXPORT HelixSqldoSearchField
 
 		twine name;
 		twine sql;
+		twine subSql;
 		twine type;
 		twine alias1;
 		twine alias2;
