@@ -67,10 +67,28 @@ ${selectOutputs}
 		<Comment>Part of the paging sql for ${tableName}</Comment>
 		<Sql/>
 	</SqlStatement>
-	<SqlStatement methodName="pagingSql_Filter" methodType="SELECTTOXML" target="odbc" outputCol="">
-		<Comment>Part of the paging sql for ${tableName}</Comment>
+	<SearchFunction name="GetSearchFields">
+		<Comment>
+			Generates the function used by paging search that provides the metadata that tells the search
+			routines how to prepare the search portion of the query.
+		</Comment>
+		<SampleSearchField name="Number" sql="Jobs.Number" type="Contains" alias1="job" alias2="number" alias3="num"/>
+		<SampleSearchField name="CreatedByFirstName" sql="CreatedByContact.FirstName" type="StartsWith" alias1="createdfirst" alias2="createdf" alias3="created1"/>
+		<SampleSearchField name="StartDate" sql="Jobs.StartDate" type="Date" alias1="start" alias2="startdate"/>
+		<SampleSearchField name="EmployeeNumber" sql="Employees.Number" type="Number" alias1="emp" alias2="no"/>
+		<SampleSearchField name="POCount" sql="PurchaseOrders.Number" type="SubCount" alias1="po" alias2="purchaseorder">
+			select count(1) -- always return a count
+			from PurchaseOrders
+				inner join PurchaseOrderJobs on PurchaseOrderJobs.PurchaseOrder_Id = PurchaseOrders.Id
+			where PurchaseOrderJobs.Job_Id = Jobs.Id -- link to the outer query with this
+			-- don't put the filter condition in here, the SearchHandler functions will do that
+		</SampleSearchField>
+	</SearchFunction>
+	<SqlStatement methodName="pagingSql_Filter" methodType="SELECTTOXML" target="odbc">
+		<Comment>Used to pull up all rows from the table Messages that are visible to Admin Users</Comment>
 		<Sql>
-			${tableName}.Description COLLATE Latin1_General_CI_AS LIKE ${Contains} -- FIXME, Just an example
+			DO NOT USE
+			This has been replaced by the auto-generated filter from the SearchFunction
 		</Sql>
 	</SqlStatement>
 	<SqlStatement methodName="pagingSql_OuterColumns" methodType="SELECTTOXML" target="odbc" outputCol="">

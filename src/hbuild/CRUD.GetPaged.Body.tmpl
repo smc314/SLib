@@ -93,8 +93,8 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 	if(local.SortBy.empty()){
 		local.SortBy = "Id"; // FIXME
 	}
-
-	PageQuery<${OBJNAME}, ${OBJNAME}_svect> query(ioc, local);
+	auto searchFields = ${OBJNAME}::GetSearchFields();
+	PageQuery<${OBJNAME}, ${OBJNAME}_svect> query(ioc, local, searchFields.get());
 
 	// If you need to adjust anything before running the queries - do it here.
 
