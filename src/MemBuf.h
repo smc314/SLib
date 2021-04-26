@@ -224,7 +224,7 @@ class DLLEXPORT MemBuf
 		/**
 		  * Returns a twine that is a hex representation of our internal value.
 		  */
-		twine hex(void);
+		twine hex(void) const;
 			
 		/** Handles converting the contents of our MemBuf into a base64 encoded
 		  * version.

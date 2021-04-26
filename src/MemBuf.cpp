@@ -935,7 +935,7 @@ MemBuf MemBuf::Digest(RSA* keypair)
 	return ret;
 }
 
-twine MemBuf::hex()
+twine MemBuf::hex() const
 {
 	EnEx ee("MemBuf::hex()");
 
