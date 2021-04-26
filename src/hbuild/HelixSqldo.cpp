@@ -542,6 +542,7 @@ twine HelixSqldo::GenJSBody(const twine& app)
 	twine jsWriteToXml;
 	twine jsCloneArrays;
 	twine jsCloneProperties;
+	twine jsSearchFunctions;
 	bool first = true;
 	for(auto& p : m_all_params){
 		jsProperties.append( p.second.JSPropDef(first) );
@@ -566,6 +567,8 @@ twine HelixSqldo::GenJSBody(const twine& app)
 		jsWriteToXml.append( co.JSXmlSet( app ) );
 		jsCloneProperties.append( co.JSClone( app ) );
 	}
+	for(auto& search : m_searchs) jsSearchFunctions.append( search.GenJSBody(m_class_name, app) );
+
 	m_parms[ "childArrayInit" ] = childArrayInit;
 	m_parms[ "childArrayDispose" ] = childArrayDispose;
 	m_parms[ "jsProperties" ] = jsProperties;
@@ -574,6 +577,7 @@ twine HelixSqldo::GenJSBody(const twine& app)
 	m_parms[ "jsWriteToXml" ] = jsWriteToXml;
 	m_parms[ "jsCloneArrays" ] = jsCloneArrays;
 	m_parms[ "jsCloneProperties" ] = jsCloneProperties;
+	m_parms[ "jsSearchFunctions" ] = jsSearchFunctions;
 
 	twine output;
 	output.append( loadTmpl( "JsObj.full.tmpl", m_parms) );

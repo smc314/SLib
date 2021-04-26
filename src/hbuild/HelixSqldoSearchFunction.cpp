@@ -19,6 +19,7 @@ using namespace SLib;
 
 #include "HelixSqldoSearchFunction.h"
 #include "HelixSqldoMethod.h"
+#include "HelixConfig.h"
 using namespace Helix::Build;
 
 
@@ -86,6 +87,54 @@ twine HelixSqldoSearchFunction::GenCPPBody(const twine& className, map<twine, He
 		"\treturn ret;\n"
 		"\n"
 		"}\n"
+		"\n"
+	);
+	return ret;
+}
+
+twine HelixSqldoSearchFunction::GenJSBody(const twine& className, const twine& app) 
+{
+	EnEx ee(FL, "HelixSqldo::GenCPPBody(const twine& className)");
+
+	twine ret;
+
+	ret.append(
+		"\t\t/** This will return a list of search fields defined by this class.\n"
+		"\t\t  */\n"
+		"\t\t" + name + " : function (){\n"
+		"\t\t\tvar ret = [];\n"
+		"\n"
+	);
+
+	twine finalApp( app );
+	if(HelixConfig::getInstance().UseCore()){
+		if( app == "atm" || app == "sspm" ){
+			finalApp = "corem";
+		} else {
+			finalApp = "cored";
+		}
+	}
+
+	for(auto& sf : fields){
+		ret.append(
+			"\t\t\tvar sf_" + sf.name + " = new " + finalApp + ".util.sqldo.SearchField();\n"
+			"\t\t\tsf_" + sf.name + ".Setname( \"" + sf.name + "\" );\n"
+			"\t\t\tsf_" + sf.name + ".Setsql( \"" + sf.sql + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".Settype( \"" + sf.type + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".Setalias1( \"" + sf.alias1 + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".Setalias2( \"" + sf.alias2 + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".Setalias3( \"" + sf.alias3 + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".Setalias4( \"" + sf.alias4 + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".Setalias5( \"" + sf.alias5 + "\") ;\n"
+			"\t\t\tret.push( sf_" + sf.name + " );\n"
+			"\n"
+		);
+	}
+
+	ret.append(
+		"\t\t\treturn ret;\n"
+		"\n"
+		"\t\t},\n"
 		"\n"
 	);
 	return ret;

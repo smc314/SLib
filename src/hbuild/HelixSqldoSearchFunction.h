@@ -33,6 +33,7 @@ class DLLEXPORT HelixSqldoSearchFunction
 		HelixSqldoSearchFunction( xmlNodePtr elem );
 		twine GenCPPHeader(const twine& className);
 		twine GenCPPBody(const twine& className, map<twine, HelixSqldoParam>& allParams);
+		twine GenJSBody(const twine& className, const twine& app);
 
 		twine name;
 		vector< HelixSqldoSearchField > fields;
