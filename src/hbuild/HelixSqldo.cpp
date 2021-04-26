@@ -205,6 +205,11 @@ const vector<HelixSqldoMapFunction>& HelixSqldo::MapFunctions()
 	return m_maps;
 }
 
+const vector<HelixSqldoLogChangesFunction>& HelixSqldo::LogChangesFunctions()
+{
+	return m_logchanges;
+}
+
 const vector<HelixSqldoSearchFunction>& HelixSqldo::SearchFunctions()
 {
 	return m_searchs;
@@ -221,6 +226,7 @@ void HelixSqldo::ReadSqldo()
 	m_matches.clear();
 	m_validations.clear();
 	m_maps.clear();
+	m_logchanges.clear();
 	m_searchs.clear();
 	m_parms.clear();
 
@@ -255,6 +261,9 @@ void HelixSqldo::ReadSqldo()
 	}
 	for(auto n : XmlHelpers::FindChildren( root, "MapFunction" ) ){
 		m_maps.push_back( HelixSqldoMapFunction( n ) );
+	}
+	for(auto n : XmlHelpers::FindChildren( root, "LogChangesFunction" ) ){
+		m_logchanges.push_back( HelixSqldoLogChangesFunction( n ) );
 	}
 	for(auto n : XmlHelpers::FindChildren( root, "SearchFunction" ) ){
 		m_searchs.push_back( HelixSqldoSearchFunction( n ) );
@@ -471,6 +480,7 @@ twine HelixSqldo::GenCPPHeader()
 	for(auto& match : m_matches) output.append( match.GenCPPHeader(m_class_name) );
 	for(auto& valid : m_validations) output.append( valid.GenCPPHeader(m_class_name) );
 	for(auto& map : m_maps) output.append( map.GenCPPHeader(m_class_name) );
+	for(auto& logchange : m_logchanges) output.append( logchange.GenCPPHeader(m_class_name) );
 	for(auto& search : m_searchs) output.append( search.GenCPPHeader(m_class_name) );
 	output.append( loadTmpl( "CppObjHeader99.tmpl", BuildObjectParms() ) );
 	return output;
@@ -486,6 +496,7 @@ twine HelixSqldo::GenCPPBody()
 	for(auto& match : m_matches) output.append( match.GenCPPBody(m_class_name) );
 	for(auto& valid : m_validations) output.append( valid.GenCPPBody(m_class_name) );
 	for(auto& map : m_maps) output.append( map.GenCPPBody(m_class_name, m_all_params) );
+	for(auto& logchange : m_logchanges) output.append( logchange.GenCPPBody(m_class_name, m_all_params) );
 	for(auto& search : m_searchs) output.append( search.GenCPPBody(m_class_name, m_all_params) );
 	return output;
 }

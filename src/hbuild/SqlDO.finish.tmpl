@@ -11,6 +11,21 @@
 		<FakeField name="Children" type="childArray" function="Validate"/>
 	</ValidateFunction>
 
+	<LogChangesFunction name="LogChanges">
+		<Comment>
+			This is a sample LogChanges function, with all of the field information disabled.  This can
+			serve as an example of the types of log changes functions that can be built.  Simply change the
+			names of the nodes below from FakeField to Field.
+		</Comment>
+		<KeyField name="Id"/>
+		<KeyField name="Number"/>
+		<KeyField name="SubNumber"/>
+		<FakeField name="Number"/>
+		<FakeField name="SubNumber"/>
+		<FakeField name="Description"/>
+		<FakeField name="Children" type="childArray" function="LogChanges"/>
+	</LogChangesFunction>
+
 	<SortFunction name="FirstSort">
 		<Comment>
 			This is a sample sorting function with all of the comparison fields disabled.  This can
@@ -22,7 +37,7 @@
 		<FakeField name="Id"/>
 	</SortFunction>
 
-	<SortFunction name="FirstMatch">
+	<MatchFunction name="FirstMatch">
 		<Comment>
 			This is a sample matching function with all of the comparison fields disabled.  This can
 			serve as an example of the types of matching that can be built with this.  Simply change the
@@ -31,9 +46,9 @@
 		<FakeField name="Name" type="contains"/>
 		<FakeField name="Description" type="starts"/>
 		<FakeField name="Value" type="ends"/>
-	</SortFunction>
+	</MatchFunction>
 
-	<SortFunction name="XlsxFormat">
+	<XlsxFunction name="XlsxFormat">
 		<Comment>
 			This is a sample Xlsx format function with all of the fields disabled.  This can
 			serve as an example of the types of formatting that can be built with this.  Simply change the
@@ -42,7 +57,7 @@
 		<FakeField name="Name" header="The Name" format="XLSX_STYLE_ITALIC"/>
 		<FakeField name="Description" header="Descriptive Text"/>
 		<FakeField name="Id" header="Identifier" format="XLSX_STYLE_BACKGROUND_RED"/>
-	</SortFunction>
+	</XlsxFunction>
 
 	<!-- Include this if you need to access any of the fields in this object from a CannedEmail
 		or other situation where you need a std::map<twine, twine> containing all of the fields
