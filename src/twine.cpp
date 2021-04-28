@@ -1119,22 +1119,32 @@ twine& twine::append(const char* c, size_t count)
 twine& twine::insert(size_t p, const char* c)
 {
 	//EnEx ee("twine::insert(size_t p, const char* c)");
-	bounds_check(p);
-	if(c == NULL){
-		return *this; // nothing to insert
-	}
 	if(m_data_size == 0){
 		// If we don't have any existing data - then set our data to the input
 		return set( c );
+	}
+
+	// If we have data, then bounds check where they want to put it
+	bounds_check(p);
+	if(c == NULL){
+		return *this; // nothing to insert
 	}
 
 	size_t csize = strlen(c);
 	if(csize > MAX_INPUT_SIZE){
 		throw AnException(0,FL,"twine: Input Too Large");
 	}
+	if(csize == 0){
+		return *this; // nothing to insert
+	}
 	reserve(m_data_size + csize);
+	// The last iteration of the for loop decrements i, and if p == 0, i will end up at SIZE_T_MAX
+	// because size_t is unsigned.  To avoid this, break at the end of the loop if i == 0
 	for(size_t i = m_data_size - 1; i >= p; i--){
 		m_data[i+csize] = m_data[i];
+		if(i == 0){
+			break; // avoid decrementing past zero and looping to SIZE_T_MAX
+		}
 	}
 	memcpy(m_data + p, c, csize);
 	m_data_size += csize;
@@ -1183,6 +1193,9 @@ twine& twine::rtrim(void)
 		if(isspace((unsigned char)m_data[i]) || m_data[i] == '\r' || m_data[i] == '\n') {
 			m_data[i] = '\0';
 			m_data_size --;
+			if(i == 0){
+				break; // Avoid decrementing past zero and looping to SIZE_T_MAX
+			}
 			i--;
 		} else {
 			break; // found something that is not a space or newline.  we're done.
