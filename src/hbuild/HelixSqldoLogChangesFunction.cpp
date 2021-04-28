@@ -140,7 +140,18 @@ twine HelixSqldoLogChangesFunction::GenCPPBody(const twine& className, map< twin
 	);
 
 	for(auto& field : fields){
-		if(field.type == "childArray"){
+		if(field.type == "childObject"){
+			ret.append(
+				"\t// Checking " + field.name + " - Log Changes for child object changes\n"
+				"\t{ // For scope\n"
+				"\t\tbool childObjHasChanged = this->" + field.name + "." + field.function + "(db, &original->" + field.name + ", changeReason, ourKey, logChanges);\n"
+				"\t\tif(childObjHasChanged){\n"
+				"\t\t\tfoundChange = true; // Remember this\n"
+				"\t\t}\n"
+				"\t}\n"
+				"\n"
+			);
+		} else if(field.type == "childArray"){
 			ret.append(
 				"\t// Checking " + field.name + " - Log Changes for child array changes\n"
 				"\t// First look for new records, and changes to existing records\n"
