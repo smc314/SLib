@@ -223,6 +223,26 @@ twine HelixSqldoLogChangesFunction::GenCPPBody(const twine& className, map< twin
 					"\t}\n"
 					"\n"
 				);
+			} else if(param.type == "base64" || param.type == "cdata"){
+				ret.append(
+					"\tthis->" + field.name + ".rtrim();\n"
+					"\tif(this->" + field.name + " != original->" + field.name + "){\n"
+					"\t\tfoundChange = true;\n"
+					"\t\tif(logChanges){\n"
+					"\t\t\tStatics::LogChange(\n"
+					"\t\t\t\tdb,                           // Which database to use for logging\n"
+					"\t\t\t\t\"" + tableName + "\",        // Our table name\n"
+					"\t\t\t\t" + guid + ",                 // Our record Id value\n"
+					"\t\t\t\tourKey,                       // Our record key that will be used for searching\n"
+					"\t\t\t\tchangeReason,                 // A reason for the change - if provided\n"
+					"\t\t\t\t\"" + field.name + "\",       // The name of the file that changed\n"
+					"\t\t\t\tthis->" + field.name + ",     // The new value of the field\n"
+					"\t\t\t\toriginal->" + field.name + "  // The old value of the field\n"
+					"\t\t\t);\n"
+					"\t\t}\n"
+					"\t}\n"
+					"\n"
+				);
 			} else {
 				ret.append(
 					"\tif(this->" + field.name + " != original->" + field.name + "){\n"
