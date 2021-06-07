@@ -85,21 +85,25 @@ void HelixInstallTask::Execute()
 	if(m_file_pattern.empty()){
 		CopyFolder( m_source_folder, m_target_folder );
 	} else {
-		for(auto& file : File::listFiles( m_source_folder )){
-			if(file.endsWith( m_file_pattern )){
-				twine sourceFileName( m_source_folder + "/" + file );
-				twine targetFileName;
-				if(m_new_name.empty()){
-					targetFileName = m_target_folder + "/" + file;
-				} else {
-					targetFileName = m_target_folder + "/" + m_new_name;
-				}
-				File::EnsurePath( targetFileName );
-				if(HelixFSFile::IsNewerThan( sourceFileName, targetFileName )){
-					INFO(FL, "%s is newer than %s - installing file.", sourceFileName(), targetFileName() );
-					File::Copy( sourceFileName(), targetFileName() );
+		try {
+			for(auto& file : File::listFiles( m_source_folder )){
+				if(file.endsWith( m_file_pattern )){
+					twine sourceFileName( m_source_folder + "/" + file );
+					twine targetFileName;
+					if(m_new_name.empty()){
+						targetFileName = m_target_folder + "/" + file;
+					} else {
+						targetFileName = m_target_folder + "/" + m_new_name;
+					}
+					File::EnsurePath( targetFileName );
+					if(HelixFSFile::IsNewerThan( sourceFileName, targetFileName )){
+						INFO(FL, "%s is newer than %s - installing file.", sourceFileName(), targetFileName() );
+						File::Copy( sourceFileName(), targetFileName() );
+					}
 				}
 			}
+		} catch (AnException& e){
+			WARN(FL, "WARNING: Directory does not exist: %s", m_source_folder() );
 		}
 	}
 }
@@ -127,6 +131,6 @@ void HelixInstallTask::CopyFolder(const twine& fromFolder, const twine& toFolder
 			CopyFolder( fromFolder + "/" + folder, toFolder + "/" + folder );
 		}
 	} catch (AnException& e){
-		WARN(FL, "Directory does not exist: %s", fromFolder() );
+		WARN(FL, "WARNING: Directory does not exist: %s", fromFolder() );
 	}
 }
