@@ -118,14 +118,14 @@ twine HelixSqldoSearchFunction::GenJSBody(const twine& className, const twine& a
 	for(auto& sf : fields){
 		ret.append(
 			"\t\t\tvar sf_" + sf.name + " = new " + finalApp + ".util.sqldo.SearchField();\n"
-			"\t\t\tsf_" + sf.name + ".Setname( \"" + sf.name + "\" );\n"
-			"\t\t\tsf_" + sf.name + ".Setsql( \"" + sf.sql + "\") ;\n"
-			"\t\t\tsf_" + sf.name + ".Settype( \"" + sf.type + "\") ;\n"
-			"\t\t\tsf_" + sf.name + ".Setalias1( \"" + sf.alias1 + "\") ;\n"
-			"\t\t\tsf_" + sf.name + ".Setalias2( \"" + sf.alias2 + "\") ;\n"
-			"\t\t\tsf_" + sf.name + ".Setalias3( \"" + sf.alias3 + "\") ;\n"
-			"\t\t\tsf_" + sf.name + ".Setalias4( \"" + sf.alias4 + "\") ;\n"
-			"\t\t\tsf_" + sf.name + ".Setalias5( \"" + sf.alias5 + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".setName( \"" + sf.name + "\" );\n"
+			"\t\t\tsf_" + sf.name + ".setSql( \"" + sf.sql + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".setType( \"" + sf.type + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".setAlias1( \"" + sf.alias1 + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".setAlias2( \"" + sf.alias2 + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".setAlias3( \"" + sf.alias3 + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".setAlias4( \"" + sf.alias4 + "\") ;\n"
+			"\t\t\tsf_" + sf.name + ".setAlias5( \"" + sf.alias5 + "\") ;\n"
 			"\t\t\tret.push( sf_" + sf.name + " );\n"
 			"\n"
 		);
