@@ -53,6 +53,11 @@ bool HelixConfig::UseCore()
 	return XmlHelpers::getBoolAttr( xmlDocGetRootElement( m_config ), "UseCore" );
 }
 
+bool HelixConfig::UseDebug()
+{
+	return XmlHelpers::getBoolAttr( xmlDocGetRootElement( m_config ), "Debug" );
+}
+
 twine HelixConfig::CoreFolder()
 {
 	twine ret( xmlDocGetRootElement( m_config ), "CoreFolder" );
