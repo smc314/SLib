@@ -22,6 +22,7 @@
 #include <stdarg.h>
 
 #include <openssl/evp.h>
+#include <openssl/err.h>
 
 #include "MemBuf.h"
 #include "AnException.h"
@@ -750,7 +751,11 @@ xmlDocPtr MemBuf::Encrypt(RSA* keypair, bool usePublic)
 
 	size_t loopCount = m_data_size / chunkSize;
 	size_t leftOver = m_data_size % chunkSize;
-	int encryptedSize;
+	int encryptedSize = 0;
+
+	//printf("keysize(%d) chunkSize(%d) loopCount(%d) leftOver(%d) encryptedSize(%d)\n",
+	//	keysize, chunkSize, (int)loopCount, (int)leftOver, encryptedSize
+	//);
 
 	sptr<xmlDoc, xmlFreeDoc> doc = xmlNewDoc((const xmlChar*)"1.0");
 	doc->children = xmlNewDocNode(doc, NULL, (const xmlChar*)"Encrypted", NULL);
@@ -764,7 +769,7 @@ xmlDocPtr MemBuf::Encrypt(RSA* keypair, bool usePublic)
 				(unsigned char*)m_data + (i * chunkSize), // where is the data
 				(unsigned char*)rsaOut.data(),            // where does the encrypted data go
 				keypair,                                  // public/private keypair
-				RSA_PKCS1_OAEP_PADDING                    // what type of padding to use
+				RSA_PKCS1_PADDING                         // what type of padding to use
 			);
 		} else {
 			encryptedSize = RSA_private_encrypt( 
@@ -772,8 +777,11 @@ xmlDocPtr MemBuf::Encrypt(RSA* keypair, bool usePublic)
 				(unsigned char*)m_data + (i * chunkSize), // where is the data
 				(unsigned char*)rsaOut.data(),            // where does the encrypted data go
 				keypair,                                  // public/private keypair
-				RSA_PKCS1_OAEP_PADDING                    // what type of padding to use
+				RSA_PKCS1_PADDING                         // what type of padding to use
 			);
+		}
+		if(encryptedSize == -1){
+			throw AnException(0, FL, "Error encrypting: %s", ERR_error_string( ERR_get_error(), NULL ) );
 		}
 		rsaOutTrimmed.set( rsaOut.data(), encryptedSize );
 
@@ -782,33 +790,49 @@ xmlDocPtr MemBuf::Encrypt(RSA* keypair, bool usePublic)
 		XmlHelpers::setBase64( chunk, rsaOutTrimmed );
 
 		// keep going through the whole buffer
+		//printf("i(%d) keysize(%d) chunkSize(%d) loopCount(%d) leftOver(%d) encryptedSize(%d)\n",
+		//	(int)i, keysize, chunkSize, (int)loopCount, (int)leftOver, encryptedSize
+		//);
 	}
 
 	// Now, encrypt anything left at the end of the buffer:
 	if(leftOver != 0){
+		//printf("processing left over\n");
 		rsaOut.erase(); // clear the output buffer.
+		//printf("rsaOut erased\n");
 		if(usePublic){
+			//printf("calling RSA_public_encrypt\n");
 			encryptedSize = RSA_public_encrypt( 
 				(int)leftOver,                                    // how big is the data
 				(unsigned char*)m_data + (loopCount * chunkSize), // where is the data
 				(unsigned char*)rsaOut.data(),                    // where does the encrypted data go
 				keypair,                                          // public/private keypair
-				RSA_PKCS1_OAEP_PADDING                            // what type of padding to use
+				RSA_PKCS1_PADDING                                 // what type of padding to use
 			);
 		} else {
+			//printf("calling RSA_private_encrypt\n");
 			encryptedSize = RSA_private_encrypt( 
 				(int)leftOver,                                    // how big is the data
 				(unsigned char*)m_data + (loopCount * chunkSize), // where is the data
 				(unsigned char*)rsaOut.data(),                    // where does the encrypted data go
 				keypair,                                          // public/private keypair
-				RSA_PKCS1_OAEP_PADDING                            // what type of padding to use
+				RSA_PKCS1_PADDING                                 // what type of padding to use
 			);
 		}
+		if(encryptedSize == -1){
+			throw AnException(0, FL, "Error encrypting: %s", ERR_error_string( ERR_get_error(), NULL ) );
+		}
+		//printf("setting rsaOutTrimmed encryptedSize(%d)\n", encryptedSize);
 		rsaOutTrimmed.set( rsaOut.data(), encryptedSize );
 
 		// Save to the XML as a base64 CDATA section:
+		//printf("adding chunk to xml\n");
 		xmlNodePtr chunk = xmlNewChild(root, NULL, (const xmlChar*)"chunk", NULL);
 		XmlHelpers::setBase64( chunk, rsaOutTrimmed );
+
+		//printf("leftover keysize(%d) chunkSize(%d) loopCount(%d) leftOver(%d) encryptedSize(%d)\n",
+		//	keysize, chunkSize, (int)loopCount, (int)leftOver, encryptedSize
+		//);
 	}
 
 	// Finally, return the xml document
@@ -846,7 +870,7 @@ MemBuf& MemBuf::Decrypt(xmlDocPtr doc, RSA* keypair, bool usePrivate)
 				(unsigned char*)chunk.data(),  // where is the data
 				(unsigned char*)rsaOut.data(), // where does the decrypted data go
 				keypair,                       // public/private keypair
-				RSA_PKCS1_OAEP_PADDING         // what type of padding to use
+				RSA_PKCS1_PADDING              // what type of padding to use
 			);
 		} else {
 			decryptedSize = RSA_public_decrypt( 
@@ -854,7 +878,7 @@ MemBuf& MemBuf::Decrypt(xmlDocPtr doc, RSA* keypair, bool usePrivate)
 				(unsigned char*)chunk.data(),  // where is the data
 				(unsigned char*)rsaOut.data(), // where does the decrypted data go
 				keypair,                       // public/private keypair
-				RSA_PKCS1_OAEP_PADDING         // what type of padding to use
+				RSA_PKCS1_PADDING              // what type of padding to use
 			);
 		}
 
