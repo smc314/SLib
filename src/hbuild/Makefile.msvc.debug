@@ -1,0 +1,47 @@
+CC=cl.exe
+LINK=link.exe
+OHEXT=obj
+CP=copy
+RM=del /Q /S
+
+3PL=..\..\..
+SOCKET_LIB=ws2_32.lib odbc32.lib rpcrt4.lib
+
+
+GCFLAGS=-c -wd4251 -Zp8 -EHsc -Zi -FS -JMC -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MP8 -MDd -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D CS_NO_LARGE_IDENTIFIERS -I .. -I "$(3PL)/include" -I "$(3PL)/include/libxml2"
+
+
+SSLLIBS=$(3PL)/lib/libeay32.lib $(3PL)/lib/ssleay32.lib \
+	$(3PL)/lib/libxml2.lib ../libSLib.lib
+
+LFLAGS=-machine:x64 -subsystem:console -DEBUG:FULL
+LLIBS=$(SSLLIBS) $(SOCKET_LIB)
+
+CFLAGS=$(GCFLAGS)
+
+DOTOH=
+
+HBUILD_OH=hbuild.obj HelixFS.obj HelixFSFolder.obj HelixFSFile.obj HelixBuilder.obj HelixWorker.obj \
+	HelixCompileTask.obj HelixLinkTask.obj HelixInstallTask.obj HelixSqldoParam.obj HelixSqldoMethod.obj \
+	HelixSqldoChildVector.obj HelixSqldoChildObject.obj HelixSqldoSortFunction.obj HelixSqldoXlsxFunction.obj \
+	HelixSqldoMatchFunction.obj \
+	HelixSqldo.obj HelixGenTask.obj HelixJSApiGenTask.obj HelixConfig.obj HelixSqldoValidateFunction.obj \
+	HelixSqldoMapFunction.obj \
+	HelixAutoAsset.obj HelixExtractStrings.obj HelixJSGenTask.obj HelixCountLines.obj HelixFind.obj \
+	HelixSqldoSearchField.obj HelixSqldoSearchFunction.obj HelixSqldoLogChangesFunction.obj
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $<
+
+.c.obj:
+	$(CC) $(CFLAGS) $<
+
+all: $(HBUILD_OH)
+	$(LINK) $(LFLAGS) /OUT:hbuild.exe $(HBUILD_OH) $(LLIBS)
+
+install:
+	$(CP) hbuild.exe $(3PL)\bin
+	$(CP) *.tmpl $(3PL)\bin
+
+clean:
+	-$(RM) $(DOTOH) *.$(OHEXT) core *.pch *.lib *.exp *.exe.manifest *.exe *.dll.manifest

@@ -38,6 +38,9 @@ class DLLEXPORT HelixConfig
 		/// Returns a flag indicating whether we are using a separate core folder to support us
 		bool UseCore();
 
+		/// Returns a flag indicating whether we are doing a debug build or not
+		bool UseDebug();
+
 		/// Returns the core folder, if any, that we should use
 		twine CoreFolder();
 

@@ -916,4 +916,7 @@ void CopyCore()
 #endif
 
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin", ""));
+	if(HelixConfig::getInstance().UseDebug()){
+		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", ".pdb", "bin", ""));
+	}
 }

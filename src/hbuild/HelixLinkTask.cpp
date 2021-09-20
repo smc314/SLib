@@ -512,9 +512,15 @@ twine HelixLinkTask::Link(const twine& bin, const twine& outLib)
 	// ///////////////////////////////////////////////////////////////////////////////
 	// 64-bit windows
 	// ///////////////////////////////////////////////////////////////////////////////
-	return 	
-		"link.exe -machine:x64 -subsystem:console /DLL "
-			"/OUT:" + FixPhysical( bin ) + outLib + ".dll ";
+	if(HelixConfig::getInstance().UseDebug()){
+		return 	
+			"link.exe -machine:x64 -subsystem:console -DEBUG:FULL /DLL "
+				"/OUT:" + FixPhysical( bin ) + outLib + ".dll ";
+	} else {
+		return 	
+			"link.exe -machine:x64 -subsystem:console /DLL "
+				"/OUT:" + FixPhysical( bin ) + outLib + ".dll ";
+	}
 
 #	endif
 #elif __APPLE__
@@ -548,9 +554,15 @@ twine HelixLinkTask::LinkMain(const twine& bin, const twine& outLib)
 	// ///////////////////////////////////////////////////////////////////////////////
 	// 64-bit windows
 	// ///////////////////////////////////////////////////////////////////////////////
-	return 	
-		"link.exe -machine:x64 -subsystem:console "
-			"/OUT:" + FixPhysical( bin ) + outLib + ".exe ";
+	if(HelixConfig::getInstance().UseDebug()){
+		return 	
+			"link.exe -machine:x64 -subsystem:console -DEBUG:FULL "
+				"/OUT:" + FixPhysical( bin ) + outLib + ".exe ";
+	} else {
+		return 	
+			"link.exe -machine:x64 -subsystem:console "
+				"/OUT:" + FixPhysical( bin ) + outLib + ".exe ";
+	}
 
 #	endif
 #elif __APPLE__

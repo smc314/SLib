@@ -1,0 +1,134 @@
+#
+# This is the MS VC++ build version of the makefile for SLib
+# Use nmake -f Makefile.msvc64.debug to run this
+###############################################################
+
+CC=cl.exe
+LINK=link.exe
+OHEXT=obj
+CP=copy
+RM=del /Q
+
+3PL=..\..
+SOCKET_LIB=ws2_32.lib
+
+
+CFLAGS=-c -EHsc -Zi -FS -JMC -D_WIN64 -DWIN64 -D_AMD64_=1 -D__64BIT__ -DWIN32 -DLINT_ARGS -MDd -W3 -D "_CRT_SECURE_NO_DEPRECATE" -D "_CRT_NON_CONFORMING_SWPRINTFS" -D "_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES" -D CS_NO_LARGE_IDENTIFIERS -I "$(3PL)\include" -I "$(3PL)\include\libxml2"
+
+EXECFLAGS=/MD -O2 -I "$(3PL)\include" -I "$(3PL)\include\libxml2"
+
+SSLLIBS=$(3PL)\lib\libeay32.lib $(3PL)\lib\ssleay32.lib \
+	$(3PL)\lib\libxml2.lib $(3PL)\lib\libcurl.lib \
+	$(3PL)\lib\zlib.lib $(3PL)\lib\libiconv.lib
+
+# Note -SafeSEH not required/available on x64 targets
+LFLAGS=-machine:x64 -DEBUG:FULL
+EXELFLAGS=/link $(LFLAGS) 
+LLIBS=$(SSLLIBS) $(SOCKET_LIB) rpcrt4.lib advapi32.lib
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $<
+
+.c.obj:
+	$(CC) $(CFLAGS) $<
+
+
+MINIZIP_OH=ioapi.$(OHEXT) iowin32.$(OHEXT) mztools.$(OHEXT) unzip.$(OHEXT) zip.$(OHEXT)
+
+DOTOH=Base64.$(OHEXT) Log.$(OHEXT) Socket.$(OHEXT) SSocket.$(OHEXT) \
+	Thread.$(OHEXT) Mutex.$(OHEXT) Tools.$(OHEXT) twine.$(OHEXT) Date.$(OHEXT) \
+	smtp.$(OHEXT) SmtpClient.$(OHEXT) Interval.$(OHEXT) EMail.$(OHEXT) Timer.$(OHEXT) \
+	Parms.$(OHEXT) LogMsg.$(OHEXT) Hash.$(OHEXT) EnEx.$(OHEXT) XmlHelpers.$(OHEXT) \
+	BlockingQueue.$(OHEXT) File.$(OHEXT) LogFile.$(OHEXT) HttpClient.$(OHEXT) ZipFile.$(OHEXT) \
+	MemBuf.$(OHEXT) sqlite3.$(OHEXT) LogFile2.$(OHEXT) TmpFile.$(OHEXT)
+
+all: $(DOTOH) $(MINIZIP_OH) LogDump.$(OHEXT) SLogDump.$(OHEXT) SqlShell.$(OHEXT) incs
+	$(LINK) $(LFLAGS) $(DOTOH) $(MINIZIP_OH) /OUT:libSLib.dll /DLL $(LLIBS)
+	$(CC) $(EXECFLAGS) LogDump.$(OHEXT) $(EXELFLAGS) libSLib.lib
+	$(CC) $(EXECFLAGS) SLogDump.$(OHEXT) $(EXELFLAGS) libSLib.lib
+	$(CC) $(EXECFLAGS) SqlShell.$(OHEXT) $(EXELFLAGS) sqlite3.$(OHEXT)
+	$(CP) libSLib.dll ..\lib
+	$(CP) libSLib.lib ..\lib
+	cd hbuild && nmake -f Makefile.msvc.debug all
+
+test_twine: test_split.$(OHEXT) test_tokenize.$(OHEXT) test_string.$(OHEXT) test_twine.$(OHEXT) $(DOTOH)
+	$(LINK) $(LFLAGS) /OUT:test_twine.exe test_twine.$(OHEXT) libSLib.lib $(LLIBS)
+	$(LINK) $(LFLAGS) /OUT:test_string.exe test_string.$(OHEXT) libSLib.lib $(LLIBS)
+	$(LINK) $(LFLAGS) /OUT:test_split.exe test_split.$(OHEXT) libSLib.lib $(LLIBS)
+	$(LINK) $(LFLAGS) /OUT:test_tokenize.exe test_tokenize.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_enex: test_enex.$(OHEXT) $(DOTOH)
+	$(CC) test_enex.$(OHEXT) libSLib.lib $(LFLAGS)
+
+thrash_twine: thrash_twine.$(OHEXT)
+	$(CC) thrash_twine.$(OHEXT) libSLib.lib $(LFLAGS)
+
+test_log: test_log.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_log.exe test_log.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_zip: test_zip.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_zip.exe test_zip.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_membuf: test_membuf.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_membuf.exe test_membuf.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_logfile: test_logfile.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_logfile.exe test_logfile.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_date: test_date.$(OHEXT)
+	$(LINK) /OUT:test_date.exe test_date.$(OHEXT) libSLib.lib $(3PL)\lib\libxml2.lib $(LFLAGS)
+
+test_sleep: test_sleep.$(OHEXT)
+	$(LINK) /OUT:test_sleep.exe test_sleep.$(OHEXT) libSLib.lib $(LFLAGS)
+
+test_compile: test_compile.$(OHEXT)
+	$(LINK) /OUT:test_compile.exe test_compile.$(OHEXT) $(LFLAGS) $(DOTOH)
+
+test_xml: test_xml.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_xml.exe test_xml.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_socket: test_socket.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_socket.exe test_socket.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_hexdump: test_hexdump.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_hexdump.exe test_hexdump.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_file: test_file.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_file.exe test_file.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_runcmd: test_runcmd.$(OHEXT) test_echoargs.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_echoargs.exe test_echoargs.$(OHEXT) libSLib.lib $(LLIBS)
+	$(LINK) $(LFLAGS) /OUT:test_runcmd.exe test_runcmd.$(OHEXT) libSLib.lib $(LLIBS)
+
+test_SmtpClient: test_SmtpClient.$(OHEXT)
+	$(LINK) $(LFLAGS) /OUT:test_SmtpClient.exe test_SmtpClient.$(OHEXT) libSLib.lib $(LLIBS)
+
+incs:
+	$(CP) *.h ..\include
+	$(CP) Pool.cpp ..\include
+
+clean:
+	$(RM) $(DOTOH) *.$(OHEXT) libSLib.dll core *.pch *.lib *.exp *.exe.manifest *.exe *.dll *.dll.manifest
+	$(RM) ..\lib\libSLib.dll
+	$(RM) ..\lib\libSLib.lib
+	$(RM) ..\include\*.h
+	$(RM) ..\include\Pool.cpp
+	cd $(3PL)\include && $(RM) AnException.h AutoXMLChar.h Base64.h BlockingQueue.h Date.h dptr.h EMail.h EnEx.h File.h GSocket.h Hash.h Interval.h Lock.h Log.h LogFile.h LogMsg.h memptr.h MsgQueue.h Mutex.h ObjQueue.h Parms.h Pool.h smtp.h SmtpClient.h Socket.h sptr.h SSocket.h suvector.h Thread.h Timer.h Tools.h twine.h XmlHelpers.h xmlinc.h Pool.cpp HttpClient.h ZipFile.h MemBuf.h sqlite3.h sqlite3ext.h LogFile2.h
+	cd hbuild && nmake -f Makefile.msvc.debug clean
+
+
+install:
+	$(CP) ..\include\*.h $(3PL)\include
+	$(CP) ..\include\*.cpp $(3PL)\include
+	-mkdir $(3PL)\lib
+	-mkdir $(3PL)\bin
+	$(CP) ..\lib\libSLib.lib $(3PL)\lib
+	$(CP) ..\lib\libSLib.dll $(3PL)\bin
+	$(CP) LogDump.exe $(3PL)\bin
+	$(CP) SLogDump.exe $(3PL)\bin
+	$(CP) SqlShell.exe $(3PL)\bin
+	cd hbuild && nmake -f Makefile.msvc.debug install
+
+docs:
+	docxx --html --dir ..\..\appint\doc\slib *.h
+

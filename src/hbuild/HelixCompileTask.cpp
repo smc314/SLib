@@ -188,7 +188,11 @@ twine HelixCompileTask::CC(const twine& tpl)
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// 64-bit windows
 	// ///////////////////////////////////////////////////////////////////////////////////
-	return "cl.exe /nologo /std:c++14 -c -wd4251 -Zp8 -EHsc -O2 -D_WIN64 -DWIN64 -D_AMD64=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MP8 -MD -W3 -D \"_CRT_SECURE_NO_DEPRECATE\" -D \"_CRT_NON_COMFORMING_SWPRINTFS\" -D CS_NO_LARGE_IDENTIFIERS -I " + tpl + "/include -I " + tpl + "/include/libxml2 -I . ";
+	if(HelixConfig::getInstance().UseDebug()){
+		return "cl.exe /nologo /std:c++14 -c -wd4251 -Zi -FS -JMC -Zp8 -EHsc -D_WIN64 -DWIN64 -D_AMD64=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MP8 -MDd -W3 -D \"_CRT_SECURE_NO_DEPRECATE\" -D \"_CRT_NON_COMFORMING_SWPRINTFS\" -D CS_NO_LARGE_IDENTIFIERS -I " + tpl + "/include -I " + tpl + "/include/libxml2 -I . ";
+	} else {
+		return "cl.exe /nologo /std:c++14 -c -wd4251 -Zp8 -EHsc -O2 -D_WIN64 -DWIN64 -D_AMD64=1 -D__64BIT__ -DWIN32 -D_MT -D_DLL -DLINT_ARGS -MP8 -MD -W3 -D \"_CRT_SECURE_NO_DEPRECATE\" -D \"_CRT_NON_COMFORMING_SWPRINTFS\" -D CS_NO_LARGE_IDENTIFIERS -I " + tpl + "/include -I " + tpl + "/include/libxml2 -I . ";
+	}
 #	endif
 #elif __APPLE__
 	// ///////////////////////////////////////////////////////////////////////////////////
