@@ -98,6 +98,7 @@ twine HelixSqldoMapFunction::GenCPPBody(const twine& className, map<twine, Helix
 		} else if(p.second.type == "bin"){
 			ret.append("\t// " + p.second.name + " is of type bin - not added to map\n" );
 		} else if(p.second.type == "timestamp" || p.second.type == "Timestamp" || p.second.type == "Date" || p.second.type == "DateTime"){
+			ret.append("\t" + p.second.name + ".PrepDayW(); // Do this to make sure Day of Week is correct.\n" );
 			ret.append("\tmap[ \"" + className + "." + p.second.name + "\" ] = " + p.second.name + ".GetValue();\n" );
 			ret.append("\tmap[ \"" + className + "." + p.second.name + "_DATE\" ] = " + p.second.name + ".GetValue(\"%m/%d/%Y\");\n" );
 			ret.append("\tmap[ \"" + className + "." + p.second.name + "_DATE2\" ] = " + p.second.name + ".GetValue(\"%Y-%m-%d\");\n" );
