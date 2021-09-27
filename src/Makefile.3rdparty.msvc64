@@ -71,7 +71,7 @@ curl:
 
 png:
 	del /Q /S libpng-$(V_PNG)-vc14-x64.zip
-	$(CURL) http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libpng-$(V_PNG)-vc14-x64.zip
+	$(CURL) --insecure http://windows.php.net/downloads/php-sdk/deps/vc14/x64/libpng-$(V_PNG)-vc14-x64.zip
 	$(UNZIP) libpng-$(V_PNG)-vc14-x64.zip
 
 libharu:
