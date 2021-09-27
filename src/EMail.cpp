@@ -37,6 +37,7 @@ EMail::EMail(const EMail& e)
 	m_to_list = e.m_to_list;
 	m_cc_list = e.m_cc_list;
 	m_create_date = e.m_create_date;
+	m_headers = e.m_headers;
 }
 
 EMail& EMail::operator=(const EMail& e)
@@ -48,6 +49,7 @@ EMail& EMail::operator=(const EMail& e)
 	m_to_list = e.m_to_list;
 	m_cc_list = e.m_cc_list;
 	m_create_date = e.m_create_date;
+	m_headers = e.m_headers;
 	return *this;
 }
 
