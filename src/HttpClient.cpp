@@ -24,6 +24,7 @@
 #include "dptr.h"
 #include "AnException.h"
 #include "XmlHelpers.h"
+#include "TmpFile.h"
 using namespace SLib;
 
 static bool HttpClient_cURL_Initialized = false;
@@ -150,6 +151,12 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 {
 	EnEx ee(FL, "HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)");
 
+	TmpFile verboseLog; // Create a temp file to hold the verbose log - will be cleaned up when this method exits
+
+	CURLcode res = CURLE_OK;
+	char errbuf[ CURL_ERROR_SIZE ];
+	memset(errbuf, 0, CURL_ERROR_SIZE);
+
 	ResponseBuffer.clear();
 	struct curl_slist* slist = NULL;
 
@@ -172,6 +179,11 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 		// Ignore SSL cert issues
 		curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYPEER, false);
 		curl_easy_setopt( m_curl_handle, CURLOPT_SSL_VERIFYHOST, false);
+
+		// Capture the verbose log
+		curl_easy_setopt( m_curl_handle, CURLOPT_VERBOSE, 1L );
+		curl_easy_setopt( m_curl_handle, CURLOPT_ERRORBUFFER, errbuf );
+		curl_easy_setopt( m_curl_handle, CURLOPT_STDERR, (FILE*)verboseLog );
 	}
 
 	// Call for any extra curl options from child classes
@@ -179,13 +191,31 @@ char* HttpClient::PostRaw(const twine& url, const char* msg, size_t msgLen)
 
 	{ // for timing scope
 		EnEx ee3(FL, "HttpClient::Post - curl_easy_perform");
-		curl_easy_perform( m_curl_handle );
+		res = curl_easy_perform( m_curl_handle );
 	}
+
+	verboseLog.flush();
+	m_verbose_log = verboseLog.readContentsAsTwine();
+	twine errmsg;
+	if(res != CURLE_OK){
+		WARN(FL, "Sending HTTP Post (%s) failed: %s: %s\n%s",
+			url(), curl_easy_strerror(res), errbuf, m_verbose_log()
+		);
+		errmsg.format( "Sending HTTP Post (%s) failed: %s: %s\n%s",
+			url(), curl_easy_strerror(res), errbuf, m_verbose_log()
+		);
+	}
+
 	curl_easy_reset( m_curl_handle );
 	curl_slist_free_all(slist);
 
 	// Call for any extra free-up of data or configs
 	PostFree();
+
+	// After cleaning up curl, check for an error and throw exceptions
+	if(res != CURLE_OK){
+		throw AnException(0, FL, errmsg() );
+	}
 
 	return ResponseBuffer.data();
 }
@@ -236,6 +266,11 @@ void HttpClient::GetFree()
 		curl_slist_free_all( m_get_headerlist );
 		m_get_headerlist = nullptr;
 	}
+}
+
+const twine& HttpClient::GetVerboseLog()
+{
+	return m_verbose_log;
 }
 
 xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)

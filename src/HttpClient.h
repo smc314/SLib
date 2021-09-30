@@ -120,6 +120,10 @@ class DLLEXPORT HttpClient
 		  */
 		CURL* CurlHandle( );
 
+		/** Use this to retrieve the verbose curl log after a POST.
+		  */
+		const twine& GetVerboseLog();
+
 
 	protected:
 		/** This is an internal method that is called by PostRaw just before the curl_easy_perform is
@@ -162,6 +166,9 @@ class DLLEXPORT HttpClient
 		/// Our list of GET headers
 		vector<twine> m_get_headers;
 		struct curl_slist* m_get_headerlist = nullptr;
+
+		/// Holds the curl verbose log output after a post
+		twine m_verbose_log;
 
 
 };
