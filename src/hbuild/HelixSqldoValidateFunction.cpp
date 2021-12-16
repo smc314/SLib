@@ -115,6 +115,16 @@ twine HelixSqldoValidateFunction::GenCPPBody(const twine& className)
 				"\t}\n"
 				"\n"
 			);
+		} else if(field.type == "nonnulldate"){
+			ret.append(
+				"\t// Validate nonnull date field\n"
+				"\tif(" + field.name + ".IsMinValue() == true){\n"
+				"\t\tthrow AnException(EXCEPTION_HANDLED_VALIDATION, FL,\n"
+				"\t\t\t\"" + className + " - " + field.name + " must not be empty.\"\n"
+				"\t\t);\n"
+				"\t}\n"
+				"\n"
+			);
 		} else if(field.type == "numeric"){
 			ret.append(
 				"\t// Validate numeric twine field\n"
