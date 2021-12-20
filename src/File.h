@@ -183,6 +183,9 @@ class DLLEXPORT File
 		/// Use this to determine the current working directory
 		static twine Pwd();
 
+		/// Use this to determine the full path to our binary location
+		static twine OurLocation();
+
 	protected:
 
 		void closeFile();

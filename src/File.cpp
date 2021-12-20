@@ -10,6 +10,9 @@ using namespace SLib;
 #endif
 #include <errno.h>
 
+static char _slib_file_our_binary[1024];
+static char _slib_file_our_folder[1024];
+
 File::File()
 {
 	EnEx ee("File::File()");
@@ -754,4 +757,71 @@ twine File::Pwd()
 
 	ret.check_size();
 	return ret;
+}
+
+twine File::OurLocation()
+{
+	EnEx ee("File::OurLocation()");
+
+	// Have we already looked up ourselves:
+	if(_slib_file_our_binary[0] == 'D' &&
+		_slib_file_our_binary[1] == 'O' &&
+		_slib_file_our_binary[2] == 'N' &&
+		_slib_file_our_binary[3] == 'E'
+	){
+		twine cached( _slib_file_our_folder ); // Skip the first 4 bytes
+		return cached;
+	}
+
+	// Use windows/linux symbol lookup functions to find out where our binary is located.
+	// Our config file needs to live where our binary is located.
+	memset(_slib_file_our_binary, 0, sizeof(_slib_file_our_binary));
+#ifdef _WIN32
+	HMODULE hm = NULL;
+	BOOL rc = FALSE;
+	rc = GetModuleHandleEx( 
+		GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+		(LPCSTR)_slib_file_our_binary, 
+		&hm
+	);
+	if(rc == 0){
+		int err = GetLastError();
+		throw AnException(0, FL, "Error looking up our location: %d", err );
+	}
+	if(GetModuleFileName(hm, _slib_file_our_binary + 4, sizeof(_slib_file_our_binary) - 4) == 0){
+		int err = GetLastError();
+		throw AnException(0, FL, "Error looking up our location name: %d", err );
+	}
+#else
+	Dl_info dlinfo;
+	int ret = dladdr(_slib_file_our_binary, &dlinfo);
+	if(ret == 0){
+		throw AnException(0, FL, "Error looking up our location");
+	}
+	strcpy( _slib_file_our_binary + 4, dlinfo.dli_fname );
+#endif
+	DEBUG(FL, "Our binary lives here: %s", _slib_file_our_binary + 4);		
+	twine tmp( _slib_file_our_binary + 4);
+	tmp = File::NormalizePath( tmp );
+	if(tmp.startsWith( "./" )){
+		tmp = File::Pwd();
+	} else {
+		size_t idx = tmp.rfind( "/" );
+		if(idx == TWINE_NOT_FOUND){
+			throw AnException(0, FL, "Invalid server binary path: %s", tmp() );
+		}
+		tmp.erase( idx );
+	}
+	memset(_slib_file_our_folder, 0, sizeof(_slib_file_our_folder));
+	memcpy(_slib_file_our_folder, tmp(), tmp.size());
+	DEBUG(FL, "Our Binary Folder is: %s", _slib_file_our_folder);		
+
+	// Flag the fact that we've looked up this value already.
+	_slib_file_our_binary[0] = 'D';
+	_slib_file_our_binary[1] = 'O';
+	_slib_file_our_binary[2] = 'N';
+	_slib_file_our_binary[3] = 'E';
+
+	// Return the folder we live in
+	return tmp;
 }
