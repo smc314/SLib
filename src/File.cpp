@@ -11,6 +11,7 @@ using namespace SLib;
 #endif
 #include <errno.h>
 
+static bool _slib_file_loaded = false;
 static char _slib_file_our_binary[1024];
 static char _slib_file_our_folder[1024];
 
@@ -765,11 +766,7 @@ twine File::OurLocation()
 	EnEx ee("File::OurLocation()");
 
 	// Have we already looked up ourselves:
-	if(_slib_file_our_binary[0] == 'D' &&
-		_slib_file_our_binary[1] == 'O' &&
-		_slib_file_our_binary[2] == 'N' &&
-		_slib_file_our_binary[3] == 'E'
-	){
+	if( _slib_file_loaded == true ){
 		twine cached( _slib_file_our_folder ); // Skip the first 4 bytes
 		return cached;
 	}
@@ -789,7 +786,7 @@ twine File::OurLocation()
 		int err = GetLastError();
 		throw AnException(0, FL, "Error looking up our location: %d", err );
 	}
-	if(GetModuleFileName(hm, _slib_file_our_binary + 4, sizeof(_slib_file_our_binary) - 4) == 0){
+	if(GetModuleFileName(hm, _slib_file_our_binary, sizeof(_slib_file_our_binary)) == 0){
 		int err = GetLastError();
 		throw AnException(0, FL, "Error looking up our location name: %d", err );
 	}
@@ -799,10 +796,10 @@ twine File::OurLocation()
 	if(ret == 0){
 		throw AnException(0, FL, "Error looking up our location");
 	}
-	strcpy( _slib_file_our_binary + 4, dlinfo.dli_fname );
+	strcpy( _slib_file_our_binary, dlinfo.dli_fname );
 #endif
-	DEBUG(FL, "Our binary lives here: %s", _slib_file_our_binary + 4);		
-	twine tmp( _slib_file_our_binary + 4);
+	DEBUG(FL, "Our binary lives here: %s", _slib_file_our_binary);		
+	twine tmp( _slib_file_our_binary );
 	tmp = File::NormalizePath( tmp );
 	if(tmp.startsWith( "./" )){
 		tmp = File::Pwd();
@@ -818,10 +815,7 @@ twine File::OurLocation()
 	DEBUG(FL, "Our Binary Folder is: %s", _slib_file_our_folder);		
 
 	// Flag the fact that we've looked up this value already.
-	_slib_file_our_binary[0] = 'D';
-	_slib_file_our_binary[1] = 'O';
-	_slib_file_our_binary[2] = 'N';
-	_slib_file_our_binary[3] = 'E';
+	_slib_file_loaded = true;
 
 	// Return the folder we live in
 	return tmp;
