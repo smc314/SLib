@@ -7,6 +7,7 @@ using namespace SLib;
 #include <direct.h>
 #else
 #include <dirent.h>
+#include <dlfcn.h> // for dlopen, etc.
 #endif
 #include <errno.h>
 
