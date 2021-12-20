@@ -22,6 +22,8 @@
 #include <string.h>
 
 #include "twine.h"
+#include "File.h"
+#include "TmpFile.h"
 using namespace SLib;
 
 #include "suvector.h"
@@ -53,6 +55,19 @@ int main (void)
 	for(int i = 0; i < (int)my_vect.size(); i++){
 		printf("my_vect[%d] = (%s)\n", i, my_vect[i].c_str());
 	}
+
+	twine ourLoc = File::OurLocation();
+	printf("First ourLoc --%s--\n", ourLoc() );
+
+	ourLoc = File::OurLocation();
+	printf("Secon ourLoc --%s--\n", ourLoc() );
+
+	ourLoc = File::OurLocation();
+	printf("Third ourLoc --%s--\n", ourLoc() );
+	printf("PWD output:  --%s--\n", File::Pwd()() );
+
+	TmpFile tmpf;
+
 }
 
 
