@@ -8,6 +8,7 @@ TmpFile::TmpFile()
 	EnEx ee("TmpFile::TmpFile()");
 	twine fileName; fileName.Guid(); // Our file name is a guid
 	fileName = File::PathCombine( File::OurLocation(), fileName );
+	//printf("Temp File Name is: %s\n", fileName() );
 	create( fileName );
 }
 

@@ -7,7 +7,9 @@ using namespace SLib;
 #include <direct.h>
 #else
 #include <dirent.h>
+#include <unistd.h>
 #include <dlfcn.h> // for dlopen, etc.
+#include <link.h>
 #endif
 #include <errno.h>
 
@@ -765,9 +767,13 @@ twine File::OurLocation()
 {
 	EnEx ee("File::OurLocation()");
 
+	//twine log;
+	//twine msg;
 	// Have we already looked up ourselves:
 	if( _slib_file_loaded == true ){
 		twine cached( _slib_file_our_folder ); // Skip the first 4 bytes
+		//msg.format("Returning cached value: %s\n", cached() ); log.append(msg);
+		//return log;
 		return cached;
 	}
 
@@ -792,15 +798,40 @@ twine File::OurLocation()
 	}
 #else
 	Dl_info dlinfo;
-	int ret = dladdr(_slib_file_our_binary, &dlinfo);
+	int ret = dladdr((void*)OurLocation, &dlinfo);
 	if(ret == 0){
 		throw AnException(0, FL, "Error looking up our location");
 	}
 	strcpy( _slib_file_our_binary, dlinfo.dli_fname );
+	twine binaryPath( _slib_file_our_binary );
+	if(binaryPath[0] != '/'){
+		// This is not an absolute path - need to dig further to figure it out
+		FILE* proc_self_maps = fopen( "/proc/self/maps", "r" );
+		if(proc_self_maps == NULL){
+			throw AnException(0, FL, "Error reading from /proc/self/maps");
+		}
+		const size_t BUFFER_SIZE = 256;
+		char buffer[BUFFER_SIZE] = "";
+		char path[BUFFER_SIZE] = "";
+		while(fgets(buffer, BUFFER_SIZE, proc_self_maps)){
+			if(sscanf( buffer, "%*llx-%*llx %*s %*s %*s %*s %s", path) == 1){
+				//msg.format( "Examining path: %s\n", path); log.append(msg);
+				twine fileName = File::FileName( path );
+				if(fileName == binaryPath){
+					//msg.format( "Found our match: %s\n", path); log.append(msg);
+					strcpy( _slib_file_our_binary, path );
+					break;
+				}
+			}
+		}
+		fclose( proc_self_maps );
+	}
+
 #endif
-	DEBUG(FL, "Our binary lives here: %s", _slib_file_our_binary);		
+	//msg.format("Our binary lives here: %s\n", _slib_file_our_binary); log.append(msg);
 	twine tmp( _slib_file_our_binary );
 	tmp = File::NormalizePath( tmp );
+	//msg.format("After normalizing: %s\n", tmp()); log.append(msg);
 	if(tmp.startsWith( "./" )){
 		tmp = File::Pwd();
 	} else {
@@ -812,11 +843,12 @@ twine File::OurLocation()
 	}
 	memset(_slib_file_our_folder, 0, sizeof(_slib_file_our_folder));
 	memcpy(_slib_file_our_folder, tmp(), tmp.size());
-	DEBUG(FL, "Our Binary Folder is: %s", _slib_file_our_folder);		
+	//msg.format("Our Binary Folder is: %s\n", _slib_file_our_folder); log.append(msg);
 
 	// Flag the fact that we've looked up this value already.
 	_slib_file_loaded = true;
 
 	// Return the folder we live in
+	//return log;
 	return tmp;
 }
