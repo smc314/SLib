@@ -298,21 +298,18 @@ twine HelixSqldoMethod::GenInsertSql(const twine& logic, const twine& tableName,
 	twine values;
 	twine inputs;
 
-	int count = 0;
+	bool first = true;
 	for(auto& entry : params){
 		if(entry.first == "Id" || entry.first == "ID") continue; // Don't include Id values in the insert
-		if(count > 0){
-			names.append(", ");
-			values.append(", ");
-		}
-		if( (count + 1) % 6 == 0 ){ // new line every 6 columns
-			names.append("\n\t\t\t\t");
-			values.append("\n\t\t\t\t");
-		}
-
-		names += entry.first;
 		twine valueForName( GetValueForName( logic, entry.first ) );
-		values += valueForName;
+		if(first){
+			names.append("\t\t\t\t").append( entry.first ).append( "\n" );
+			values.append("\t\t\t\t").append( valueForName ).append( " -- " ).append( entry.first ).append("\n");
+			first = false;
+		} else {
+			names.append("\t\t\t\t, ").append( entry.first ).append( "\n" );
+			values.append("\t\t\t\t, ").append( valueForName ).append( " -- " ).append( entry.first ).append("\n");
+		}
 
 		if(valueForName == "?"){
 			twine tmp; 
@@ -322,8 +319,6 @@ twine HelixSqldoMethod::GenInsertSql(const twine& logic, const twine& tableName,
 			);
 			inputs.append( tmp );
 		}
-
-		count ++;
 	}
 	tmpl_params["insertColNames"] = names;
 	tmpl_params["insertColValues"] = values;
@@ -344,20 +339,17 @@ twine HelixSqldoMethod::GenInsertWithIdSql(const twine& logic, const twine& tabl
 	twine values;
 	twine inputs;
 
-	int count = 0;
+	bool first = true;
 	for(auto& entry : params){
-		if(count > 0){
-			names.append(", ");
-			values.append(", ");
-		}
-		if( (count + 1) % 6 == 0 ){ // new line every 6 columns
-			names.append("\n\t\t\t\t");
-			values.append("\n\t\t\t\t");
-		}
-
-		names += entry.first;
 		twine valueForName( GetValueForName( logic, entry.first ) );
-		values += valueForName;
+		if(first){
+			names.append("\t\t\t\t").append( entry.first ).append( "\n" );
+			values.append("\t\t\t\t").append( valueForName ).append( " -- " ).append( entry.first ).append("\n");
+			first = false;
+		} else {
+			names.append("\t\t\t\t, ").append( entry.first ).append( "\n" );
+			values.append("\t\t\t\t, ").append( valueForName ).append( " -- " ).append( entry.first ).append("\n");
+		}
 
 		if(valueForName == "?"){
 			twine tmp; 
@@ -367,8 +359,6 @@ twine HelixSqldoMethod::GenInsertWithIdSql(const twine& logic, const twine& tabl
 			);
 			inputs.append( tmp );
 		}
-
-		count ++;
 	}
 	tmpl_params["insertColNames"] = names;
 	tmpl_params["insertColValues"] = values;

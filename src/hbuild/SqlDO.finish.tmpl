@@ -5,9 +5,11 @@
 			names of the nodes below from FakeField to Field.
 		</Comment>
 		<FakeField name="Description" type="length" min="5" max="30"/>
+		<FakeField name="Height" type="number" min="1" max="8"/>
 		<FakeField name="Distance" type="nonzero"/>
 		<FakeField name="SiteId" type="nonzeroid"/>
 		<FakeField name="PerDiem" type="numeric"/>
+		<FakeField name="TestDate" type="nonnulldate"/>
 		<FakeField name="Children" type="childArray" function="Validate"/>
 	</ValidateFunction>
 

@@ -131,6 +131,29 @@ twine HelixSqldoValidateFunction::GenCPPBody(const twine& className)
 				"\t" + field.name + " = Statics::VerifyNumeric( " + field.name + " );\n"
 				"\n"
 			);
+		} else if(field.type == "number"){
+			if(!field.min.empty()){
+				ret.append(
+					"\t// Validate minimum value\n"
+					"\tif(" + field.name + " < " + field.min + "){\n"
+					"\t\tthrow AnException(EXCEPTION_HANDLED_VALIDATION, FL,\n"
+					"\t\t\t\"" + className + " - " + field.name + " must be at least " + field.min + ".\"\n"
+					"\t\t);\n"
+					"\t}\n"
+					"\n"
+				);
+			}
+			if(!field.max.empty()){
+				ret.append(
+					"\t// Validate maximum value\n"
+					"\tif(" + field.name + " > " + field.max + "){\n"
+					"\t\tthrow AnException(EXCEPTION_HANDLED_VALIDATION, FL,\n"
+					"\t\t\t\"" + className + " - " + field.name + " must be no more than " + field.max + ".\"\n"
+					"\t\t);\n"
+					"\t}\n"
+					"\n"
+				);
+			}
 		} else if(field.type == "childArray"){
 			ret.append(
 				"\t// Validate child array objects\n"
