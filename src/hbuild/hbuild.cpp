@@ -917,6 +917,9 @@ void CopyCore()
 
 	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin", ""));
 	if(HelixConfig::getInstance().UseDebug()){
-		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", ".pdb", "bin", ""));
+		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.pdb", "bin", ""));
+		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.pdb", "bin", ""));
+		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.pdb", "bin", ""));
+		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.pdb", "bin", ""));
 	}
 }
