@@ -649,7 +649,8 @@ twine File::NormalizePath( const twine& path )
 		startingPath = segments[0];
 		segments.erase( segments.begin() ); // remove the first segment - it's in startingPath
 	} else if( path.length() >= 2 && path[0] == '\\' && path[1] == '\\'){ // Windows style network path
-		startingPath = "//";
+		startingPath = "\\\\" + segments[0];
+		segments.erase( segments.begin() ); // remove the first segment - it's in startingPath
 	} else if( path.length() >= 2 && path[0] == '/' && path[1] == '/'){ // Windows style network path
 		startingPath = "//";
 	} else {
