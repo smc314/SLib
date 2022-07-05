@@ -77,6 +77,12 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 	// Pick up the input objects from the request document
 	auto v = ${OBJNAME}::readXmlChildren( ioc.GetRequestRoot() );
 	for(auto o : *v){
+		// For object types that have a unique key like name, employee#, etc.  Check here to make sure that
+		// if the object exists locally, but has a different Id, then we switch the Id in our local system
+		// to match what the remote system is telling us it should be.  If this doesn't make sense for this
+		// object type - just remove this.
+		CheckIdAndUniqueKey( ioc, o );
+
 		try {
 			Update${OBJNAME} updater( nullptr ); // xmlNodePtr passed in is not used
 			updater.ExecuteInLine( ioc, *o, false );
@@ -89,4 +95,83 @@ void ${CLASSNAME}::ExecuteRequest(IOConn& ioc)
 	ioc.SendReturn();
 	ioc.Close();
 }
+
+void ${CLASSNAME}::CheckIdAndUniqueKey(IOConn& ioc, ${OBJNAME}* obj)
+{
+	EnEx ee(FL, "${CLASSNAME}::CheckIdAndUniqueKey(IOConn& ioc, ${OBJNAME}* obj)");
+
+	OdbcObj& db = *ioc.getDBConnection();
+
+	// Look up the Object by Unique Key 
+	auto v = ${OBJNAME::selectByFIXME( db, obj->FIXME );
+	if(v->size() == 0){
+		return; // needs to be inserted
+	}
+	// if it exists, check the Id
+	if(Statics::IdMatch( obj->Id, v->at(0)->Id )){
+		return; // Id's match - just do the normal update
+	}
+
+	// The object exists, but the Id's don't match.  Need to fix the local Id to match what the
+	// calling system is telling us it should be
+	Transaction trans(db);
+
+	// Step 1 - create a temporary record as a place-holder
+	${OBJNAME} tmpObj;
+	// Fill out enough to get a record inserted
+	tmpObj.FIXME1 = "SizeForNothing";
+	tmpObj.FIXME2 = "SizeForNothing";
+	tmpObj.FIXME3 = "SizeForNothing";
+	tmpObj.Id = ${OBJNAME}::insert( db, tmpObj );
+
+	// Step 2 - shift the related objects to point to the tmp record
+	${OBJNAME}::shiftRelatedRecord1( db, tmpObj.Id, v->at(0)->Id );
+	${OBJNAME}::shiftRelatedRecord2( db, tmpObj.Id, v->at(0)->Id );
+	${OBJNAME}::shiftRelatedRecord3( db, tmpObj.Id, v->at(0)->Id );
+	${OBJNAME}::shiftRelatedRecord4( db, tmpObj.Id, v->at(0)->Id );
+
+	// Step 3 - Update the Id of the local ${OBJNAME} to match the remote one
+	${OBJNAME}::changeId( db, obj->Id, v->at(0)->Id );
+
+	// Step 4 - Point the related objects back to the original record with the new Id
+	${OBJNAME}::shiftRelatedRecord1( db, obj->Id, tmpObj.Id );
+	${OBJNAME}::shiftRelatedRecord2( db, obj->Id, tmpObj.Id );
+	${OBJNAME}::shiftRelatedRecord3( db, obj->Id, tmpObj.Id );
+	${OBJNAME}::shiftRelatedRecord4( db, obj->Id, tmpObj.Id );
+
+	// Step 5 - Remove the tmp record used
+	${OBJNAME}::deleteById( db, tmpObj.Id );
+
+	// Commit the transaction
+	trans.CommitAndEnd();
+}
+
+/* The SQL required to support the above calls will look something like this:
+
+	<SqlStatement methodName="shiftRelatedRecord1" methodType="UPDATE" target="odbc" outputCol="">
+		<Comment>Used when adjusting the Id of a ${OBJNAME} record</Comment>
+		<Sql>update RelatedRecordFIXME set ${OBJNAME}Id = ? where ${OBJNAME}Id = ?
+		</Sql>
+		<Input name="NewId" type="guid"/>
+		<Input name="OldId" type="guid"/>
+	</SqlStatement>
+	<SqlStatement methodName="shiftRelatedRecord2" methodType="UPDATE" target="odbc" outputCol="">
+		<Comment>Used when adjusting the Id of a ${OBJNAME} record</Comment>
+		<Sql>update RelatedRecordFIXME set ${OBJNAME}Id = ? where ${OBJNAME}Id = ?
+		</Sql>
+		<Input name="NewId" type="guid"/>
+		<Input name="OldId" type="guid"/>
+	</SqlStatement>
+
+	<SqlStatement methodName="changeId" methodType="UPDATE" target="odbc" outputCol="">
+		<Comment>Changes the Id for a given record</Comment>
+		<Sql>update ${OBJNAME}s set Id = ? where Id = ?
+		</Sql>
+		<Input name="NewId" type="guid"/>
+		<Input name="OldId" type="guid"/>
+	</SqlStatement>
+
+*/
+
+
 

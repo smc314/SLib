@@ -18,6 +18,9 @@ using namespace SLib;
 #include "ActionClass.h"
 using namespace Helix::Glob;
 
+#include "${OBJNAME}.h"
+using namespace Helix::Logic::${PACKAGE};
+
 namespace Helix {
 namespace Logic {
 namespace rep {
@@ -39,6 +42,9 @@ class DLLEXPORT ${CLASSNAME} : public ActionClass
 
 		/// We implement the ExecuteRequest method
 		virtual void ExecuteRequest(IOConn& ioc);
+
+		/// Use this to verify an object id vs. unique key
+		static void CheckIdAndUniqueKey(IOConn& ioc, ${OBJNAME}* obj);
 
 	private:
 
