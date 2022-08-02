@@ -1124,6 +1124,11 @@ twine& twine::insert(size_t p, const char* c)
 		return set( c );
 	}
 
+	if(p == m_data_size){
+		// inserting at the very end - this is an append
+		return append( c );
+	}
+
 	// If we have data, then bounds check where they want to put it
 	bounds_check(p);
 	if(c == NULL){
