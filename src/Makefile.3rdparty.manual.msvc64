@@ -36,7 +36,7 @@ zlib:
 	$(CURL) http://zlib.net/zlib1212.zip
 	$(UNZIP) zlib1212.zip
 	cd zlib-1.2.12
-	nmake -f win32/Makefile.msc AS=ml64 LOC="-DASMV -DASMINF -I." OBJA="inffasx64.obj gvmat64.obj inffas8664.obj"
+	nmake -f win32/Makefile.msc AS=ml64
 	copy zdll.lib ..\lib
 	copy zlib.lib ..\lib
 	copy zlib1.dll ..\bin
