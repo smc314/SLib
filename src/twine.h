@@ -590,6 +590,10 @@ class DLLEXPORT twine
 		  */
 		twine& decode64url();
 
+		/** Handles converting the contents of our twine into a url decoded version.
+		  */
+		twine& urlDecode();
+
 
 
 		/** Determines if the given twine pointer is null, or if the

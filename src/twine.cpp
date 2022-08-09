@@ -1530,6 +1530,24 @@ twine& twine::urlEncode()
 	return *this;
 }
 
+twine& twine::urlDecode()
+{
+	if(size() == 0) return *this; // We're an empty string
+
+	// Use curl to url encode our data
+	char* tmpEscaped = curl_unescape( m_data, (int)size() );
+
+	// Now copy the converted data over to ourself:
+	erase();
+	set( tmpEscaped );
+
+	// Now free up the temporary pointer
+	curl_free( tmpEscaped );
+
+	// Return ourselves
+	return *this;
+}
+
 twine& twine::decode64()
 {
 	//EnEx ee("twine::decode64()");
