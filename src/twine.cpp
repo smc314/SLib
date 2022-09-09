@@ -506,8 +506,8 @@ size_t twine::check_size(void)
 		if(m_data_size >= m_allocated_size){
 			ERRORL(FL, "twine::check_size - data size(%d) > allocated_size(%d).  Possible memory corruption.",
 				(int)m_data_size, (int)m_allocated_size );
-			ERRORL(FL, "twine::check_size - resetting data_size to allocated_size - 1, and null terminating.");
-			m_data_size = m_allocated_size - 1;
+			ERRORL(FL, "twine::check_size - resetting data_size to allocated_size - 10, and null terminating.");
+			m_data_size = m_allocated_size - 10;
 			m_data[ m_data_size ] = '\0';
 			throw AnException(0, FL, "twine::check_size - data_size > allocated_size - you've just corrupted memory, or you forgot to null terminate m_data when you wrote to it!");
 		}
@@ -622,9 +622,9 @@ twine& twine::format(const char* f, va_list ap)
 		memset(m_data, 0, m_allocated_size);
 		//printf("twine here6\n");	
 #ifdef _WIN32
-		nsize = _vsnprintf(m_data, m_allocated_size - 1, f, apCopy);
+		nsize = _vsnprintf(m_data, m_allocated_size - 10, f, apCopy);
 #else
-		nsize = vsnprintf(m_data, m_allocated_size - 1, f, apCopy);
+		nsize = vsnprintf(m_data, m_allocated_size - 10, f, apCopy);
 #endif
 
 		//printf("twine here7\n");	
@@ -633,7 +633,7 @@ twine& twine::format(const char* f, va_list ap)
 			// double twine capacity
 			reserve(m_allocated_size * 2);  
 			success = false;
-		} else if (nsize > (int)(m_allocated_size - 1)){ // newer C lib
+		} else if (nsize > (int)(m_allocated_size - 10)){ // newer C lib
 			//printf("twine here9\n");	
 			// give it requested size
 			reserve(nsize + 20);                 
@@ -1231,7 +1231,7 @@ twine& twine::reserve(size_t min_size)
 		throw AnException(0, FL, "twine::reserve m_allocated_size < TWINE_SMALL_STRING");
 	} 
 
-	if(min_size < m_allocated_size){
+	if((min_size + 10) <= m_allocated_size){
 		return *this; // nothing to do, we already have enough allocated
 	}
 	
@@ -1262,10 +1262,10 @@ twine& twine::reserve(size_t min_size)
 		// For detailed analysis: http://www.gotw.ca/gotw/043.htm
 		size_t dbl = m_allocated_size * 2;
 		size_t newlen = 0;
-		if(dbl >  min_size+10 ){
+		if(dbl > (min_size + 10) ){
 			newlen = dbl;
 		} else {
-			newlen = min_size + 1;
+			newlen = min_size + 10;
 		}
 
 		char *ptr = (char *)realloc(m_data, newlen);
@@ -1303,13 +1303,13 @@ size_t twine::length(void) const
 size_t twine::max_size(void) const 
 { 
 	//EnEx ee("twine::max_size(void)");
-	return m_allocated_size - 1; 
+	return m_allocated_size - 10; 
 }
 
 size_t twine::capacity(void) const 
 { 
 	//EnEx ee("twine::capacity(void)");
-	return m_allocated_size - 1; 
+	return m_allocated_size - 10; 
 }
 
 bool twine::empty(void) const 
