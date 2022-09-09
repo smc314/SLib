@@ -96,11 +96,11 @@ libxml2:
 	move lib\libxslt.dll bin
 
 curl:
-	del /Q /S curl-7.46.0.tar.gz
-	rm -rf curl-7.46.0
-	$(CURL) http://curl.haxx.se/download/curl-7.46.0.tar.gz
-	$(UNTAR) curl-7.46.0.tar.gz
-	cd curl-7.46.0\winbuild
+	del /Q /S curl-7.85.0.tar.gz
+	rm -rf curl-7.85.0
+	$(CURL) http://curl.se/download/curl-7.85.0.tar.gz
+	$(UNTAR) curl-7.85.0.tar.gz
+	cd curl-7.85.0\winbuild
 	nmake /f Makefile.vc mode=dll VC=14 WITH_DEVEL=..\.. WITH_SSL=dll WITH_ZLIB=dll MACHINE=x64
 	cd ..\builds\libcurl-vc14-x64-release-dll-ssl-dll-zlib-dll-ipv6-sspi
 	copy bin\*.* ..\..\..\bin
