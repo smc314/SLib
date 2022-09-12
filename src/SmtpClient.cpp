@@ -201,7 +201,7 @@ void SmtpClient::Send(EMail& message, const twine& smtpServer, const twine& user
 		errmsg.format("Sending SMTP Message failed: %s: %s", curl_easy_strerror(res), errbuf );
 		//printf("%s", errmsg() );
 	} else {
-		WARN(FL, "Sending SMTP Message worked:\n%s\n", verboseLog.readContentsAsTwine()() );
+		DEBUG(FL, "Sending SMTP Message worked:\n%s\n", verboseLog.readContentsAsTwine()() );
 	}
 
 	// Always clean up and free lists
