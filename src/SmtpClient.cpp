@@ -262,12 +262,14 @@ void SmtpClient::FormatMessage(EMail& message )
 
 	tmp.format("MIME-Version: 1.0\r\n" ); SendLines.push_back(tmp);
 	tmp.format("Content-Type: multipart/mixed; boundary=\"%s\"\r\n", boundary() ); SendLines.push_back(tmp);
-	tmp = "To:";
-	for(size_t i = 0; i < message.TOList().size()-1; i++){
-		tmp += " " + message.TOList()[i] + ",";
+	if(message.TOList().size() > 0){
+		tmp = "To:";
+		for(size_t i = 0; i < message.TOList().size()-1; i++){
+			tmp += " " + message.TOList()[i] + ",";
+		}
+		tmp += " " + message.TOList()[ message.TOList().size() - 1] + "\r\n";
+		SendLines.push_back( tmp );
 	}
-	tmp += " " + message.TOList()[ message.TOList().size() - 1] + "\r\n";
-	SendLines.push_back( tmp );
 
 	if(message.CCList().size() > 0){
 		tmp = "Cc:";
