@@ -142,6 +142,14 @@ qx:
 	$(CURL) http://www.helixsdk.org/qooxdoo-5.0.1-sdk.zip
 	$(UNZIP) -q qooxdoo-5.0.1-sdk.zip
 
+
+#
+# Apache is downloaded as a pre-built binary from apachelounge.com/download
+# Pick the one that is correct for our current Visual Studio compiler.
+# Download it, then rename it to HelixApache24Win64.zip and upload it
+# to helixsdk.org
+# This makefile will then download it from there for packaging into our
+# 3rdParty bundle.
 apache:
 	rm -rf Apache24
 	$(CURL) http://www.helixsdk.org/HelixApache24Win64.zip
