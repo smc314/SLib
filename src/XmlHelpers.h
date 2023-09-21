@@ -175,7 +175,7 @@ class DLLEXPORT XmlHelpers {
 					}
 				}
 			}
-			throw AnException(0, FL, "No CDATA Section found under given node.");
+			throw AnException(10010, FL, "No CDATA Section found under given node.");
 		}
 
 		static void setCDATASection(xmlNodePtr parent, const twine& content) {
