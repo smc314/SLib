@@ -33,10 +33,11 @@ zlib:
 	del /Q /S zlib-1.2.11 zlib1211.zip 
 	del /Q /S zlib-1.2.12 zlib1212.zip 
 	del /Q /S zlib-1.2.13 zlib1213.zip 
-	rm -rf  zlib-1.2.13
-	$(CURL) http://zlib.net/zlib1213.zip
-	$(UNZIP) zlib1213.zip
-	cd zlib-1.2.13
+	del /Q /S zlib-1.3 zlib13.zip 
+	rm -rf  zlib-1.3
+	$(CURL) http://zlib.net/zlib13.zip
+	$(UNZIP) zlib13.zip
+	cd zlib-1.3
 	nmake -f win32/Makefile.msc AS=ml64
 	copy zdll.lib ..\lib
 	copy zlib.lib ..\lib
