@@ -92,6 +92,9 @@ ${ChildVectorDefines}
 		/// Create an XML Document from this data object
 		xmlDocPtr createXmlDoc() const;
 
+		/// Save an XML Document as a file from this data object
+		void saveXmlDoc( const twine& fileName ) const;
+
 		/// Create a series of these objects by reading all children of the given parent
 		static ${shortName}_svect readXmlChildren(xmlNodePtr parent);
 

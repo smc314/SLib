@@ -13,6 +13,7 @@
 #include <Log.h>
 #include <XmlHelpers.h>
 #include <Timer.h>
+#include <File.h>
 using namespace SLib;
 
 #include "${shortName}.h"
@@ -143,6 +144,24 @@ ${XmlWriteMembers}
 
 	return doc;
 }
+
+/* ********************************************************************** */
+/* Save an XML Document as a file from our data object                    */
+/* ********************************************************************** */
+void ${shortName}::saveXmlDoc( const twine& fileName ) const
+{
+	EnEx ee(FL, "${shortName}::saveXmlDoc( const twine& fileName )");
+
+	sptr<xmlDoc, xmlFreeDoc> tmpDoc = createXmlDoc();
+	twine tmpTwine = XmlHelpers::docToString( tmpDoc );
+	MemBuf tmpMemBuf( tmpTwine );
+	SLib::File::EnsurePath( fileName );
+	SLib::File outputFile;
+	outputFile.create( fileName );
+	outputFile.write( tmpMemBuf );
+	outputFile.flush();
+}
+
 
 /* ********************************************************************** */
 /* Create a series of these objects by reading all children of the parent */
