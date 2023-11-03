@@ -29,6 +29,7 @@ using namespace SLib;
 #include "HelixExtractStrings.h"
 #include "HelixCountLines.h"
 #include "HelixFind.h"
+#include "HelixScanUnused.h"
 #include "HelixJSGenTask.h"
 #include "HelixSqldo.h"
 using namespace Helix::Build;
@@ -59,6 +60,7 @@ void handleTestGen(int argIndex);
 void handleSqldoGen(int argIndex);
 void handleCrudGen(int argIndex);
 void handleRepGen(int argIndex);
+void handleUnused(int argIndex);
 void testDep();
 void CopyCore();
 void describe();
@@ -225,6 +227,10 @@ int internalMain (int argc, char** argv)
 					handleRepGen( (int)i );
 					break; // All the rest of the arguments belong to the test command
 				}
+				else if(targ == "unused") {
+					handleUnused( (int)i );
+					break; // All the rest of the arguments belong to the test command
+				}
 				else if(targ == "?") describe();
 				else if(targ == "help") describe();
 				else if(targ == "-?") describe();
@@ -319,6 +325,10 @@ void describe()
 	printf("== repgen -  creates a set of Bulk Replication files with the following options\n");
 	printf("             logic=... - specifies which logic folder to use\n");
 	printf("             do=... - specifies which server Data Object to generate\n");
+	printf("== unused -  scans sql.xml data objects for unused methods with the following options\n");
+	printf("             logic=... - specifies which logic folder to scan (optional)\n");
+	printf("             do=... - specifies which server Data Object to scan (optional)\n");
+	printf("             only=true/false - indicates whether to only show unused or counts on all methods (default true)\n");
 	printf("\n");
 	printf("== If no target is specified, the 'all' target is invoked.\n");
 	printf("\n");
@@ -639,6 +649,42 @@ void handleRepGen(int argIndex )
 	fileName.format("BulkReplicateRecv%s.cpp", forDO() );
 	fileName = File::PathCombine( path, fileName );
 	File::writeToFile( fileName, sqldo.GenRepRecvBody( logic, forDO ) );
+}
+
+void handleUnused(int argIndex )
+{
+	printf("============================================================================\n");
+	printf("== Scan Data Objects for Unused Methods\n");
+	printf("============================================================================\n");
+
+	twine logic; // Picks up argument: logic=ttvx 
+	twine forDO; // Picks up argument do=ITOStatus
+	twine only;
+	
+	for(size_t i = argIndex; i < m_targets.size(); i++){
+		auto splits = m_targets[i].split("=");
+		if(splits[0] == "logic"){
+			logic = splits[1];
+		} else if(splits[0] == "do"){
+			forDO = splits[1];
+		} else if(splits[0] == "only"){
+			only = splits[1];
+		}
+	}
+
+	if(logic.empty()){
+		logic = "all";
+	}
+	if(forDO.empty()){
+		forDO = "all";
+	}
+	if(only.empty()){
+		only = "true";
+	}
+
+	HelixScanUnused scanUnused;	
+	scanUnused.Generate(logic, forDO, only == "true");
+
 }
 
 void handleSqldoGen(int argIndex)

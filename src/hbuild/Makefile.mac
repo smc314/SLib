@@ -41,7 +41,8 @@ HBUILD_OH=hbuild.o HelixFS.o HelixFSFolder.o HelixFSFile.o HelixBuilder.o HelixW
 	HelixSqldo.o HelixGenTask.o HelixJSApiGenTask.o HelixConfig.o HelixSqldoValidateFunction.o \
 	HelixSqldoMapFunction.o \
 	HelixAutoAsset.o HelixExtractStrings.o HelixJSGenTask.o HelixCountLines.o HelixFind.o \
-	HelixSqldoSearchField.o HelixSqldoSearchFunction.o HelixSqldoLogChangesFunction.o
+	HelixSqldoSearchField.o HelixSqldoSearchFunction.o HelixSqldoLogChangesFunction.o \
+	HelixScanUnused.o
 
 all: $(HBUILD_OH)
 	$(CC) -o hbuild $(HBUILD_OH) $(LFLAGS) -L.. -lSLib 
