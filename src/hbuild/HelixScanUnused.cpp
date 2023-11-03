@@ -104,6 +104,7 @@ void HelixScanUnused::Generate( const twine& logic, const twine& forDO, bool onl
 			if(method.name.startsWith( "pagingSql" ) ||
 				method.name.startsWith( "dummy" ) ||
 				method.name.startsWith( "Dummy" ) ||
+				method.name.startsWith( "insert" ) ||
 				method.name.startsWith( "insertWithId" )
 			){
 				continue; // Skip these methods
