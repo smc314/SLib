@@ -26,6 +26,9 @@ namespace HelixPdfGen.DO.${shortPackage}
 	  */
 	public class ${shortName}
 	{
+		/// Used to track whether this object is dirty - 0 = Not dirty, 1 = New, 2 = Deleted, 3 = Modified
+		public int m_is_dirty;
+
 		/// All Data Members are public
 ${C#DefineDataMembers}
 
@@ -39,9 +42,48 @@ ${C#ChildVectorDefines}
 
 		/// Initialize this data object to have all empty or 0 values.
 		public ${shortName} init() {
+			m_is_dirty = 0;
+
 ${C#MemberInitStatements}
 
 			return this;
+		}
+
+		/// Returns whether this object is dirty
+		public bool IsDirty(){
+			return m_is_dirty != 0;
+		}
+		
+		/// Clears the dirty flag of any setting
+		public void ClearDirty(){
+			m_is_dirty = 0;
+		}
+
+		/// Checks to see if this is a new object
+		public bool IsNew() {
+			return m_is_dirty == 1;
+		}
+		/// Sets this object as a new object
+		public void SetNew() {
+			m_is_dirty = 1;
+		}
+
+		/// Checks to see if this is a deleted object
+		public bool IsDeleted() {
+			return m_is_dirty == 2;
+		}
+		/// Sets this object as a deleted object
+		public void SetDeleted() {
+			m_is_dirty = 2;
+		}
+
+		/// Checks to see if this is a modified object
+		public bool IsModified() {
+			return m_is_dirty == 3;
+		}
+		/// Sets this object as a modified object
+		public void SetModified() {
+			m_is_dirty = 3;
 		}
 
 		/* ************************************************************************** */
@@ -63,6 +105,8 @@ ${C#MemberInitStatements}
 				throw new Exception("XmlElement passed to construct ${shortName} is NULL.");
 			}
 
+			m_is_dirty = XmlHelpers.getIntAttr( node, "_m_is_dirty" );
+
 ${C#XmlReadMembers}
 
 			return this;
@@ -78,6 +122,8 @@ ${C#XmlReadMembers}
 			XmlElement child = parent.OwnerDocument.CreateElement( "${shortName}" );
 			parent.AppendChild( child );
 
+			if(m_is_dirty != 0) XmlHelpers.setIntAttr( child, "_m_is_dirty", m_is_dirty );
+
 ${C#XmlWriteMembers}
 
 			return child;
@@ -88,6 +134,8 @@ ${C#XmlWriteMembers}
 			XmlDocument doc = new XmlDocument();
 			doc.AppendChild( doc.CreateElement( "${shortName}" ) );
 			XmlElement child = doc.DocumentElement;
+
+			if(m_is_dirty != 0) XmlHelpers.setIntAttr( child, "_m_is_dirty", m_is_dirty );
 
 ${C#XmlWriteMembers}
 

@@ -15,6 +15,7 @@ ${childArrayInit}
 	},
 
 	properties : {
+		M_IsDirty : {init : 0, event: "changeIsDirty", check : "Integer" },
 ${jsProperties}
 	},
 
@@ -65,6 +66,7 @@ ${jsArrayProperties}
 				// figure out how to throw an exception!
 				return;
 			}
+			if(elem.getAttribute("_m_is_dirty")){ this.setM_IsDirty( Number(elem.getAttribute("_m_is_dirty") ) ); }
 ${jsReadFromXml}
 		},
 
@@ -85,6 +87,7 @@ ${jsReadFromXml}
 				subElem = doc.createElement("${shortName}");
 			}
 			parent.appendChild(subElem);
+			if(this.getM_IsDirty() != 0) subElem.setAttribute("_m_is_dirty", String(this.getM_IsDirty()));
 ${jsWriteToXml}
 			return subElem;
 		},
@@ -113,9 +116,48 @@ ${jsCloneArrays}
 		  * @param newObj {Object} The new object that we will populate and return.
 		  */
 		createDuplicate : function( newObj ) {
+			newObj.setM_IsDirty( this.getM_IsDirty() );
 ${jsCloneProperties}
 			return newObj;
+		},
+
+		/// Returns whether the object is dirty or not - boolean
+		IsDirty : function( ){
+			return this.getM_IsDirty() !== 0;
+		},
+		/// Clears the dirty flag of any setting
+		ClearDirty : function(){
+			this.setM_IsDirty( 0 );
+		},
+
+		/// Returns whether this is a new object - boolean
+		IsNew : function( ) {
+			return this.getM_IsDirty() === 1;
+		},
+		/// Sets this object as a new object
+		SetNew : function( ){
+			this.setM_IsDirty( 1 );
+		},
+
+		/// Returns whether this is a deleted object - boolean
+		IsDeleted : function( ){
+			return this.getM_IsDirty() === 2;
+		},
+		/// Sets this object as a deleted object
+		SetDeleted : function( ){
+			this.setM_IsDirty( 2 );
+		},
+
+		/// Returns whether this is a modified object - boolean
+		IsModified : function( ){
+			return this.getM_IsDirty() === 3;
+		},
+		/// Sets this object as a modified object
+		SetModified : function( ){
+			this.setM_IsDirty( 3 );
 		}
+
+
 	},
 
 	statics : {
