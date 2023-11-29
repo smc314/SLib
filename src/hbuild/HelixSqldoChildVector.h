@@ -48,6 +48,8 @@ class DLLEXPORT HelixSqldoChildVector
 		twine JSXmlGet(const twine& app);
 		twine JSXmlSet(const twine& app);
 		twine JSClone(const twine& app);
+		twine JSCheckDirty(const twine& app);
+		twine JSRemoveNotDirty(const twine& app);
 
 		twine name;
 		twine type;

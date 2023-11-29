@@ -202,4 +202,29 @@ twine HelixSqldoChildVector::JSClone(const twine& app)
 	;
 }
 
+twine HelixSqldoChildVector::JSCheckDirty(const twine& app) 
+{
+	return 
+		"\t\t\tfor(var i = 0, l = this." + name + ".length; i<l; i++){\n"
+		"\t\t\t\tif(this." + name + "[i].IsDirty() || this." + name + "[i].ChildrenDirty()){\n"
+		"\t\t\t\t\treturn true;\n"
+		"\t\t\t\t}\n"
+		"\t\t\t}\n"
+	;
+}
+
+twine HelixSqldoChildVector::JSRemoveNotDirty(const twine& app) 
+{
+	return 
+		"\t\t\tfor(var i = 0, l = this." + name + ".length; i<l; i++){\n"
+		"\t\t\t\tif(this." + name + "[i].IsDirty() === false && this." + name + "[i].ChildrenDirty() === false){\n"
+		"\t\t\t\t\tthis." + name + "[i].dispose();   // dispose of the object at this position\n"
+		"\t\t\t\t\tthis." + name + ".splice( i, 1 ); // remove this element of the array\n"
+		"\t\t\t\t\ti --; // adjust the loop counter to account for the removed item\n"
+		"\t\t\t\t\tl --; // adjust the array length to account for the removed item\n"
+		"\t\t\t\t}\n"
+		"\t\t\t}\n"
+	;
+}
+
 

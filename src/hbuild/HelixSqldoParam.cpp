@@ -531,3 +531,17 @@ twine HelixSqldoParam::JSClone(const twine& app) const
 
 	return "\t\t\tnewObj.set" + ucase + "( this.get" + ucase + "() );\n";
 }
+
+twine HelixSqldoParam::JSReset(const twine& app) const
+{
+	twine ucase( name );
+	ucase.ucase(0);
+
+	if(ucase == "Id"){
+		return 
+			"\t\t\t\t// Don't reset the Id property\n"
+			"\t\t\t\t//this.reset" + ucase + "();\n";
+	} else {
+		return "\t\t\t\tthis.reset" + ucase + "();\n";
+	}
+}

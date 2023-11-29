@@ -129,6 +129,11 @@ ${jsCloneProperties}
 		ClearDirty : function(){
 			this.setM_IsDirty( 0 );
 		},
+		/// Returns whether any of our children are dirty
+		ChildrenDirty : function(){
+${jsCheckArraysDirty}
+			return false;
+		},
 
 		/// Returns whether this is a new object - boolean
 		IsNew : function( ) {
@@ -155,6 +160,19 @@ ${jsCloneProperties}
 		/// Sets this object as a modified object
 		SetModified : function( ){
 			this.setM_IsDirty( 3 );
+		},
+
+		/** This will strip this object of any children that have not been modified.
+		  */
+		OnlyChanges : function (){
+			if(this.IsDirty() === false){
+				// Re-init this object with default/blank values
+${jsResetProperties}
+			}
+
+			// Now check our child arrays - this will recurs into each object
+${jsRemoveArraysNotDirty}
+
 		}
 
 

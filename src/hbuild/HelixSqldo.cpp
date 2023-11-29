@@ -552,7 +552,10 @@ twine HelixSqldo::GenJSBody(const twine& app)
 	twine jsReadFromXml;
 	twine jsWriteToXml;
 	twine jsCloneArrays;
+	twine jsCheckArraysDirty;
+	twine jsRemoveArraysNotDirty;
 	twine jsCloneProperties;
+	twine jsResetProperties;
 	twine jsSearchFunctions;
 	bool first = true;
 	for(auto& p : m_all_params){
@@ -560,6 +563,7 @@ twine HelixSqldo::GenJSBody(const twine& app)
 		jsReadFromXml.append( p.second.JSXmlGet( app ) );
 		jsWriteToXml.append( p.second.JSXmlSet( app ) );
 		jsCloneProperties.append( p.second.JSClone( app ) );
+		jsResetProperties.append( p.second.JSReset( app ) );
 
 		first = false;
 	}
@@ -570,6 +574,8 @@ twine HelixSqldo::GenJSBody(const twine& app)
 		jsReadFromXml.append( cv.JSXmlGet( app ) );
 		jsWriteToXml.append( cv.JSXmlSet( app ) );
 		jsCloneArrays.append( cv.JSClone( app ) );
+		jsCheckArraysDirty.append( cv.JSCheckDirty( app ) );
+		jsRemoveArraysNotDirty.append( cv.JSRemoveNotDirty( app ) );
 	}
 	for(auto& co : m_child_objects){
 		childArrayInit.append( co.JSInit( app ) );
@@ -587,7 +593,10 @@ twine HelixSqldo::GenJSBody(const twine& app)
 	m_parms[ "jsReadFromXml" ] = jsReadFromXml;
 	m_parms[ "jsWriteToXml" ] = jsWriteToXml;
 	m_parms[ "jsCloneArrays" ] = jsCloneArrays;
+	m_parms[ "jsCheckArraysDirty" ] = jsCheckArraysDirty;
+	m_parms[ "jsRemoveArraysNotDirty" ] = jsRemoveArraysNotDirty;
 	m_parms[ "jsCloneProperties" ] = jsCloneProperties;
+	m_parms[ "jsResetProperties" ] = jsResetProperties;
 	m_parms[ "jsSearchFunctions" ] = jsSearchFunctions;
 
 	twine output;
