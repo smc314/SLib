@@ -369,6 +369,7 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 	twine testRequireCompareWithoutId;
 	twine testRequireCompareWithId;
 	twine testCompareAllFields;
+	twine cppCheckArraysDirty;
 
 	for(auto& p : m_all_params){
 		DEBUG(FL, "%s - Parm %s(%s)", m_class_name(), p.second.name(), p.second.type() );
@@ -411,6 +412,7 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 		xmlCSWriteMembers.append( cv.CSXmlSet() );
 		jsonReadMembers.append( cv.CPPJsonGet() );
 		jsonWriteMembers.append( cv.CPPJsonSet() );
+		cppCheckArraysDirty.append( cv.CPPCheckDirty( ) );
 	}
 	for(auto& co : m_child_objects){
 		DEBUG(FL, "%s - Child Object %s(%s)", m_class_name(), co.name(), co.type() );
@@ -466,6 +468,7 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 	m_parms[ "TestRequireCompareWithoutId" ] = testRequireCompareWithoutId;
 	m_parms[ "TestRequireCompareWithId" ] = testRequireCompareWithId;
 	m_parms[ "TestCompareAllFields" ] = testCompareAllFields;
+	m_parms[ "CppCheckArraysDirty" ] = cppCheckArraysDirty;
 
 	return m_parms;
 }

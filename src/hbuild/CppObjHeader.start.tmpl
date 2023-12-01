@@ -88,6 +88,11 @@ ${ChildVectorDefines}
 		void ClearDirty(){
 			m_is_dirty = 0;
 		}
+		/// Returns whether any of our children are dirty
+		bool ChildrenDirty(){
+${CppCheckArraysDirty}
+			return false;
+		}
 
 		/// Checks to see if this is a new object
 		bool IsNew(){

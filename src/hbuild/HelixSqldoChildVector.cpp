@@ -213,6 +213,17 @@ twine HelixSqldoChildVector::JSCheckDirty(const twine& app)
 	;
 }
 
+twine HelixSqldoChildVector::CPPCheckDirty() 
+{
+	return 
+		"\t\t\tfor(auto obj : *" + name + "){\n"
+		"\t\t\t\tif(obj->IsDirty() || obj->ChildrenDirty()){\n"
+		"\t\t\t\t\treturn true;\n"
+		"\t\t\t\t}\n"
+		"\t\t\t}\n"
+	;
+}
+
 twine HelixSqldoChildVector::JSRemoveNotDirty(const twine& app) 
 {
 	return 

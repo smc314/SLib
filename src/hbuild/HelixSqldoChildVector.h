@@ -38,6 +38,7 @@ class DLLEXPORT HelixSqldoChildVector
 		twine CPPXmlSet();
 		twine CPPJsonGet();
 		twine CPPJsonSet();
+		twine CPPCheckDirty();
 
 		twine CSXmlGet();
 		twine CSXmlSet();

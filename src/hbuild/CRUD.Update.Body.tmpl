@@ -158,6 +158,27 @@ void ${CLASSNAME}::HandleFIXMEs(IOConn& ioc, ${OBJNAME}& local)
 
 	OdbcObj& db = *ioc.getDBConnection();
 
+	// If the UI is setting the dirty flags correctly at the object level, you can
+	// use a more concise version of this method here:
+	for(auto input : *local.FIXMEs){
+		if(input->IsDirty() == false) continue; // Nothing happened to this one
+		else if(input->IsNew()){
+			input->FIXMEId = local.Id; // copy our id into the record
+			Replication::HandleInsert( db, *input );
+		} else if(input->IsDeleted()){
+			FIXME::deleteById( db, input->Id );
+		} else if(input->IsModified()){
+			input->FIXMEId = local.Id; // Make sure of this
+			FIXME::update( db, *input );
+		}
+	}
+
+
+	// If the UI does not set the dirty flags, then you'll need to go through
+	// the full comparison against the database.
+	// Note - this is also the way to do this for nightly replication because
+	// there is no dirty flag involved.
+
 	// Pull up the existing list of child objects
 	auto existing = FIXMEs::selectAllFor${OBJNAME}( db, local.Id );
 
