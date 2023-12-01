@@ -25,6 +25,9 @@ using namespace SLib;
 Timer::Timer()
 {
 	// not much to do.
+	ftime(&m_start_time);
+	m_end_time.time = m_start_time.time;
+	m_end_time.millitm = m_start_time.millitm;
 }
 
 Timer::~Timer()
