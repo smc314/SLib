@@ -71,6 +71,7 @@ class DLLEXPORT HelixSqldo
 
 		const HelixSqldoParam& Param(const twine& paramName);
 		const map<twine, HelixSqldoParam>& AllParams();
+		const vector<HelixSqldoParam>& Constants();
 		const vector<HelixSqldoMethod>& Methods();
 		const vector<HelixSqldoChildVector>& ChildVectors();
 		const vector<HelixSqldoChildObject>& ChildObjects();
@@ -135,6 +136,7 @@ class DLLEXPORT HelixSqldo
 		vector< HelixSqldoMapFunction > m_maps;
 		vector< HelixSqldoLogChangesFunction > m_logchanges;
 		vector< HelixSqldoSearchFunction > m_searchs;
+		vector< HelixSqldoParam > m_consts;
 		map< twine, twine > m_parms;
 		
 		HelixFSFolder* m_folder;

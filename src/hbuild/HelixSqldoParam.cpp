@@ -46,6 +46,7 @@ HelixSqldoParam::HelixSqldoParam(xmlNodePtr elem)
 	function.getAttribute( elem, "function" );
 	header.getAttribute( elem, "header" );
 	format.getAttribute( elem, "format" );
+	value.getAttribute( elem, "value" );
 
 	if(type.empty()){
 		type = "twine"; // Default to twine

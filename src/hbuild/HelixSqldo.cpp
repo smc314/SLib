@@ -218,6 +218,7 @@ const vector<HelixSqldoSearchFunction>& HelixSqldo::SearchFunctions()
 void HelixSqldo::ReadSqldo()
 {
 	m_all_params.clear();
+	m_consts.clear();
 	m_methods.clear();
 	m_child_vectors.clear();
 	m_child_objects.clear();
@@ -238,6 +239,9 @@ void HelixSqldo::ReadSqldo()
 	m_package_dot_name = m_package_name;
 	m_package_dot_name.replace( '/', '.' );
 
+	for(auto n : XmlHelpers::FindChildren( root, "Constant" ) ){
+		m_consts.push_back( HelixSqldoParam( n ) );
+	}
 	for(auto n : XmlHelpers::FindChildren( root, "SqlStatement" ) ){
 		m_methods.push_back( HelixSqldoMethod( n ) );
 	}
@@ -370,6 +374,12 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 	twine testRequireCompareWithId;
 	twine testCompareAllFields;
 	twine cppCheckArraysDirty;
+	twine cppConstDefs;
+	twine csConstDefs;
+
+	for(auto& c : m_consts){
+		cppConstDefs.append( "\t\tconst static int " + c.name + " = " + c.value + ";\n");
+	}
 
 	for(auto& p : m_all_params){
 		DEBUG(FL, "%s - Parm %s(%s)", m_class_name(), p.second.name(), p.second.type() );
@@ -469,6 +479,8 @@ map< twine, twine >& HelixSqldo::BuildObjectParms()
 	m_parms[ "TestRequireCompareWithId" ] = testRequireCompareWithId;
 	m_parms[ "TestCompareAllFields" ] = testCompareAllFields;
 	m_parms[ "CppCheckArraysDirty" ] = cppCheckArraysDirty;
+	m_parms[ "CppConstDefs" ] = cppConstDefs;
+	m_parms[ "CsConstDefs" ] = csConstDefs;
 
 	return m_parms;
 }
@@ -560,6 +572,12 @@ twine HelixSqldo::GenJSBody(const twine& app)
 	twine jsCloneProperties;
 	twine jsResetProperties;
 	twine jsSearchFunctions;
+	twine jsConstDefs;
+
+	for(auto& c : m_consts){
+		jsConstDefs.append( "\t\t" + c.name + " : " + c.value + ",\n" );
+	}
+
 	bool first = true;
 	for(auto& p : m_all_params){
 		jsProperties.append( p.second.JSPropDef(first) );
@@ -601,6 +619,7 @@ twine HelixSqldo::GenJSBody(const twine& app)
 	m_parms[ "jsCloneProperties" ] = jsCloneProperties;
 	m_parms[ "jsResetProperties" ] = jsResetProperties;
 	m_parms[ "jsSearchFunctions" ] = jsSearchFunctions;
+	m_parms[ "jsConstDefs" ] = jsConstDefs;
 
 	twine output;
 	output.append( loadTmpl( "JsObj.full.tmpl", m_parms) );

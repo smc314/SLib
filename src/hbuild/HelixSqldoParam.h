@@ -74,6 +74,7 @@ class DLLEXPORT HelixSqldoParam
 		twine function;
 		twine header;
 		twine format;
+		twine value;
 };
 
 }} // End Namespace stack
