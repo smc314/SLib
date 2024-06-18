@@ -65,6 +65,11 @@ twine HelixSqldoLogChangesFunction::GenCPPHeader(const twine& className)
 		"\t\t  */\n"
 		"\t\tbool " + name + "(OdbcObj& db, " + className + "* original, const twine& changeReason, const twine& parentKey, bool logChanges = true, bool watchChangeFlags = false);\n"
 		"\n"
+		"\t\t/** This is used by the LogChanges function to build our key.  It is separated so that you\n"
+		"\t\t  * may invoke this function directly if required.\n"
+		"\t\t  */\n"
+		"\t\ttwine BuildKeyFor" + name + "(const twine& parentKey);\n"
+		"\n"
 	;
 
 }
@@ -80,12 +85,8 @@ twine HelixSqldoLogChangesFunction::GenCPPBody(const twine& className, map< twin
 	twine ret;
 
 	ret.append(
-		"bool " + className  + "::" + name + "(OdbcObj& db, " + className + "* original, const twine& changeReason, const twine& parentKey, bool logChanges, bool watchChangeFlags)\n"
+		"twine " + className + "::BuildKeyFor" + name + "(const twine& parentKey)\n"
 		"{\n"
-		"\tEnEx ee(FL, \"" + className + "::" + name + "(OdbcObj& db, " + className + "* original, const twine& changeReason, const twine& parentKey, bool logChanges, bool watchChangeFlags)\");\n"
-		"\n"
-		"\tbool foundChange = false;\n"
-		"\n"
 		"\ttwine ourKey;\n"
 		"\ttwine tmp;\n"
 		"\tif(!parentKey.empty()){\n"
@@ -123,13 +124,47 @@ twine HelixSqldoLogChangesFunction::GenCPPBody(const twine& className, map< twin
 		}
 		ret.append( "ourKey.append( \"[\" ).append( tmp ).append( \"]\" );\n" );
 	}
+
 	ret.append(
+		"\n"
+		"\treturn ourKey;\n"
+		"}\n"
+		"\n"
+	);
+
+	ret.append(
+		"bool " + className  + "::" + name + "(OdbcObj& db, " + className + "* original, const twine& changeReason, const twine& parentKey, bool logChanges, bool watchChangeFlags)\n"
+		"{\n"
+		"\tEnEx ee(FL, \"" + className + "::" + name + "(OdbcObj& db, " + className + "* original, const twine& changeReason, const twine& parentKey, bool logChanges, bool watchChangeFlags)\");\n"
+		"\n"
+		"\tbool foundChange = false;\n"
+		"\n"
+		"\ttwine ourKey = BuildKeyFor" + name + "( parentKey );\n"
 		"\n"
 		"\tif(original == nullptr){\n"
 		"\t\t// This is used by the caller to indicate a record has been created or deleted\n"
 		"\t\t// We log the change with our key, and then return without doing any actual comparisons\n"
 		"\t\tif(logChanges){\n"
 		"\t\t\tStatics::LogChange(db, \"" + tableName + "\", " + guid + ", ourKey, changeReason);\n"
+		"\n"
+		"\t\t\t// Also log any children as new records as well\n"
+	);
+
+	for(auto& field : fields){
+		if(field.type == "childObject"){
+			ret.append (
+				"\t\t\tthis->" + field.name + "." + field.function + "(db, nullptr, \"Insert\", ourKey, logChanges, watchChangeFlags);\n"
+			);
+		} else if(field.type == "childArray"){
+			ret.append (
+				"\t\t\tfor(auto c : *" + field.name + ") {\n"
+				"\t\t\t\tc->" + field.function + "(db, nullptr, \"Insert\", ourKey, logChanges, watchChangeFlags);\n"
+				"\t\t\t}\n"
+			);
+		}
+	}
+
+	ret.append(
 		"\t\t}\n"
 		"\n"
 		"\t\treturn true; // change was logged\n"
