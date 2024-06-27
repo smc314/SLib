@@ -65,6 +65,6 @@
 
 // Convenience literal syntax so xmlChar* string literals can be written as "tag"_x rather
 // than needing (const xmlChar*)"tag" casts all over the place
-inline const xmlChar* operator "" _x( const char * literal, std::size_t ) { return (const xmlChar*)literal; }
+inline const xmlChar* operator "" _x( const char * literal, size_t ) { return (const xmlChar*)literal; }
 
 #endif // XMLINC_H Defined
