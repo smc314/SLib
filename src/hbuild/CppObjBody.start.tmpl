@@ -325,7 +325,7 @@ cJSON* ${shortName}::createJSON() const
 
 	cJSON* child = cJSON_CreateObject();
 
-	cJSON_SetAddIntValue( child, "_m_is_dirty", (int)m_is_dirty );
+	//cJSON_SetAddIntValue( child, "_m_is_dirty", (int)m_is_dirty );
 
 ${JSONWriteMembers}
 
