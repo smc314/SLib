@@ -400,7 +400,7 @@ twine HelixSqldoParam::CSReadDB(int pos) const
 	else if(type == "float") 
 		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? 0.0f : (float)reader.GetDouble(" + pos_string + ");\n";
 	else if(type == "bool") 
-		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? false : reader.GetBool(" + pos_string + ");\n";
+		return "\t\t\t\tlocal." + name + " = Util.Statics.ReadSqlBool( reader, " + pos_string + ");\n";
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") 
 		return "\t\t\t\tlocal." + name + " = reader.IsDBNull(" + pos_string + ") ? DateTime.MinValue: reader.GetDateTime(" + pos_string + ");\n";
 	else if(type == "guid" || type == "Guid") 
