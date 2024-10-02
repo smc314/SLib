@@ -219,13 +219,13 @@ twine HelixSqldoParam::CPPJsonGet() const
 twine HelixSqldoParam::CPPJsonSet() const
 {
 	if(CPPType() == "intptr_t") 
-		return "cJSON_SetAddIntValue( child, \"" + name + "\", (int)" + name + " );";
+		return "if( " + name + " != 0) cJSON_SetAddIntValue( child, \"" + name + "\", (int)" + name + " );";
 	else if(type == "long") 
-		return "cJSON_SetAddIntValue( child, \"" + name + "\", (int)" + name + "  );";
+		return "if( " + name + " != 0) cJSON_SetAddIntValue( child, \"" + name + "\", (int)" + name + "  );";
 	else if(type == "float") 
-		return "cJSON_SetAddDoubleValue( child, \"" + name + "\", " + name + " );";
+		return "if( " + name + " != 0.0) cJSON_SetAddDoubleValue( child, \"" + name + "\", " + name + " );";
 	else if(type == "bool") 
-		return "cJSON_SetAddBoolValue( child, \"" + name + "\", (int)" + name + " );";
+		return "if( " + name + " != false) cJSON_SetAddBoolValue( child, \"" + name + "\", (int)" + name + " );";
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") 
 		return "if(!" + name + ".IsMinValue()) cJSON_SetAddStringValue( child, \"" + name + "\", " + name + ".GetValue( OdbcObj::DateFormat() )() );";
 	else if(type == "base64")
