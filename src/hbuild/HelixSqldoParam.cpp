@@ -225,7 +225,7 @@ twine HelixSqldoParam::CPPJsonSet() const
 	else if(type == "float") 
 		return "if( " + name + " != 0.0) cJSON_SetAddDoubleValue( child, \"" + name + "\", " + name + " );";
 	else if(type == "bool") 
-		return "if( " + name + " != false) cJSON_SetAddBoolValue( child, \"" + name + "\", (int)" + name + " );";
+		return "cJSON_SetAddBoolValue( child, \"" + name + "\", (int)" + name + " );";
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") 
 		return "if(!" + name + ".IsMinValue()) cJSON_SetAddStringValue( child, \"" + name + "\", " + name + ".GetValue( OdbcObj::DateFormat() )() );";
 	else if(type == "base64")
