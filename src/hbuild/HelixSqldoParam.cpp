@@ -219,11 +219,11 @@ twine HelixSqldoParam::CPPJsonGet() const
 twine HelixSqldoParam::CPPJsonSet() const
 {
 	if(CPPType() == "intptr_t") 
-		return "if( " + name + " != 0) cJSON_SetAddIntValue( child, \"" + name + "\", (int)" + name + " );";
+		return "cJSON_SetAddIntValue( child, \"" + name + "\", (int)" + name + " );";
 	else if(type == "long") 
-		return "if( " + name + " != 0) cJSON_SetAddIntValue( child, \"" + name + "\", (int)" + name + "  );";
+		return "cJSON_SetAddIntValue( child, \"" + name + "\", (int)" + name + "  );";
 	else if(type == "float") 
-		return "if( " + name + " != 0.0) cJSON_SetAddDoubleValue( child, \"" + name + "\", " + name + " );";
+		return "cJSON_SetAddDoubleValue( child, \"" + name + "\", " + name + " );";
 	else if(type == "bool") 
 		return "cJSON_SetAddBoolValue( child, \"" + name + "\", (int)" + name + " );";
 	else if(type == "Timestamp" || type == "Date" || type == "DateTime") 
