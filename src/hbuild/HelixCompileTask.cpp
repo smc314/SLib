@@ -120,7 +120,7 @@ twine HelixCompileTask::GetCommandLine()
 			auto& logicName = splits[ splits.size() - 2 ];
 			//printf("Logic name is %s\n", logicName() );
 
-			cmd.append(CC(tpl6) + LogicIncludes(logicName, true));
+			cmd.append(CC(tpl6) + "-I .. " + LogicIncludes(logicName, true));
 
 			// Pick up any dependent folders from our config file
 			auto deps = HelixConfig::getInstance().LogicDepends( logicName );
