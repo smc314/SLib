@@ -81,7 +81,7 @@ ${ChildVectorDefines}
 		${shortName}& checkSize();
 
 		/// Returns whether this object is dirty
-		bool IsDirty(){
+		bool IsDirty() const {
 			return m_is_dirty != 0;
 		}
 		/// Clears the dirty flag of any setting
@@ -89,13 +89,13 @@ ${ChildVectorDefines}
 			m_is_dirty = 0;
 		}
 		/// Returns whether any of our children are dirty
-		bool ChildrenDirty(){
+		bool ChildrenDirty() const {
 ${CppCheckArraysDirty}
 			return false;
 		}
 
 		/// Checks to see if this is a new object
-		bool IsNew(){
+		bool IsNew() const {
 			return m_is_dirty == 1;
 		}
 		/// Sets this object as a new object
@@ -104,7 +104,7 @@ ${CppCheckArraysDirty}
 		}
 
 		/// Checks to see if this is a deleted object
-		bool IsDeleted(){
+		bool IsDeleted() const {
 			return m_is_dirty == 2;
 		}
 		/// Sets this object as a deleted object
@@ -113,7 +113,7 @@ ${CppCheckArraysDirty}
 		}
 
 		/// Checks to see if this is a modified object
-		bool IsModified(){
+		bool IsModified() const {
 			return m_is_dirty == 3;
 		}
 		/// Sets this object as a modified object
