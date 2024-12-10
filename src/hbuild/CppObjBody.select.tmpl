@@ -58,67 +58,70 @@ ${doName}_svect ${doName}::${methodName}(OdbcObj& odbc, twine& stmt, bool useInp
 		throw AnException(0, FL, "useInputs no longer supported." );
 	}
 
-	selectTimer.Start();
-	{ // Used for scope for the timing object.
-		EnEx eeExe("${doName}::${methodName}()-ExecStmt");
+	try {
+		selectTimer.Start();
+		{ // Used for scope for the timing object.
+			EnEx eeExe("${doName}::${methodName}()-ExecStmt");
 
-		// Execute the statement
-		if(!suppressTrace){
-			DEBUG(UFL, "Executing the statement for ${doName}::${methodName}");
-		}
-		
-		try {
+			// Execute the statement
+			if(!suppressTrace){
+				DEBUG(UFL, "Executing the statement for ${doName}::${methodName}");
+			}
+			
 			odbc.SetReadUncommited( true ); // Turn on dirty reads for select statements
 			odbc.ExecStmt();
-			odbc.SetReadUncommited( false ); // Turn it back off right after the exec
-		} catch (AnException&){
-			odbc.SetReadUncommited( false ); // Ensure the dirty reads is turned back off
-			throw;
+
+		}
+		selectTimer.Finish();
+		if(selectTimer.Duration() > 1.0){
+			PerfLogs::LogSql( currentUserId, "${doName}::${methodName}", stmt, (int)(selectTimer.Duration() * 1000.0f) );
 		}
 
-	}
-	selectTimer.Finish();
-	if(selectTimer.Duration() > 1.0){
-		PerfLogs::LogSql( currentUserId, "${doName}::${methodName}", stmt, (int)(selectTimer.Duration() * 1000.0f) );
-	}
+		// Now that we've executed the statement, we'll know how many output columns we have.
+		// Grab the column count so that we don't bind invalid output positions.
+		int colCount = odbc.GetResultsetColumnCount();
+		while( colCount == 0 ){
+			DEBUG(UFL, "Statement returned a result set with 0 columns.  Checking for another result set.");
+			if(odbc.GetNextResultset() == false){
+				// No more result sets to process.  Bail out
+				return ret;
+			}
 
-	// Now that we've executed the statement, we'll know how many output columns we have.
-	// Grab the column count so that we don't bind invalid output positions.
-	int colCount = odbc.GetResultsetColumnCount();
-	while( colCount == 0 ){
-		DEBUG(UFL, "Statement returned a result set with 0 columns.  Checking for another result set.");
-		if(odbc.GetNextResultset() == false){
-			// No more result sets to process.  Bail out
-			return ret;
+			// Check the next result set column count
+			colCount = odbc.GetResultsetColumnCount();
 		}
 
-		// Check the next result set column count
-		colCount = odbc.GetResultsetColumnCount();
-	}
-
-	if( ${SqlOutputColCount} > colCount ){
-		throw AnException(0, FL, "Column count mismatch ${doName}::${methodName} results col count is %d, bound col count is %d.", colCount, ${SqlOutputColCount} );
-	}
-
-	int count;
-	fetchTimer.Start();
-	{ // Used for scope for the timing object
-		EnEx eeExe("${doName}::${methodName}()-FetchLoop");
-		if(!suppressTrace){
-			DEBUG(UFL, "Fetching data...");
+		if( ${SqlOutputColCount} > colCount ){
+			throw AnException(0, FL, "Column count mismatch ${doName}::${methodName} results col count is %d, bound col count is %d.", colCount, ${SqlOutputColCount} );
 		}
 
-		while( (count = odbc.FetchData()) != 0 ){
-			${doName}* obj = new ${doName}(); // Create a new empty object
-${CPPReadResultOutput}
+		int count;
+		fetchTimer.Start();
+		{ // Used for scope for the timing object
+			EnEx eeExe("${doName}::${methodName}()-FetchLoop");
+			if(!suppressTrace){
+				DEBUG(UFL, "Fetching data...");
+			}
 
-			ret->push_back( obj ); // Add it to our return vector
+			while( (count = odbc.FetchData()) != 0 ){
+				${doName}* obj = new ${doName}(); // Create a new empty object
+	${CPPReadResultOutput}
+
+				ret->push_back( obj ); // Add it to our return vector
+			}
 		}
+		fetchTimer.Finish();
+		if(fetchTimer.Duration() > 1.0){
+			PerfLogs::LogSql( currentUserId, "${doName}::${methodName}-fetch", stmt, (int)(fetchTimer.Duration() * 1000.0f) );
+		}
+
+	} catch (AnException&){
+		odbc.SetReadUncommited( false ); // Ensure the dirty reads is turned back off
+		throw;
 	}
-	fetchTimer.Finish();
-	if(fetchTimer.Duration() > 1.0){
-		PerfLogs::LogSql( currentUserId, "${doName}::${methodName}-fetch", stmt, (int)(fetchTimer.Duration() * 1000.0f) );
-	}
+
+	// Turn this back off before we exit
+	odbc.SetReadUncommited( false );
 
 	// When we return, the unique_ptr semantics make this work correctly
 	return ret;
