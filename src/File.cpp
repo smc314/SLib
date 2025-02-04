@@ -9,7 +9,6 @@ using namespace SLib;
 #include <dirent.h>
 #include <unistd.h>
 #include <dlfcn.h> // for dlopen, etc.
-#include <link.h>
 #endif
 #include <errno.h>
 
