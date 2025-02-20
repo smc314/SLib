@@ -25,7 +25,13 @@
 #else
 #       define DLLEXPORT
 #endif
-#include <chrono>
+
+#include <stdint.h>
+#include <time.h>
+#include <sys/timeb.h>
+#ifndef _WIN32
+#include <sys/time.h>
+#endif
 
 namespace SLib
 {
@@ -48,18 +54,6 @@ class DLLEXPORT Timer
 		/// Standard constructor
 		Timer();
 
-		/// Copy constructor
-		Timer(const Timer& other) = default;
-
-		/// Move constructor
-		Timer(Timer&& other) noexcept = default;
-
-		/// Copy assignment operator
-		Timer& operator=(const Timer& other) = default;
-
-		/// Move assignment operator
-		Timer& operator=(Timer&& other) noexcept = default;
-
 		/// Standard Destructor
 		virtual ~Timer();
 	
@@ -74,7 +68,7 @@ class DLLEXPORT Timer
 		  * and finish times for this timer.  The result is returned
 		  * as a float count of seconds and fractions of seconds.
 		  */
-		double Duration(void) const;
+		float Duration(void);
 
 		/** Use this method to retrieve a microsecond resolution clock value.
 		  * We use gettimeofday on linux and ftime on windows to implement this. Note,
@@ -83,12 +77,62 @@ class DLLEXPORT Timer
 		  */
 		static uint64_t GetCycleCount(void);
 
+#if 0
+		/** Use this method to retrieve the current CPU cycle count
+		 * value on an intel machine.  This works on windows, linux, and mac.
+		 */
+#ifdef _WIN32
+		// Link http://stackoverflow.com/questions/275004/c-timer-function-to-provide-time-in-nano-seconds
+
+		// Here's the actual code to retrieve the number of 80x86 CPU clock ticks passed
+		// since the CPU was last started.  It will work on Pentium and above (386/486 not
+		// supported).  This function has the advantage of being extremely fast - it usually
+		// takes no more than 50 cpu cycles to execute.
+
+		// If you need to translate the clock counts into true elapsed time, divide the results by
+		// your chip's clock speed.  Remember that the "rated" GHz is likely to be slightly different
+		// from the actual speed of your chip.  To check your chip's true speed, you can use several
+		// very good utilities, or the Win32 call: QueryPerformanceFrequency();
+
+		// This code is MS Visual C++ specific
+		static inline unsigned long GetCycleCount(void)
+		{
+			// Counter
+			struct { __int32 low, high; } counter;
+
+			// Use RDTSC instruction to get clocks count
+			__asm push EAX
+			__asm push EDX
+			__asm __emit 0fh __asm __emit 031h // RDTSC
+			__asm mov counter.low, EAX
+			__asm mov counter.high, EDX
+			__asm pop EDX
+			__asm pop EAX
+
+			// Returned result
+			return *(__int64 *)(&counter);
+
+		}
+#else
+
+		// This version works on any 80x86 platform targeted by the g++ compiler.
+		static __inline__ unsigned long GetCycleCount(void)
+		{
+			unsigned a, d;
+			asm volatile("rdtsc" : "=a" (a), "=d" (d));
+			return ((unsigned long)a) | (((unsigned long)d) << 32);
+		}
+#endif
+#endif // #if 0
+
+
 	private:
 
-		std::chrono::high_resolution_clock::time_point m_start_time;
-		std::chrono::high_resolution_clock::time_point m_end_time;
+		struct timeb m_start_time;
+		struct timeb m_end_time;
 
 };
 
 } // End namespace
-#endif // TIMER_H
+
+#endif // TIMER_H Defined

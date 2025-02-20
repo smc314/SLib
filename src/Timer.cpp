@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2001,2002 Steven M. Cherry. All rights reserved.
  *
@@ -17,39 +18,66 @@
  */
 
 #include "Timer.h"
-#include <chrono>
+#include <stdio.h>
 
 using namespace SLib;
 
-Timer::Timer() : 
-	m_start_time(std::chrono::high_resolution_clock::now()),
-	m_end_time(m_start_time)
+Timer::Timer()
 {
+	// not much to do.
+	ftime(&m_start_time);
+	m_end_time.time = m_start_time.time;
+	m_end_time.millitm = m_start_time.millitm;
 }
 
-Timer::~Timer() = default;
-
-void Timer::Start()
+Timer::~Timer()
 {
-	m_start_time = std::chrono::high_resolution_clock::now();
+	// not much to do.
 }
 
-void Timer::Finish()
+void Timer::Start(void)
 {
-	m_end_time = std::chrono::high_resolution_clock::now();
+	ftime(&m_start_time);
 }
 
-double Timer::Duration() const
+void Timer::Finish(void)
 {
-	auto duration = m_end_time - m_start_time;
-	return std::chrono::duration<double>(duration).count();
+	ftime(&m_end_time);
 }
 
-uint64_t Timer::GetCycleCount()
+float Timer::Duration(void)
 {
-	auto now = std::chrono::high_resolution_clock::now();
-	auto duration = now.time_since_epoch();
-	return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+	double f1, f2, f3, f4, f5;
+
+	f1 = m_start_time.time;
+	f2 = m_start_time.millitm;
+	f2 /= 1000.0;
+
+	f3 = m_end_time.time;
+	f4 = m_end_time.millitm;
+	f4 /= 1000.0;
+
+	f5 = (f3+f4) - (f1+f2);
+
+	return (float)f5;
+}
+
+uint64_t Timer::GetCycleCount(void)
+{
+#ifdef _WIN32
+	struct timeb tb;
+	uint64_t t1, t2;
+
+	ftime( &tb );
+
+	t1 = tb.time;
+	t2 = tb.millitm;
+	return t1 * 1000000 + t2 * 1000;
+#else
+	struct timeval tv;
+	gettimeofday( &tv, NULL);
+	return tv.tv_sec * 1000000 + tv.tv_usec;
+#endif
 }
 
 
