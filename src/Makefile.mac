@@ -150,8 +150,3 @@ install:
 	cp SLogDump ../../bin/
 	cp SqlShell ../../bin/
 	cd hbuild && make -f Makefile.mac install
-
-maczip:
-	rm -f ../../../3rdPartyMac.tgz
-	cd ../../.. && tar cvfz 3rdPartyMac.tgz 3rdParty/bin 3rdParty/include 3rdParty/lib 3rdParty/qooxdoo-5.0.1-sdk 3rdParty/share
-	scp ../../../3rdPartyMac.tgz smc@www.helixsdk.org:/home/smc/websites/helixweb/publicweb/
