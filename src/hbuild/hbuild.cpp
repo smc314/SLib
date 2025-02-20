@@ -158,8 +158,6 @@ int internalMain (int argc, char** argv)
 #	else
 	m_platform = "WIN32_x64";
 #	endif
-#elif __APPLE__
-	m_platform = "MAC";
 #else
 	m_platform = "LINUX_x64";
 #endif
@@ -893,8 +891,7 @@ void handleInstall(bool displayBanner)
 		twine ends(install, "endsWith");
 		twine to(install, "to");
 		twine newName(install, "newName");
-		twine platform(install, "platform");
-		HelixWorker::getInstance().Add( new HelixInstallTask( from, ends, to, newName, platform ) );
+		HelixWorker::getInstance().Add( new HelixInstallTask( from, ends, to, newName ) );
 	}
 }
 
@@ -914,8 +911,7 @@ void handleDeploy(bool displayBanner)
 		twine ends(install, "endsWith");
 		twine to(install, "to");
 		twine newName(install, "newName");
-		twine platform(install, "platform");
-		HelixWorker::getInstance().Add( new HelixInstallTask( from, ends, to, newName, platform ) );
+		HelixWorker::getInstance().Add( new HelixInstallTask( from, ends, to, newName) );
 	}
 }
 
@@ -946,30 +942,30 @@ void CopyCore()
 	// Copy over the core binaries that we will need
 	twine core = HelixConfig::getInstance().CoreFolder();
 #ifdef _WIN32
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixSvc.exe", "bin", "", "WIN32"	));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain.exe", "bin", "", "WIN32"	));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.dll", "bin", "", "WIN32"	));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.lib", "bin", "", "WIN32"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.dll", "bin", "", "WIN32"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.lib", "bin", "", "WIN32"	));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.dll", "bin", "", "WIN32"	));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.lib", "bin", "", "WIN32"	));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.dll", "bin", "", "WIN32"	));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.lib", "bin", "", "WIN32"));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixSvc.exe", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain.exe", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.dll", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.lib", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.dll", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.lib", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.dll", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.lib", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.dll", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.lib", "bin", ""));
 #else
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixDaemon", "bin", "", "LINUX"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain", "bin", "", "LINUX"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.so", "bin", "", "LINUX"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.so", "bin", "", "LINUX"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.so", "bin", "", "LINUX"));
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.so", "bin", "", "LINUX"));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixDaemon", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "HelixMain", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.so", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.so", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.so", "bin", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.so", "bin", ""));
 #endif
 
-	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin", "", ""));
+	HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "db.xml", "bin", ""));
 	if(HelixConfig::getInstance().UseDebug()){
-		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.pdb", "bin", "", ""));
-		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.pdb", "bin", "", ""	));
-		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.pdb", "bin", "", ""));
-		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.pdb", "bin", "", ""));
+		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.client.pdb", "bin", ""));
+		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.glob.pdb", "bin", ""));
+		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dev.pdb", "bin", ""));
+		HelixWorker::getInstance().Add( new HelixInstallTask(core + "/server/c/bin", "libhelix.logic.dm.pdb", "bin", ""));
 	}
 }
