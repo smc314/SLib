@@ -97,8 +97,6 @@ libxml2:
 	nmake
 	nmake install
 	cd ..\..
-	move lib\libexslt.dll bin
-	move lib\libxslt.dll bin
 
 curl:
 	del /Q /S curl-7.85.0.tar.gz
