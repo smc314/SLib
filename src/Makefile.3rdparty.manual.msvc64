@@ -70,13 +70,15 @@ iconv:
 
 libxml2:
 	del /Q /S libxml2-2.9.3.tar.gz libxslt-1.1.28.tar.gz
+	del /Q /S libxml2-v2.13.5.tar.gz libxslt-v1.1.42.tar.gz
 	rm -rf libxml2-2.9.3 libxslt-1.1.28
+	rm -rf libxml2-2.13.5 libxslt-1.1.42
 	rm -rf include\libxml2 include\libxml include\libexslt include\libxslt
-	$(CURL) ftp://xmlsoft.org/libxml2/libxml2-2.9.3.tar.gz
-	$(CURL) ftp://xmlsoft.org/libxml2/libxslt-1.1.28.tar.gz
-	$(UNTAR) libxml2-2.9.3.tar.gz
-	$(UNTAR) libxslt-1.1.28.tar.gz
-	cd libxml2-2.9.3\win32
+	$(CURL) https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.13.5/libxml2-v2.13.5.tar.gz
+	$(CURL) https://gitlab.gnome.org/GNOME/libxslt/-/archive/v1.1.42/libxslt-v1.1.42.tar.gz
+	$(UNTAR) libxml2-v2.13.5.tar.gz
+	$(UNTAR) libxslt-v1.1.42.tar.gz
+	cd libxml2-v2.13.5\win32
 	cscript configure.js compiler=msvc zlib=yes iconv=yes prefix=$(CURRENTPATH) include=$(CURRENTPATH) lib=$(CURRENTPATH)
 	nmake -f Makefile.msvc
 	nmake -f Makefile.msvc install
@@ -84,7 +86,7 @@ libxml2:
 	cd include
 	move libxml2\libxml .
 	cd ..
-	cd libxslt-1.1.28\win32
+	cd libxslt-v1.1.42\win32
 	cscript configure.js compiler=msvc zlib=yes iconv=yes prefix=$(CURRENTPATH) include=$(CURRENTPATH) lib=$(CURRENTPATH)
 	cd ..\libxslt
 	move win32config.h win32config.h.bak
@@ -100,10 +102,11 @@ libxml2:
 
 curl:
 	del /Q /S curl-7.85.0.tar.gz
-	rm -rf curl-7.85.0
-	$(CURL) http://curl.se/download/curl-7.85.0.tar.gz
-	$(UNTAR) curl-7.85.0.tar.gz
-	cd curl-7.85.0\winbuild
+	del /Q /S curl-8.11.1.tar.gz
+	rm -rf curl-8.11.1
+	$(CURL) http://curl.se/download/curl-8.11.1.tar.gz
+	$(UNTAR) curl-8.11.1.tar.gz
+	cd curl-8.11.1\winbuild
 	nmake /f Makefile.vc mode=dll VC=14 WITH_DEVEL=..\.. WITH_SSL=dll WITH_ZLIB=dll MACHINE=x64
 	cd ..\builds\libcurl-vc14-x64-release-dll-ssl-dll-zlib-dll-ipv6-sspi
 	copy bin\*.* ..\..\..\bin
