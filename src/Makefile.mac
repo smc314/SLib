@@ -10,7 +10,7 @@ UNAME := $(shell uname)
 ifeq ($(UNAME),Linux)
 	OPENSSLDIR=/usr
 else
-	OPENSSLDIR=/opt/homebrew/opt/openssl
+	OPENSSLDIR=/usr/local/opt/openssl
 endif
 
 SOCKET_LIB=

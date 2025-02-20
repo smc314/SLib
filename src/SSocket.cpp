@@ -639,11 +639,7 @@ SSocket::SSocket(char *machine, int port)
 
 	// Get client's certificate (note: beware of dynamic allocation) - opt
 
-#if OPENSSL_VERSION_NUMBER >= 0x3000000L
-	the_cert = SSL_get1_peer_certificate (m_ssl);
-#else
 	the_cert = SSL_get_peer_certificate (m_ssl);
-#endif
 	if (the_cert != NULL) {
 		str = X509_NAME_oneline ( X509_get_subject_name(the_cert),
 		                          0, 0);

@@ -199,9 +199,9 @@ twine HelixCompileTask::CC(const twine& tpl)
 	// 64-bit mac
 	// ///////////////////////////////////////////////////////////////////////////////////
 	if(m_file->FileName().endsWith(".c")){
-		return "gcc -c -g -Wall -D_REENTRANT -fPIC -O2 -I/opt/homebrew/include -I/opt/homebrew/include/openssl/include -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+		return "gcc -c -g -Wall -D_REENTRANT -fPIC -O2 -I/usr/local/opt/openssl/include -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
 	} else {
-		return "g++ -std=c++14 -c -g -Wall -D_REENTRANT -fPIC -O2 -I/opt/homebrew/include -I/opt/homebrew/include/openssl/include -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
+		return "g++ -std=c++14 -c -g -Wall -D_REENTRANT -fPIC -O2 -I/usr/local/opt/openssl/include -I/usr/include -I/usr/include/libxml2 -I" + tpl + "/include -I. ";
 	}
 
 #elif __linux__

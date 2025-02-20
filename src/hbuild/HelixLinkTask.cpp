@@ -308,7 +308,7 @@ twine HelixLinkTask::LinkLibs1( const twine& tpl )
 	// ///////////////////////////////////////////////////////////////////////////////
 	// 64-bit mac
 	// ///////////////////////////////////////////////////////////////////////////////
-	return "-L/opt/homebrew/opt/openssl/lib -lssl -lcrypto -lpthread -lresolv -lxml2 -lz -L/opt/homebrew/opt/unixodbc/lib -lodbc -lcurl -liconv -lhpdf -L" + tpl + "/lib -lSLib ";
+	return "-L/usr/local/opt/openssl/lib -lssl -lcrypto -lpthread -lresolv -lxml2 -lz -lodbc -lcurl -liconv -lhpdf -L" + tpl + "/lib -lSLib ";
 
 #elif __linux__
 	// ///////////////////////////////////////////////////////////////////////////////
