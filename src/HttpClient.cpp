@@ -143,7 +143,7 @@ xmlDocPtr HttpClient::GetXml(const twine& url)
 	// Ensure we null terminate the buffer before trying to parse as XML:
 	ResponseBuffer.append(nullTerm, 10);
 	
-	xmlDocPtr doc = xmlReadMemory( ResponseBuffer(), ResponseBuffer.size(), NULL, NULL, XML_PARSE_HUGE );
+	xmlDocPtr doc = xmlReadMemory( ResponseBuffer(), ResponseBuffer.size() - 10, NULL, NULL, XML_PARSE_HUGE );
 	return doc;
 }
 
@@ -283,7 +283,7 @@ xmlDocPtr HttpClient::Post(const twine& url, const char* msg, size_t msgLen)
 	// ensure we null terminate the buffer before trying to parse as XML:
 	ResponseBuffer.append(nullTerm, 10);
 
-	xmlDocPtr doc = xmlReadMemory( ResponseBuffer(), ResponseBuffer.size(), NULL, NULL, XML_PARSE_HUGE );
+	xmlDocPtr doc = xmlReadMemory( ResponseBuffer(), ResponseBuffer.size() - 10, NULL, NULL, XML_PARSE_HUGE );
 	return doc;
 }
 
