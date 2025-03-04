@@ -28,7 +28,7 @@ class DLLEXPORT HelixInstallTask
 	public:
 		/// Constructor requires a folder and a file
 		HelixInstallTask(const twine& sourceFolder, const twine& filePattern, const twine& targetFolder, 
-			const twine& newName);
+			const twine& newName, const twine& platform);
 
 		/// Standard Copy Constructor
 		HelixInstallTask(const HelixInstallTask& c);
@@ -57,7 +57,7 @@ class DLLEXPORT HelixInstallTask
 		twine m_file_pattern;
 		twine m_target_folder;
 		twine m_new_name;
-
+		twine m_platform;
 };
 
 }} // End Namespace stack
