@@ -10,7 +10,7 @@ UNAME := $(shell uname)
 ifeq ($(UNAME),Linux)
 	OPENSSLDIR=/usr
 else
-	OPENSSLDIR=/usr/local/opt/openssl
+	OPENSSLDIR=/opt/homebrew/opt/openssl
 endif
 
 _CFLAGS=-g -Wall -D_REENTRANT -O2 -I/usr/include/libxml2 -I$(OPENSSLDIR)/include -I..
