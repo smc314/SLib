@@ -267,6 +267,10 @@ void HelixBuilder::BuildCS()
 	pdfGen = "..\\c#\\HelixPdfGen";
 	cmd = "cd " + pdfGen + " && c:\\software\\NuGet.exe restore HelixPdfGen.sln";
 #elif __APPLE__
+	printf("============================================================================\n");
+	printf("== ****** NOTE ***** CS Target Skipped on Mac\n");
+	printf("============================================================================\n");
+	return;
 	pdfGen = "../c#/HelixPdfGen";
 	cmd = "cd " + pdfGen + " && mono ~/bin/nuget.exe restore HelixPdfGen.sln";
 #elif __linux__
@@ -344,6 +348,10 @@ void HelixBuilder::BuildCSTest()
 	testRoot = "..\\..\\test\\Helix.Test";
 	cmd = "cd " + testRoot + " && c:\\software\\NuGet.exe restore Helix.Test.sln";
 #elif __APPLE__
+	printf("============================================================================\n");
+	printf("== ****** NOTE ***** CS Target Skipped on Mac\n");
+	printf("============================================================================\n");
+	return;
 	testRoot = "../../test/Helix.Test";
 	cmd = "cd " + testRoot + " && mono ~/bin/nuget.exe restore Helix.Test.sln";
 #elif __linux__
