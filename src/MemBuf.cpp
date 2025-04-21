@@ -461,7 +461,7 @@ MemBuf& MemBuf::reserve(size_t min_size)
 		m_data = ptr;
 		size_t oldSize = m_data_size;
 		m_data_size = min_size;
-		erase( oldSize ); // ensure the new segment of memory is zeroed 
+		memset((char*)m_data + oldSize, 0, (min_size+10) - oldSize); // ensure the new segment of memory is zeroed
 
 		return *this;
 	}
