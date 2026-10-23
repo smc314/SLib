@@ -56,6 +56,7 @@ class DLLEXPORT HelixCompileTask
 		
 		twine FixPhysical(const twine& path);
 		twine CC(const twine& tpl);
+		twine BuildCC(const twine& tpl);
 		twine LogicIncludes(const twine& logicName, bool fromSqldo = false);
 		twine DependentInclude(const twine& ourLogic, const twine& depLogic, bool fromSqldo = false);
 		twine AddApache();

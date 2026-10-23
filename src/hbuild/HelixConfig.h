@@ -83,6 +83,14 @@ class DLLEXPORT HelixConfig
 		/// Returns a list of apache libraries
 		vector<twine> ApacheLibs();
 
+		/// Number of compile threads to use
+		int CompileThreads();
+		
+		/// Number of generator threads to use
+		int GeneratorThreads();
+
+		/// Use CCache or not
+		bool UseCCache();
 	private:
 		/// Standard Constructor
 		HelixConfig();
@@ -92,6 +100,9 @@ class DLLEXPORT HelixConfig
 
 		/// Standard Assignment Operator
 		HelixConfig& operator=(const HelixConfig& c) = delete;
+
+		// Helper function
+		int GetThreads(const char* attribute, int defaultValue);
 
 		// Our hbuild cache file
 		sptr<xmlDoc, xmlFreeDoc> m_config;

@@ -527,13 +527,13 @@ twine HelixLinkTask::Link(const twine& bin, const twine& outLib)
 	// ///////////////////////////////////////////////////////////////////////////////
 	// 64-bit mac
 	// ///////////////////////////////////////////////////////////////////////////////
-	return "g++ -shared -o " + FixPhysical( bin ) + outLib + ".so ";
+	return "g++ -Wl,--allow-shlib-undefined -shared -o " + FixPhysical( bin ) + outLib + ".so ";
 
 #elif __linux__
 	// ///////////////////////////////////////////////////////////////////////////////
 	// 64-bit linux
 	// ///////////////////////////////////////////////////////////////////////////////
-	return "g++ -shared -o " + FixPhysical( bin ) + outLib + ".so ";
+	return "g++ -Wl,--allow-shlib-undefined -shared -o " + FixPhysical( bin ) + outLib + ".so ";
 
 #else
 	throw AnException(0, FL, "Unknown link environment.");
@@ -569,13 +569,13 @@ twine HelixLinkTask::LinkMain(const twine& bin, const twine& outLib)
 	// ///////////////////////////////////////////////////////////////////////////////
 	// 64-bit mac
 	// ///////////////////////////////////////////////////////////////////////////////
-	return "g++ -o " + FixPhysical( bin ) + outLib + " ";
+	return "g++ -Wl,--allow-shlib-undefined -o " + FixPhysical( bin ) + outLib + " ";
 
 #elif __linux__
 	// ///////////////////////////////////////////////////////////////////////////////
 	// 64-bit linux
 	// ///////////////////////////////////////////////////////////////////////////////
-	return "g++ -o " + FixPhysical( bin ) + outLib + " ";
+	return "g++ -Wl,--allow-shlib-undefined -o " + FixPhysical( bin ) + outLib + " ";
 
 #else
 	throw AnException(0, FL, "Unknown link environment.");

@@ -21,6 +21,7 @@
 using namespace SLib;
 
 #include "HelixWorker.h"
+#include "HelixConfig.h"
 using namespace Helix::Build;
 
 // Our global instance of the worker
@@ -33,23 +34,19 @@ HelixWorker& HelixWorker::getInstance()
 	if(m_helix_worker == nullptr){
 		m_helix_worker = new HelixWorker();
 
-		// Start up 10 Compile threads
-		std::thread t0( HelixWorker::CompileThread ); t0.detach();
-		std::thread t1( HelixWorker::CompileThread ); t1.detach();
-		std::thread t2( HelixWorker::CompileThread ); t2.detach();
-		std::thread t3( HelixWorker::CompileThread ); t3.detach();
-		std::thread t4( HelixWorker::CompileThread ); t4.detach();
-		std::thread t5( HelixWorker::CompileThread ); t5.detach();
-		std::thread t6( HelixWorker::CompileThread ); t6.detach();
-		std::thread t7( HelixWorker::CompileThread ); t7.detach();
-		std::thread t8( HelixWorker::CompileThread ); t8.detach();
-		std::thread t9( HelixWorker::CompileThread ); t9.detach();
+		// Start up the configured number of Compile threads
+		int compileThreads = HelixConfig::getInstance().CompileThreads();
+		for (int i = 0; i < compileThreads; ++i) {
+			std::thread thread( HelixWorker::CompileThread );
+			thread.detach();
+		}
 
-		std::thread g0( HelixWorker::GenerateThread ); g0.detach();
-		std::thread g1( HelixWorker::GenerateThread ); g1.detach();
-		std::thread g2( HelixWorker::GenerateThread ); g2.detach();
-		std::thread g3( HelixWorker::GenerateThread ); g3.detach();
-		std::thread g4( HelixWorker::GenerateThread ); g4.detach();
+		// Start up the configured number of Generator threads
+		int generatorThreads = HelixConfig::getInstance().GeneratorThreads();
+		for (int i = 0; i < generatorThreads; ++i) {
+			std::thread thread( HelixWorker::GenerateThread );
+			thread.detach();
+		}
 	}
 
 	return *m_helix_worker;
@@ -79,9 +76,6 @@ void HelixWorker::Add(HelixCompileTask* task)
 	EnEx ee(FL, "HelixWorker::Add(HelixCompileTask* task)");
 
 	m_compile_queue.push( task );
-
-	// Sleep for a moment to allow other threads to start and work
-	Tools::msleep( 100 );
 }
 
 void HelixWorker::Add(HelixLinkTask* task)
@@ -99,9 +93,6 @@ void HelixWorker::Add(HelixLinkTask* task)
 		}
 		return; // bail out immediately - no reason to wait on this
 	}
-
-	// Sleep for a moment to allow other threads to start and work
-	Tools::msleep( 100 );
 
 	// Wait for all compiles to finish
 	WaitForCompilers();
@@ -138,26 +129,24 @@ void HelixWorker::Add(HelixGenTask* task)
 
 	m_gen_queue.push( task );
 
-	// Sleep for a moment to allow other threads to start and work
-	Tools::msleep( 100 );
 }
 
 void HelixWorker::WaitForGenerators()
 {
 	EnEx ee(FL, "HelixWorker::WaitForGenerators()");
 
-	while( m_generators_working > 0 ){
+	do { 
 		Tools::msleep( 100 );
-	}
+	} while( m_generators_working > 0 );
 }
 
 void HelixWorker::WaitForCompilers()
 {
 	EnEx ee(FL, "HelixWorker::WaitForCompilers()");
 
-	while( m_compilers_working > 0 ){
+	do {
 		Tools::msleep( 100 );
-	}
+	} while( m_compilers_working > 0 );
 }
 
 
